@@ -1,0 +1,22 @@
+{
+    "input_directory": "",
+    "results_directory": "",
+    "predictions_directory": "",
+    "show_tab_icons": false,
+    "tab_button_size": 40,
+    "font": "DejaVu Sans",
+    "font_scale": 1.0,
+    "theme_name": "SARgate",
+    "colormap_continuous": "Aurora",
+    "colormap_discrete": "Starfield",
+    "pca_point_size": "small",
+    "pca_mcs_timeout": "10s",
+    "pca_mcs_features": true,
+    "umap_point_size": "Small",
+    "umap_mcs_timeout": "10s",
+    "umap_mcs_features": true,
+    "tsne_point_size": "Small",
+    "tsne_mcs_timeout": "10s",
+    "tsne_mcs_features": true,
+    "slith_record": 4
+}

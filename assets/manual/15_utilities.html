@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SARgate – Utilities</title>
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/style.css">
+    <!-- Script -->
+    <script src="assets/script.js" defer></script>
+</head>
+
+<body>
+<div class="layout">
+
+    <!-- =====================
+         Sidebar / Navigation
+         ===================== -->
+    <nav class="sidebar"></nav>
+
+    <!-- =====================
+         Main Content
+         ===================== -->
+    <main class="content">
+        <h1>Utilities</h1>
+
+        <p>
+            The <strong>Utilities</strong> tab provides a suite of standalone cheminformatics tools that operate independently of the
+            core library analysis workflow. These tools enable real-time structure visualisation, molecular string format
+            interconversion, and dataset management, supporting the preparation and validation of input files for downstream
+            R-group and substructure analyses.
+        </p>
+
+        <h2>Mol Draw and String Converter</h2>
+
+        <p>
+            Converts a molecular string representation between SMILES, SMARTS, InChI, or MolBlock formats while dynamically
+            rendering the corresponding 2D molecular structure. The molecular depiction updates interactively upon each string
+            modification, ensuring syntactic validity and structural interpretability across formats.
+        </p>
+
+        <h2>Merge SDFs</h2>
+
+        <p>
+            Enumerates all Structure Data Files (SDF) located in a user-selected directory. Selected SDF files are concatenated
+            into a single consolidated SDF output, serialised into the same directory using a user-defined filename without
+            modifying SD molecular properties.
+        </p>
+
+        <h2>Compare SDFs</h2>
+
+        <p>
+            Computes the intersection of molecular entries between two or more SDF files, reporting the number of exact
+            structure matches shared across the selected datasets. This utility quantifies library overlap for independently
+            generated or sourced SDF collections.
+        </p>
+
+        <h2>SDF ↔ CSV Converter</h2>
+
+        <p>
+            Performs bidirectional interconversion between SDF and CSV formats. Molecular structures are preserved via SMILES
+            encoding, while SD properties are mapped to CSV columns or reinjected into SD tags. CSV delimiters are automatically
+            detected to ensure robust parsing across regional settings and heterogeneous file sources.
+        </p>
+
+        <p>
+            For the SDF → CSV mode, activity fields are expanded into separate columns. For CSV → SDF mode, structured activity
+            columns are optionally collapsed into a single SD property string to preserve semantic compatibility with analytical
+            pipelines and external tools that expect unified activity metadata.
+        </p>
+
+        <h3>Conversion Logic</h3>
+
+        <h4>SDF → CSV</h4>
+
+        <ul>
+            <li>Reads SD molecules from the input file.</li>
+            <li>Encodes full molecular structures into a column labelled <code>SMILES</code>.</li>
+            <li>Extracts SD properties into additional columns.</li>
+            <li>Parses <code>Activity</code> and indexed <code>Activity_*</code> SD tags into structured univariate columns:
+                <ul>
+                    <li><code>Standard Type</code>,</li>
+                    <li><code>Standard Relation</code>,</li>
+                    <li><code>Standard Value</code>,</li>
+                    <li><code>Standard Units</code>.</li>
+                </ul>
+            <li>Writes the final table to CSV in the same directory.</li>
+        </ul>
+        
+        <h4>CSV → SDF</h4>
+
+        <ul>
+            <li>Detects the correct CSV delimiter.</li>
+            <li>Identifies the SMILES column.</li>
+            <li>If columns <code>Standard Type</code>, <code>Standard Relation</code>, <code>Standard Value</code>,
+                <code>Standard Units</code> exist, they are merged into a single <code>Activity</code> SD tag as:
+                <code>Type Relation Value Units</code>.</li>
+            <li>All non-empty CSV cells are injected as SD molecular properties named as their respective column headers.</li>
+            <li>Writes the final SDF file in the same directory.</li>
+        </ul>
+
+        <h2>ChEMBL Target Entries by Year</h2>
+
+        <p>
+            Retrieves the annual count of bioactivity annotations registered in the ChEMBL database for a given target
+            identifier. This supports temporal trend inspection of structure–activity data deposition.
+        </p>
+
+        <div class="footer-spacer"></div>
+
+    </main>
+</div>
+</body>
+</html>

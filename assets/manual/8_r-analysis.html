@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>R-Groups Counts</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <script src="assets/script.js" defer></script>
+</head>
+<body>
+<div class="layout">
+
+    <!-- =====================
+         Sidebar / Navigation
+         ===================== -->
+    <nav class="sidebar"></nav>
+
+    <!-- =====================
+         Main Content
+         ===================== -->
+    <main class="content">
+        <h1>R-Groups Analysis</h1>
+
+        <p>
+            The <strong>R-Groups Analysis</strong> tab allows to explore the distribution of R-groups in a specific position 
+            across subsets, to correlate the presence of specific substituents with bioactivity trends, and to identify potential
+            SAR patterns associated with one or two specific R-group positions.
+        </p>
+
+        <h2>R-Group Counts</h2>
+
+        <p>
+            The <strong>R-Group Counts</strong> sub-tab reports substituent frequency at a given R-site
+            within a selected subset and correlates the associated molecular bioactivity using two analytical tools:
+            <strong>SAR-encoded activity boxplots</strong>, describing the statistical distribution of activity values
+            per substituent, and the <strong>R-Counts Table</strong>, summarising substituent prevalence and
+            filtering parameters.
+        </p>
+
+        <p>
+            A control panel at the top allows selection of the Subset and R-group to analyze, while
+            a second panel below the boxplot provides options to customise the boxplot and the table.
+            Depending on the activity type selected by the user, the activity values may be internally converted 
+            to logarithmic potency scales (e.g., <strong>pIC50</strong>).
+            Two checkboxes allow inclusion of molecules with <em>undefined</em> activity relationships
+            (&lt;, &le;, &ge;, &gt;) and <em>inactive</em> entries, optionally assigning a placeholder value of 0
+            to non-labelled actives for enrichment calculations.
+            A <strong>Minimum Count Filter</strong> excludes substituents below the user-defined occurrence
+            threshold to prevent statistically uninformative boxplot categories.
+        </p>
+
+        <p>
+            Within the graphical encoding, individual molecules are mapped to:
+            <strong>green upward arrows</strong> (activity above the arithmetic mean),
+            <strong>red downward arrows</strong> (activity below the mean), or
+            <strong>yellow circles</strong> (activity equal to the mean).
+            By default, both the table and boxplot elements are <strong>rank-ordered by descending substituent frequency</strong>
+            (number of molecules containing each substituent).
+            Activating <strong>Sort by Mean Activity</strong> re-orders boxes and table rows according to
+            <strong>ascending mean activity for IC50-like readouts</strong> (otherwise descending for non-IC50 scales).
+        </p>
+
+        <p>
+            Left-clicking a box or a substituent image cell updates the <strong>Properties Panel</strong>
+            with enrichment statistics, including:
+            <ul>
+                <li>active vs inactive substituent prevalence,</li>
+                <li>the list of molecules bearing that substituent, and</li>
+                <li>their corresponding activity values.</li>
+            </ul>
+        </p>
+
+
+        <h3>Example Analysis</h3>
+        
+        <img src="assets/images/R-counts_ex.png">
+
+        <p>
+            In the reference example, <strong>Subset 15</strong> and the <strong>R3 position</strong> are selected.
+            At this R-site, the subset contains exactly <strong>four</strong> substituent variants (<em>H, CH₃, Br, Cl</em>),
+            as listed in the table. The image positioned at the upper-left corresponds to the
+            <strong>common core</strong> for Subset 15.
+            The adjacent boxplot displays <strong>four boxes</strong>, each representing the activity distribution
+            of molecules bearing the respective substituent at R3.
+            Br and Cl appear in boxes 3-4, but would be excluded under a <strong>Min Count Filter ≥ 2</strong> (default value).
+        </p>
+
+        <p>
+            In the example, <strong>box 2 (CH₃)</strong> is selected, reporting the <strong>12 molecules</strong>
+            from Subset 15 that contain <em>-CH₃</em> at R3, alongside their individual IC50 values.
+        </p>
+
+        <p>
+            This representation yields dual SAR insights:
+            (1) substituent expression bias within a subset, and
+            (2) the directional dependency between substituent identity and bioactivity.
+            In the example:
+            <ul>
+                <li><em>24 molecules</em> carry <em>H at R3</em>, all showing <strong>pIC50 &gt; 6</strong>,</li>
+                <li><em>12 molecules</em> carry <em>CH₃ at R3</em>, all showing <strong>pIC50 &lt; 6</strong>,</li>
+                <li><em>1 molecule</em> carries <em>Br at R3</em>, showing <strong>pIC50 ≈ 7</strong>,</li>
+                <li><em>1 molecule</em> carries <em>Cl at R3</em>, showing <strong>pIC50 ≈ 7</strong>.</li>
+            </ul>
+            This observation suggests a <strong>strong substituent-dependent activity modulation</strong> at the R3 site.
+            </ul>
+        </p>
+
+        <p>
+            Overall, this analysis does not prove causation: the activity shift might derive from other
+            covarying structural features or sampling bias introduced during substructure aggregation,
+            but the pattern is compatible with a local <strong>substituent-driven SAR cliff</strong> hypothesis at R3.
+        </p>
+
+
+        <!-- =====================
+            R-Groups Table
+            ===================== -->
+        <h2>R-Group Pair Matrix</h2>
+
+        <p>
+            The <strong>R-Group Pair Matrix</strong> sub-tab is a matrix-based view designed to inspect activity trends associated
+            with specific <em>pairs</em> of substituents occurring at two selected R-group positions.
+            The matrix axes represent substituents observed at the chosen positions, while each cell summarizes
+            the activity of molecules featuring that specific substituent combination.
+        </p>
+
+        <p>The user selects:</p>
+        <ul>
+            <li><strong>Subset</strong> to analyse.</li>
+            <li><strong>Activity type</strong> (IC50-like endpoints are automatically converted to a logarithmic scale, e.g., pIC50).</li>
+            <li><strong>Two R-group positions</strong> to be displayed on the X and Y axes.</li>
+        </ul>
+
+        <p>
+            For each selected R position, all substituents present in the subset are listed along the corresponding axis.
+            Cell colours follow the scale reported by the colour bar on the left and encode the
+            <strong>mean activity</strong> (for the selected endpoint) of molecules matching that substituent pair.
+        </p>
+
+        <p>
+            Hovering a cell displays a tooltip reporting: mean activity, activity range, the number of molecules
+            presenting the pair (<strong>Total counts</strong>), the number of molecules annotated with a value for
+            the selected activity (<strong>Actives</strong>), and the number without an annotation (<strong>N/A</strong>).
+        </p>
+
+        <p>
+            <strong>Black cells</strong> indicate substituent pairs not observed in the subset (tooltip: <em>No Occurrences</em>).
+            <strong>Grey cells</strong> indicate observed pairs occurring exclusively in molecules without activity annotations
+            for the selected endpoint (tooltip: <em>N/A Only</em>, with <em>Total counts</em> reported).
+        </p>
+
+        <img src="assets/images/Plots_R-Groups_ex.png">
+
+
+
+        <div class="footer-spacer"></div>
+    </main>
+
+</div>
+</body>
+</html>

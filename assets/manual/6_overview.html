@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SARgate Manual – Overview</title>
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+
+<body>
+<div class="layout">
+
+    <nav class="sidebar"></nav>
+
+<main class="content">
+
+    <h1>Overview</h1>
+
+    <p>
+        The <strong>Overview</strong> tab provides a high-level, interactive summary of both
+        the dataset partitioning into molecular <em>subsets</em> based on shared core
+        substructures, and the R-group decomposition of molecules belonging to the
+        currently selected subset.
+    </p>
+
+    <img src="assets/images/Overview_Full_1.png">
+
+    <h2>Decomposition</h2>
+
+    <p>
+        The decomposition sub-tab allows the exploration of the core and 
+        R-group decomposition of molecules within the selected subset.
+
+    <h3>Structure Images Visualization</h3>
+
+    <h4>Item Selection Panel</h4>
+
+    <p>
+        Allows selecting <em>Subsets</em>, <em>Molecules</em>, or <em>R-groups</em> for display.
+        Selection is performed via dedicated UI buttons that update the adjacent
+        <strong>Images</strong> and <strong>Properties & Activity</strong> panels.
+        In this example, <em>Subset 15</em>, <em>Molecule 1</em>, and <em>R-group R3</em> are selected.
+    </p>
+
+    <img src="assets/images/Overview_1.png">
+
+    <h4>Properties & Activity Panel</h4>
+    <p>
+        The <strong>Properties</strong> panel renders computed or stored metadata for the
+        selected entity (subset, molecule, or R-group).  
+        The <strong>Activity</strong> panel reports the bioactivity record (or records) associated with the most
+        recently selected molecule, including activity value, biological target, and assay classification</em>.
+        In this example, the properties of R-group <em>R3</em> and activity data for <em>Molecule 1</em> are shown.
+    </p>
+
+    <img src="assets/images/Overview_2.png">
+
+    <h4>Images Panel</h4>
+    <p>
+        Displays three horizontally arranged molecular depictions:
+        <ul>
+            <li><strong>Left:</strong> subset common core</li>
+            <li><strong>Center:</strong> last selected molecule</li>
+            <li><strong>Right:</strong> last selected R-group</li>
+        </ul>
+    </p>
+
+    <img src="assets/images/Overview_3.png">
+
+    <h3>Subset Sorting & Image Controls</h3>
+
+    <h4>Controls Panel</h4>
+
+    <img src="assets/images/Overview_4.png">
+
+    <p>
+        Provides image alignment and subset sorting options:
+    </p>
+
+    <ul>
+        <li>
+            <strong>Align all structures to molecule:</strong>  
+            Applies coordinate frame alignment of <em>core</em> and <em>R-group</em> images to the
+            currently selected molecule depiction.
+        </li>
+
+        <li>
+            <strong>Show R-group counts:</strong>  
+            Injects R-group population frequency into the subset common core image labels.
+            In the example, <code>R3(24)</code> means that the R3 fragment of the selected molecule (H)
+            is present in 24 molecules within the active subset.
+        </li>
+
+        <li>
+            <strong>Sort subsets by:</strong>  
+            Enables sorting the subset buttons list using one of three strategies:
+            <ul>
+                <li><strong># molecules:</strong> rank by subset population size (descending).</li>
+                <li><strong>Query similarity:</strong> rank by Tanimoto similarity vs a user-provided
+                    <em>SMILES query scaffold</em>. Selecting this option reveals a SMILES input box
+                    (<strong>Query SMILES</strong>).</li>
+                <li><strong>Similarity Clustering:</strong> rank by hierarchical clustering of cores
+                    using Tanimoto similarity, visualised as a dendrogram (in the <em>Images Panel</em>).
+                    A movable threshold bar defines cluster membership: branches below the bar
+                    represent core clusters whose similarity exceeds the threshold. In the dendrogram depicted here,
+                    the threshold line is set at 50 (%). Two clusters of molecules are visible under the line:
+                    the first cluster (orange branch) containing two cores (11 and 13) and the second cluster 
+                    (green branch) containing four cores (4, 5, 6 and 14).</li>
+                
+                <img src="assets/images/Overview_4_Dendrogram.png">
+
+            </ul>
+        </li>
+
+        <li>
+            <strong>Activity shown in the enrichment plot:</strong>  
+            Activity type used for activity and R-group enrichment calculation and display 
+            (see the next <strong>Enrichment Plot</strong> section).
+        </li>
+    </ul>
+
+
+    <h3>Enrichment Plot</h3>
+
+    <p>
+        Displays two 1D bar plots sharing the same X-axis coordinate space (activity range for the
+        selected subset and for the activity type selected in the <strong>Activity shown in the enrichment plot</strong> combo box).  
+        <ul>
+            <li>
+                <strong>Top plot:</strong> activity distribution for the full subset. 
+            </li>
+
+            <li> 
+            <strong>Bottom plot:</strong> activity distribution restricted to molecules that contain the
+            selected R-group at any position.
+            </li>
+        </ul>
+    </p>
+
+    <p>
+        Bars are colour-encoded by positional density (number of overlapping molecules per X
+        coordinate bin), using the colormap scale rendered at the left of the plots.
+        Enrichment statistics are printed numerically inside the <strong>Properties</strong> panel when an R-group is selected.
+    </p>
+
+    <p>
+        In this example, the activity type is <em>IC50</em>, and the selected R-group is <em>R3 = H</em>.
+        As visible in the plot title, 38/38 molecules in <em>subset 15</em> have a recorded IC50 value, 24 of which contain
+        the R-group <em>R3 = H</em>. As shown in the x-axis tick labels, the activity values
+        in <em>subset 15</em> range from 4 nM to 20 µM. The bottom plot shows that molecules containing
+        the R-group <em>R3 = H</em> are enriched in the high-activity region (low IC50 values) of the subset activity distribution.
+    </p>
+
+    <img src="assets/images/Overview_5.png">
+
+    <h2>Subset Overview</h2>
+
+    <p>
+        The Subset Overview table can be viewed from the dedicated <strong>Subset Overview</strong> sub-tab.
+        It renders a paginated grid of molecules belonging to the selected subset.
+        Layout properties:
+    </p>
+
+    <ul>
+        <li>12 molecules per page</li>
+        <li>Each page shows a 2D structure depiction + selected metadata fields</li>
+        <li>Search by <strong>Name</strong> or <strong>MolID</strong> is supported</li>
+    </ul>
+
+    <p>
+        In this example, mol1-8 from <em>subset 15</em> are displayed,
+        showing <em>MolID</em>, <em>IC50</em> and <em>SMILES</em> fields.
+    </p>
+
+    <img src="assets/images/Overview_6.png">
+
+    <div class="footer-spacer"></div>
+
+</main>
+
+</div>
+</body>
+</html>

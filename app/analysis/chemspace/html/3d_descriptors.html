@@ -1,0 +1,468 @@
+<!--
+=========================
+3d_descriptors.html
+=========================
+
+HTML template for interactive 3D descriptors scatterplot.
+
+Defines the structure and JavaScript logic used by Plotly to render 3D chemical
+space plots inside SARgate. Supports dynamic slider controls, subset filtering,
+and interactive rotation within the embedded web view.
+-->
+
+<!-- === IMPORTS === -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.js"></script>
+
+<!-- === FILE ROADMAP (STEP MAP) ===
+     STEP 1: Styles (sliders, handles, masks, colour accents)
+     STEP 2: Fixed control panel layout (four vertical slider columns + counter)
+     STEP 3: Core script variables and data placeholders
+     STEP 4: Colour mapping utility (continuous Activity gradient → RGBA)
+     STEP 5: Plot refresh pipeline (filter by ranges, colours, tooltips, colourbar)
+     STEP 6: Sliders creation and configuration (Activity, X, Y, Z)
+     STEP 7: Slider event handlers (update labels and recolour)
+     STEP 8: Mask overlay logic for Activity slider (top/bottom covers)
+     STEP 9: Late label injection for axis and colour scale captions
+-->
+
+
+<style>
+/* STEP 1: STYLE — Handle appearance and z-index stacking for slider knobs */
+.noUi-handle {
+    transform: scale(0.7);
+    z-index: 5;
+    background-color: #999;
+    border: 1px solid #111;
+}
+
+/* STEP 1.1: STYLE — Activity slider: vertical gradient track (Red → Orange → Yellow → Lime → Dark Green) */
+#activity_slider .noUi-base {
+  background: __css_activity_gradient__;
+}
+
+/* STEP 1.2: STYLE — The segment between the handles is transparent */
+#activity_slider .noUi-connect {
+  background: transparent;
+}
+
+/* STEP 1.3: STYLE — Grey masks above and below the selected range */
+.slider-mask {
+  position: absolute;
+  left: 1px;
+  width: calc(100% - 4px);
+  background: rgb(80, 80, 80);
+  z-index: 4;
+  pointer-events: none;
+}
+
+/* STEP 1.4: STYLE — X slider colours */
+#x_slider .noUi-base {
+  background: rgb(80, 80, 80);
+}
+#x_slider .noUi-connect {
+  background: rgb(150, 150, 250);
+}
+
+/* STEP 1.5: STYLE — Y slider colours */
+#y_slider .noUi-base {
+  background: rgb(80, 80, 80);
+}
+#y_slider .noUi-connect {
+  background: rgb(50, 200, 250);
+}
+
+/* STEP 1.6: STYLE — Z slider colours */
+#z_slider .noUi-base {
+  background: rgb(80, 80, 80);
+}
+#z_slider .noUi-connect {
+  background: rgb(150, 250, 250);
+}
+</style>
+
+
+
+<!-- STEP 2: FIXED CONTROL PANEL — Sliders (Activity, X, Y, Z) and visible counter -->
+<div style="
+    position:fixed; 
+    top:10px; 
+    left:10px; 
+    z-index:999; 
+    background-color:white; 
+    padding:10px; 
+    border:1px solid #ccc; 
+    border-radius:8px; 
+    display: flex; 
+    flex-direction: column;
+    gap: 10px;
+">
+
+    <!-- STEP 2.1: ROW — Four vertical columns for the sliders -->
+    <div style="display: flex; flex-direction: row; gap: 0px;">
+
+        <!-- STEP 2.1.1: COLUMN — Activity slider, range label, colour scale caption -->
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; height: calc(100vh - 72px); justify-content: space-between; width: 50px;">
+            <div id="activity_range_label" style="width: 100%; font-size: 13px; white-space: normal; word-break: break-word; text-align: center; margin-bottom: 0px;">Activity Range</div>
+            <div id="activity_slider_container" style="position: relative; margin-top: 15px; height: 80vh; width: 20px;">
+                <div id="activity_slider" style="height: 100%;"></div>
+                <div id="mask-top" class="slider-mask slider-mask-top"></div>
+                <div id="mask-bottom" class="slider-mask slider-mask-bottom"></div>
+            </div>
+            <div id="colorscale_label_text" style="width: auto; min-width: 50px; height: 30px; padding: 0px 6px; font-size: 14px; text-align: center; line-height: 30px; background: transparent; border: none; outline: none; color: black;">colorscale</div>
+        </div>
+
+        <!-- STEP 2.1.2: COLUMN — X slider and captions -->
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; height: calc(100vh - 72px); justify-content: space-between; width: 50px;">
+            <div id="x_range_label" style="font-size: 13px; text-align:center; margin-bottom: 0px; white-space: normal; word-break: break-word;">X Range</div>
+            <div id="x_slider_container" style="position: relative; height: 80vh; width: 20px;">
+                <div id="x_slider" style="height: 100%;"></div>
+            </div>
+            <div id="x_label_text" style="width: auto; min-width: 50px; height: 30px; padding: 0px 6px; font-size: 14px; text-align: center; line-height: 30px; background: transparent; border: none; outline: none; color: black;">X</div>
+        </div>
+
+        <!-- STEP 2.1.3: COLUMN — Y slider and captions -->
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; height: calc(100vh - 72px); justify-content: space-between; width: 50px;">
+            <div id="y_range_label" style="font-size: 13px; text-align:center; margin-bottom: 0px; white-space: normal; word-break: break-word;">Y Range</div>
+            <div id="y_slider_container" style="position: relative; height: 80vh; width: 20px;">
+                <div id="y_slider" style="height: 100%;"></div>
+            </div>
+            <div id="y_label_text" style="width: auto; min-width: 50px; height: 30px; padding: 0px 6px; font-size: 14px; text-align: center; line-height: 30px; background: transparent; border: none; outline: none; color: black;">Y</div>
+        </div>
+
+        <!-- STEP 2.1.4: COLUMN — Z slider and captions -->
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; height: calc(100vh - 72px); justify-content: space-between; width: 50px;">
+            <div id="z_range_label" style="font-size: 13px; text-align:center; margin-bottom: 0px; white-space: normal; word-break: break-word;">Z Range</div>
+            <div id="z_slider_container" style="position: relative; height: 80vh; width: 20px;">
+                <div id="z_slider" style="height: 100%;"></div>
+            </div>
+            <div id="z_label_text" style="width: auto; min-width: 50px; height: 30px; padding: 0px 6px; font-size: 14px; text-align: center; line-height: 30px; background: transparent; border: none; outline: none; color: black;">Z</div>
+        </div>
+
+    </div>
+
+    <!-- STEP 2.2: Visible points counter -->
+    <div id="visible_count" style="
+        font-size: 14px;
+        font-weight: bold;
+        color: #222;
+        text-align: center;
+        padding-top: 5px;
+    ">
+        Visible points: 0
+    </div>
+</div>
+
+
+
+<script>
+    /**
+     * STEP 3: CORE DATA — Bind placeholders, arrays and UI colour
+     * - Axis labels and colour-scale title injected server-side
+     * - x/y/z/colour arrays feed the 3D scatter
+     * - original_tooltips used for Plotly hover text
+     * - text_color controls colourbar/label fonts
+     */
+    let __xlabel__ = __js_xlabel__;
+    let __ylabel__ = __js_ylabel__;
+    let __zlabel__ = __js_zlabel__;
+    let __colorscale_label__ = __js_colorscale_label__;
+    let x_values = __js_x__;
+    let y_values = __js_y__;
+    let z_values = __js_z__;
+    let colorscale_values = __js_colorscale__;
+    let original_tooltips = __js_tooltips__;
+    let text_color = __js_textcolor__;
+    let continuous_colorscale = __js_continuous_colorscale__;
+    let activity_slider;
+
+
+    const minAct = Math.min(...colorscale_values);
+    const maxAct = Math.max(...colorscale_values);
+
+
+
+    /**
+     * STEP 4: UTILITY — Map scalar value to RGBA via the active continuous colormap
+     * @param {number} val   Scalar (colour-scale) value
+     * @param {number} alpha Opacity 0..1
+     * @returns {string}     rgba(...) CSS colour string
+     */
+    function activityColor(val, alpha) {
+        const min = Math.min(...colorscale_values);
+        const max = Math.max(...colorscale_values);
+        const norm = max === min ? 0.5 : Math.max(0, Math.min(1, (val - min) / (max - min)));
+        const scaled = norm * (continuous_colorscale.length - 1);
+        const index = Math.floor(scaled);
+        const t = scaled - index;
+
+        let start = continuous_colorscale[Math.min(index, continuous_colorscale.length - 1)][1];
+        let end = continuous_colorscale[Math.min(index + 1, continuous_colorscale.length - 1)][1];
+
+        const parseRgb = (color) => color.match(/\d+/g).map(Number);
+        let [r1, g1, b1] = parseRgb(start);
+        let [r2, g2, b2] = parseRgb(end);
+        let r = Math.round(r1 + (r2 - r1) * t);
+        let g = Math.round(g1 + (g2 - g1) * t);
+        let b = Math.round(b1 + (b2 - b1) * t);
+
+        return `rgba(${r},${g},${b},${alpha})`;
+    }
+                
+
+    /**
+     * STEP 5: PIPELINE — Update plot colours/visibility and colourbar
+     *  STEP 5.1: Read slider ranges
+     *  STEP 5.2: For each point, check visibility and compute colour
+     *  STEP 5.3: Update the visible points counter
+     *  STEP 5.4: Restyle the main trace (markers + hover text)
+     *  STEP 5.5: Keep a single invisible trace to display the colourbar
+     */
+    function updatePlotColors() {
+        const plot = document.querySelectorAll('.js-plotly-plot')[0];
+
+        const activity_range = activity_slider.noUiSlider.get();
+        const minActVal = parseFloat(activity_range[0]);
+        const maxActVal = parseFloat(activity_range[1]);
+
+        const x_range = x_slider.noUiSlider.get();
+        const minX = parseFloat(x_range[0]);
+        const maxX = parseFloat(x_range[1]);
+
+        const y_range = y_slider.noUiSlider.get();
+        const minY = parseFloat(y_range[0]);
+        const maxY = parseFloat(y_range[1]);
+
+        const z_range = z_slider.noUiSlider.get();
+        const minZ = parseFloat(z_range[0]);
+        const maxZ = parseFloat(z_range[1]);
+        
+        let rgba_colors = [];
+        let line_colors = [];
+        let new_tooltips = [];
+        let colorbar_values = [];
+
+        for (let i = 0; i < x_values.length; i++) {
+            let x_val = x_values[i];
+            let y_val = y_values[i];
+            let z_val = z_values[i];
+            let activity = colorscale_values[i];
+            let visible = (
+                activity >= minActVal && activity <= maxActVal &&
+                x_val >= minX && x_val <= maxX &&
+                y_val >= minY && y_val <= maxY &&
+                z_val >= minZ && z_val <= maxZ
+            );
+            let alpha = visible ? 1.0 : 0.0;
+
+            let [r, g, b] = activityColor(colorscale_values[i], 1.0).match(/[\d.]+/g).slice(0, 3);
+            rgba_colors.push(`rgba(${r},${g},${b},${alpha})`);
+            line_colors.push(`rgba(0,0,0,${alpha * 0.2})`);
+            colorbar_values.push(maxAct === minAct ? 0.5 : Math.max(0, Math.min(1, (colorscale_values[i] - minAct) / (maxAct - minAct))));
+
+            new_tooltips.push(visible ? original_tooltips[i] : '');
+        }
+
+        // STEP 5.3: Recalculate and show number of visible points
+        const visibleCount = x_values.filter((_, i) => {
+            return (
+                colorscale_values[i] >= minActVal && colorscale_values[i] <= maxActVal &&
+                x_values[i] >= minX && x_values[i] <= maxX &&
+                y_values[i] >= minY && y_values[i] <= maxY &&
+                z_values[i] >= minZ && z_values[i] <= maxZ
+            );
+        }).length;
+
+        document.getElementById("visible_count").innerText = `Visible points: ${visibleCount}`;
+
+        // STEP 5.4: Apply marker styles and tooltip text to the primary trace
+        Plotly.restyle(plot, {
+            'marker': [{
+                size: 5,
+                color: rgba_colors,
+                line: {
+                    color: line_colors,
+                    width: 0.5
+                },
+                showscale: false
+            }],
+            'text': [new_tooltips],
+            'hovertemplate': ['%{text}<extra></extra>']
+        });
+
+
+        // STEP 5.5: Maintain a single colourbar helper trace (delete old if present)
+        if (plot.data.length > 1) {
+            Plotly.deleteTraces(plot, plot.data.length - 1);
+        }
+
+
+        Plotly.addTraces(plot, [{
+            x: [null],
+            y: [null],
+            z: [null],
+            mode: 'markers',
+            type: 'scatter3d',
+            name: '',
+            marker: {
+                color: colorbar_values,
+                colorscale: continuous_colorscale,
+                cmin: 0,
+                cmax: 1,
+                showscale: true,
+                colorbar: {
+                    title: {
+                        text: __colorscale_label__,
+                        font: {
+                            color: text_color
+                        }
+                    },                        
+                    tickvals: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+                    ticktext: Array.from({length: 11}, (_, i) => (minAct + i * (maxAct - minAct) / 10).toFixed(1)),
+                    tickfont: {
+                        color: text_color
+                    }
+                },
+                opacity: 0,
+                size: 0.1
+            }
+        }]);
+    }
+
+    /* STEP 6: SLIDER CREATION — Build the four vertical noUiSlider instances */
+    activity_slider = document.createElement("div");
+    document.getElementById("activity_slider").appendChild(activity_slider);
+    noUiSlider.create(activity_slider, {
+        start: [minAct, maxAct],
+        connect: true,
+        orientation: 'vertical',
+        direction: 'rtl',
+        step: 0.1,
+        range: { 'min': minAct, 'max': maxAct },
+        format: {to: v => v.toString(), from: v => parseFloat(v)}
+    });
+
+    let x_slider = document.createElement("div");
+    document.getElementById("x_slider").appendChild(x_slider);
+    noUiSlider.create(x_slider, {
+        start: [Math.min(...x_values), Math.max(...x_values)],
+        connect: true,
+        orientation: 'vertical',
+        direction: 'rtl',
+        step: 0.01,
+        range: {
+            min: Math.min(...x_values),
+            max: Math.max(...x_values)
+        },
+        format: {
+            to: v => v.toString(),
+            from: v => parseFloat(v)
+        }
+    });
+
+    let y_slider = document.createElement("div");
+    document.getElementById("y_slider").appendChild(y_slider);
+    noUiSlider.create(y_slider, {
+        start: [Math.min(...y_values), Math.max(...y_values)],
+        connect: true,
+        orientation: 'vertical',
+        direction: 'rtl',
+        step: 0.01,
+        range: {
+            min: Math.min(...y_values),
+            max: Math.max(...y_values)
+        },
+        format: {
+            to: v => v.toString(),
+            from: v => parseFloat(v)
+        }
+    });
+
+    let z_slider = document.createElement("div");
+    document.getElementById("z_slider").appendChild(z_slider);
+    noUiSlider.create(z_slider, {
+        start: [Math.min(...z_values), Math.max(...z_values)],
+        connect: true,
+        orientation: 'vertical',
+        direction: 'rtl',
+        step: 0.01,
+        range: {
+            min: Math.min(...z_values),
+            max: Math.max(...z_values)
+        },
+        format: {
+            to: v => v.toString(),
+            from: v => parseFloat(v)
+        }
+    });
+
+    /* STEP 7: SLIDER EVENTS — Update range labels and trigger recolouring */
+    activity_slider.noUiSlider.on('update', function(values) {
+        document.getElementById("activity_range_label").innerText =
+            parseFloat(values[0]).toFixed(2) + "–" + parseFloat(values[1]).toFixed(2);
+        updatePlotColors();
+    });
+
+    x_slider.noUiSlider.on('update', function(values) {
+        document.getElementById("x_range_label").innerText =
+            parseFloat(values[0]).toFixed(2) + "–" + parseFloat(values[1]).toFixed(2);
+        updatePlotColors();
+    });
+
+    y_slider.noUiSlider.on('update', function(values) {
+        document.getElementById("y_range_label").innerText =
+            parseFloat(values[0]).toFixed(2) + "–" + parseFloat(values[1]).toFixed(2);
+        updatePlotColors();
+    });
+
+    z_slider.noUiSlider.on('update', function(values) {
+        document.getElementById("z_range_label").innerText =
+            parseFloat(values[0]).toFixed(2) + "–" + parseFloat(values[1]).toFixed(2);
+        updatePlotColors();
+    });
+</script>
+
+
+
+<script>
+/**
+ * STEP 8: ACTIVITY MASKS — Maintain grey masks above/below the selected Activity range
+ * Uses handle positions to size the two overlay divs.
+ */
+const topMask = document.getElementById("mask-top");
+const bottomMask = document.getElementById("mask-bottom");
+
+function updateActivityMasks() {
+    const handles = activity_slider.querySelectorAll('.noUi-handle');
+    const sliderRect = activity_slider.getBoundingClientRect();
+    const topHandleRect = handles[1].getBoundingClientRect();
+    const bottomHandleRect = handles[0].getBoundingClientRect();
+
+    const topHeight = topHandleRect.top - sliderRect.top - 1.5;
+    const bottomHeight = sliderRect.bottom - bottomHandleRect.bottom - 0.5;
+
+    topMask.style.top = "1px";
+    topMask.style.height = `${topHeight}px`;
+
+    bottomMask.style.bottom = "-1px";
+    bottomMask.style.height = `${bottomHeight}px`;
+}
+
+activity_slider.noUiSlider.on('update', updateActivityMasks);
+updateActivityMasks();
+
+window.addEventListener('resize', updateActivityMasks);
+new ResizeObserver(updateActivityMasks).observe(document.getElementById("activity_slider_container"));
+</script>
+
+
+
+<script>
+    /**
+     * STEP 9: LABEL INJECTION — Populate axis and colour-scale captions post-load
+     */
+    document.getElementById("x_label_text").innerText = __xlabel__;
+    document.getElementById("y_label_text").innerText = __ylabel__;
+    document.getElementById("z_label_text").innerText = __zlabel__;
+    document.getElementById("colorscale_label_text").innerText = __colorscale_label__;
+</script>

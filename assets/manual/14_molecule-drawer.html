@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SARgate – Molecule Drawer</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <script src="assets/script.js" defer></script>
+</head>
+
+<body>
+<div class="layout">
+
+    <nav class="sidebar"></nav>
+
+    <main class="content">
+        <h1>Molecule Drawer</h1>
+
+        <p>
+            The <strong>Molecule Drawer</strong> is SARgate's standalone 2D structure editor. It is designed for fast manual
+            sketching, fragment editing, stereochemical annotation, clipboard-based exchange with external software, and quick
+            image export. The interface is deliberately compact: most functions are controlled by a small number of drawing
+            modes, direct mouse gestures, and keyboard shortcuts.
+        </p>
+
+        <h2>Main Interaction Model</h2>
+
+        <p>
+            The editor works by combining an <strong>active element</strong> with an optional <strong>bond or ring tool</strong>.
+            In normal drawing mode, clicking or dragging on the canvas adds atoms, bonds, chains, or rings. In control modes
+            such as <strong>Select</strong>, <strong>Erase</strong>, <strong>Pan</strong>, or <strong>Rotate</strong>, drawing is
+            temporarily disabled and the mouse is reassigned to editing or navigation operations.
+        </p>
+
+        <p>
+            The toolbar is organised into compact groups: structure-management buttons, control buttons, drawing helpers,
+            common atom buttons, periodic-table access, charge buttons, bond buttons, ring buttons, and visualisation/export
+            controls. Most buttons are self-explanatory from their icon and tooltip; the sections below focus on behaviour,
+            shortcuts, and less obvious interactions.
+        </p>
+
+        <h2>Mouse Controls</h2>
+
+        <ul>
+            <li><strong>Left click</strong> on the canvas adds or edits according to the active tool.</li>
+            <li><strong>Left click on an atom</strong> with an atom button active changes that atom to the selected element.</li>
+            <li><strong>Left click on an atom</strong> with a bond tool active creates a new bond using geometry-aware placement.</li>
+            <li><strong>Left drag from an atom</strong> previews and creates a bond, chain, or ring attachment interactively.</li>
+            <li><strong>Left drag on empty space</strong> in <strong>Select</strong> mode draws a selection rectangle.</li>
+            <li><strong>Left drag</strong> in <strong>Erase</strong> mode draws an erase rectangle.</li>
+            <li><strong>Left drag</strong> in <strong>Rotate</strong> mode rotates the selected fragment, or the picked fragment if only one atom/bond is active.</li>
+            <li><strong>Right drag</strong> pans the view.</li>
+            <li><strong>Right click</strong> opens the canvas context menu.</li>
+            <li><strong>Mouse wheel / trackpad zoom</strong> zooms around the cursor position.</li>
+        </ul>
+
+        <h2>Clipboard and Import/Paste Logic</h2>
+
+        <p>
+            The drawer accepts pasted structure data directly onto the canvas. Clipboard parsing supports common cheminformatics
+            representations such as <strong>SMILES</strong>, <strong>SMARTS</strong>, <strong>InChI</strong>, and <strong>MolBlock</strong>.
+            Imported structures are appended to the current canvas rather than replacing it.
+        </p>
+
+        <p>
+            When a fragment is selected, copy and cut operations serialise that selection as a MolBlock, making it possible to
+            duplicate or transfer fragments between editor sessions and external tools while preserving the local 2D geometry.
+        </p>
+
+        <h2>Keyboard Shortcuts</h2>
+
+        <ul>
+            <li><code>Ctrl/Cmd + C</code>: copy the current selection (in MolBlock format).</li>
+            <li><code>Ctrl/Cmd + X</code>: cut the current selection (in MolBlock format).</li>
+            <li><code>Ctrl/Cmd + V</code>: paste supported structure content from the clipboard onto the canvas.</li>
+            <li><code>Ctrl/Cmd + A</code>: select everything on the canvas.</li>
+            <li><code>Ctrl/Cmd + Z</code>: undo.</li>
+            <li><code>Ctrl/Cmd + Y</code> or <code>Ctrl/Cmd + Shift + Z</code>: redo.</li>
+            <li><code>Delete</code> or <code>Backspace</code>: delete the current selection.</li>
+            <li><code>Escape</code>: clear the current selection.</li>
+            <li><code>H</code>, <code>C</code>, <code>N</code>, <code>O</code>, <code>P</code>, <code>S</code>, <code>F</code>, <code>I</code>, <code>R</code>: activate the corresponding atom button.</li>
+            <li><code>C</code> followed quickly by <code>L</code>: activates <code>Cl</code>.</li>
+            <li><code>B</code> followed quickly by <code>R</code>: activates <code>Br</code>.</li>
+        </ul>
+
+        <h2>SMILES Display and Copying</h2>
+
+        <p>
+            The SMILES bar continuously reflects the current interpreted molecule. The adjacent <strong>Copy</strong> button copies
+            that string directly to the clipboard. This is useful for immediate transfer into SARgate input fields, notebooks,
+            spreadsheets, external editors, or database query tools.
+        </p>
+
+        <div class="footer-spacer"></div>
+    </main>
+</div>
+</body>
+</html>

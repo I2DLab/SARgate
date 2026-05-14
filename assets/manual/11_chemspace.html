@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SARgate User Manual</title>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/style.css">
+
+    <!-- Script -->
+    <script src="assets/script.js" defer></script>
+</head>
+
+<body>
+<div class="layout">
+
+    <!-- =====================
+         Sidebar / Navigation
+         ===================== -->
+    <nav class="sidebar"></nav>
+
+    <!-- =====================
+         Main Content
+         ===================== -->
+    <main class="content">
+
+        <h1>Chemical Space</h1>
+
+        <p>
+            The <strong>Chemical Space</strong> tab provides two tools for exploring Descriptors and visualizing
+            Structure-Activity Relationship (SAR) patterns within individual subsets or across the full dataset.
+            Each tool is available in a dedicated sub-tab: <strong>Hierarchical Dendrogram</strong>,
+            <strong>Descriptors & Activity Plot</strong>, <strong>Structure-Based PCA</strong>,
+            <strong>Structure-Based UMAP</strong>, and <strong>Structure-Based t-SNE</strong>.
+        </p>
+
+        <!-- =====================
+             Hierarchical Dendrogram
+             ===================== -->
+            <h2>Hierarchical Dendrogram</h2>
+
+            <p>
+                The <strong>Hierarchical Dendrogram</strong> organises subsets according to the similarity of their
+                common scaffolds. Each leaf corresponds to one subset, while branch heights reflect the similarity
+                level at which subsets or subset-groups merge into larger structural families.
+            </p>
+
+            <p>
+                The red threshold line inside the plot can be moved interactively to change the similarity cut-off
+                used to colour the branches. This makes it possible to inspect how subsets aggregate into broader
+                or more specific structural clusters as the similarity criterion becomes more or less stringent.
+            </p>
+
+            <p>
+                The left panel contains the subset selector, allowing the user to include or exclude subsets before
+                drawing the dendrogram and to highlight a specific subset directly on the plot. Selecting a subset
+                in the dendrogram shows its scaffold and summary information in the right-hand panel, supporting
+                direct comparison between cluster position and chemical structure.
+            </p>
+
+
+        <!-- =====================
+             Descriptors
+             ===================== -->
+            <h2>Descriptors & Activity Plot</h2>
+
+            <p>
+                The <strong>Descriptors & Activity Plot</strong> visualises relationships 
+                between two or three molecular variables within a selected subset or across 
+                the full dataset. Each axis can represent either a biological activity endpoint or a molecular descriptor.
+                In <strong>3D mode</strong>, the plot can additionally use colour to encode a fourth variable.
+            </p>
+
+            <p>The user selects:</p>
+            <ul>
+                <li><strong>Subset</strong> to analyse (or the full dataset).</li>
+                <li><strong>Dimensionality</strong> (<strong>2D</strong> or <strong>3D</strong>).</li>
+                <li><strong>Variables</strong> to plot on the X and Y axes, and on the Z axis when in 3D mode.</li>
+                <li><strong>Point colouring</strong> (3D only), to map an additional variable to the colour scale.</li>
+            </ul>
+
+        <!-- ===
+             PCA
+             === -->
+            <h2>Structure-Based PCA</h2>
+
+            <p>
+                The <strong>Structure-Based PCA</strong> view is a Principal Component Analysis projection computed from molecular fingerprints
+                in <strong>2D</strong> or <strong>3D</strong>. Because the model is fingerprint-based, the projection provides a compact representation
+                of structural variability within a subset or across the entire dataset. Clusters of points therefore correspond to groups of
+                structurally similar molecules. Point colour encodes the selected activity value, enabling rapid identification of
+                activity-enriched regions of chemical space.
+            </p>
+
+            <p>The user selects:</p>
+            <ul>
+                <li><strong>Subset</strong> to analyse (or the full dataset).</li>
+                <li><strong>Activity type</strong> (IC50-like endpoints are automatically converted to a logarithmic scale, e.g., pIC50).</li>
+                <li><strong>Dimensionality</strong> (<strong>2D</strong> or <strong>3D</strong>), corresponding to the number of principal components.</li>
+                <li><strong>Fingerprint type</strong> used to compute the PCA projection.</li>
+            </ul>
+
+            <h3>Example Analysis</h3>
+
+            <img src="assets/images/Plots_PCA_ex.png">
+
+            <p>
+                The example shows the analysis performed on <strong>Subset 15</strong>, selecting <strong>IC50</strong> (reported as <strong>pIC50</strong>)
+                and the <strong>Morgan fingerprint</strong>. Two clusters are visible, separated primarily along <strong>PC1</strong>, and display
+                clearly distinct activity levels: all molecules in <strong>Cluster 1</strong> show higher activity values than those in <strong>Cluster 2</strong>,
+                indicating a strong structure-activity correlation within Subset 15.
+            </p>
+
+        <!-- ===
+             UMAP
+             === -->
+            <h2>Structure-Based UMAP</h2>
+
+            <p>
+                The <strong>Structure-Based UMAP</strong> view is a non-linear projection of molecular fingerprints into <strong>2D</strong>,
+                designed to preserve local neighborhood relationships between structurally similar molecules. Compared with PCA, UMAP is often
+                more effective at revealing compact chemotype clusters, local transitions, and activity-enriched regions that may be hidden in
+                a linear projection. As in the PCA tab, point colour can be switched between activity values, subsets, and automatically derived clusters.
+            </p>
+
+            <p>The user selects:</p>
+            <ul>
+                <li><strong>Subset</strong> to analyse (or the full dataset).</li>
+                <li><strong>Activity type</strong> (IC50-like endpoints are automatically converted to a logarithmic scale, e.g., pIC50).</li>
+                <li><strong>Fingerprint type</strong> used to compute the UMAP projection.</li>
+                <li><strong>Neighbors</strong>, <strong>Min dist.</strong>, and <strong>Metric</strong>, which control how local structure is preserved in the embedding.</li>
+            </ul>
+
+            <p>
+                In practice, the three UMAP-specific parameters determine whether the plot highlights <strong>local compactness within each subset</strong>
+                or <strong>global separation between different subsets</strong>. Since molecules within the same subset usually share a common core, they
+                are expected to occupy nearby regions of the projection. UMAP can either keep these families tightly packed or spread them apart more clearly,
+                depending on how the parameters are tuned.
+            </p>
+
+            <ul>
+                <li><strong>Neighbors</strong> defines how many nearby molecules are considered when learning the local manifold. Lower values (for example <strong>5</strong> or <strong>10</strong>) emphasize very local structure: they often produce tighter, more fragmented islands and are useful when the goal is to separate analog series or to see sub-clusters inside the same subset. Higher values (for example <strong>25</strong> or <strong>50</strong>) smooth the embedding and preserve broader organization better, which is usually preferable when you want to visualize how multiple subsets relate to one another across the whole dataset.</li>
+                <li><strong>Min dist.</strong> controls how close projected points are allowed to sit to each other. Lower values such as <strong>0.0</strong> or <strong>0.1</strong> produce dense, compact clusters and make it easier to see sharply separated groups of related molecules. Higher values such as <strong>0.5</strong> or <strong>0.8</strong> force more empty space between points and are useful when clusters are visually overcrowded and you want to inspect internal gradients, for example activity trends within a subset.</li>
+                <li><strong>Metric</strong> defines how molecular fingerprints are compared before projection. For binary fingerprints, <strong>Jaccard</strong> is usually the most natural choice and often gives the clearest chemistry-driven neighborhoods. <strong>Cosine</strong> can be useful when relative overlap matters more than exact bit matching, while <strong>Euclidean</strong> or <strong>Manhattan</strong> tend to be less chemically intuitive for sparse binary fingerprints but can still be informative depending on the fingerprint type.</li>
+            </ul>
+
+            <p>
+                As a rule of thumb:
+            </p>
+            <ul>
+                <li>To <strong>separate subsets well</strong> across the full dataset, start with <strong>Neighbors = 25-50</strong>, <strong>Min dist. = 0.3-0.8</strong>, and <strong>Metric = Jaccard</strong>.</li>
+                <li>To <strong>see compact local groupings inside one subset</strong>, start with <strong>Neighbors = 5-10</strong>, <strong>Min dist. = 0.0-0.1</strong>, and <strong>Metric = Jaccard</strong>.</li>
+                <li>To <strong>visualize internal activity gradients</strong> within a subset that already forms a tight cloud, try keeping <strong>Neighbors</strong> moderate and increase <strong>Min dist.</strong> so the points spread enough to make the colour pattern easier to read.</li>
+            </ul>
+
+        <!-- ===
+             t-SNE
+             === -->
+            <h2>Structure-Based t-SNE</h2>
+
+            <p>
+                The <strong>Structure-Based t-SNE</strong> view is a non-linear <strong>2D</strong> embedding of molecular fingerprints that
+                emphasizes local similarity patterns and separation of nearby chemical series. It is particularly useful for visually isolating
+                analog groups, dense local neighborhoods, and fine-grained structural families. Because t-SNE prioritizes local relationships,
+                the relative distances between far-apart clusters should be interpreted more cautiously than in PCA.
+            </p>
+
+            <p>The user selects:</p>
+            <ul>
+                <li><strong>Subset</strong> to analyse (or the full dataset).</li>
+                <li><strong>Activity type</strong> (IC50-like endpoints are automatically converted to a logarithmic scale, e.g., pIC50).</li>
+                <li><strong>Fingerprint type</strong> used to compute the t-SNE projection.</li>
+                <li><strong>Perplexity</strong>, <strong>Learning rate</strong>, <strong>Iterations</strong>, and <strong>Metric</strong>, which control neighborhood balance and optimization of the embedding.</li>
+            </ul>
+
+            <p>
+                t-SNE is usually even more focused than UMAP on <strong>local neighborhood structure</strong>. This makes it very effective when the goal
+                is to separate close chemotypes or to highlight fine-grained organization inside families of molecules sharing the same core. At the same time,
+                it is more sensitive to parameter choice, so different settings can visibly change the compactness, spacing, and stability of the final plot.
+            </p>
+
+            <ul>
+                <li><strong>Perplexity</strong> can be interpreted as the effective neighborhood size used by t-SNE. Lower values such as <strong>5</strong> or <strong>10</strong> focus strongly on local structure and often split the embedding into many compact islands, which is helpful for separating analog series or subfamilies within subsets. Higher values such as <strong>30</strong> or <strong>40</strong> smooth the layout and reduce fragmentation, which is usually better when you want a more coherent overview of many subsets together.</li>
+                <li><strong>Learning rate</strong> controls how aggressively the embedding moves during optimization. Low values may compress points too much or converge slowly, while excessively high values can make the map unstable or overly scattered. In most cases <strong>auto</strong> is a safe starting point; fixed values such as <strong>100</strong> or <strong>200</strong> can be useful if you want to compare repeated runs more consistently.</li>
+                <li><strong>Iterations</strong> determines how long optimization runs. Lower values are faster but can stop before the embedding stabilizes, while higher values usually yield cleaner separation and more regular cluster shapes. If the plot looks noisy, partially collapsed, or still changing a lot between runs, increasing the number of iterations is often the first thing to try.</li>
+                <li><strong>Metric</strong> defines how fingerprint similarity is measured before t-SNE constructs the 2D map. For typical binary molecular fingerprints, <strong>Jaccard</strong> would often be the chemically most intuitive choice, but in this implementation the main available alternatives are <strong>Euclidean</strong>, <strong>Cosine</strong>, and <strong>Manhattan</strong>. Among these, <strong>Cosine</strong> often gives more chemically interpretable neighborhoods than Euclidean for sparse fingerprint-like vectors.</li>
+            </ul>
+
+            <p>
+                As a rule of thumb:
+            </p>
+            <ul>
+                <li>To <strong>separate local groups inside subsets</strong>, start with <strong>Perplexity = 5-10</strong>, <strong>Learning rate = auto</strong>, and <strong>Iterations = 2000-4000</strong>.</li>
+                <li>To <strong>obtain a smoother overview of many subsets</strong>, start with <strong>Perplexity = 20-40</strong>, <strong>Learning rate = auto</strong>, and <strong>Iterations = 1000-2000</strong>.</li>
+                <li>If points from the same subset form one very dense blob and you want to understand its internal organization better, lower the <strong>Perplexity</strong> and increase the <strong>Iterations</strong>.</li>
+                <li>If the projection appears unstable or overly fragmented, increase the <strong>Perplexity</strong> and keep the <strong>Learning rate</strong> on <strong>auto</strong> before changing other settings.</li>
+            </ul>
+
+            <h2>When to Use PCA, UMAP, or t-SNE</h2>
+
+            <p>
+                Although <strong>PCA</strong>, <strong>UMAP</strong>, and <strong>t-SNE</strong> are all used in SARgate to
+                project fingerprint-based molecular representations into low-dimensional spaces, they are not equivalent
+                and should be interpreted as complementary views of chemical space rather than interchangeable methods.
+            </p>
+
+            <p>
+                <strong>PCA</strong> is a <strong>linear</strong> projection method. It preserves global variance structure and
+                is therefore the easiest of the three methods to interpret at the whole-dataset level. When the objective is
+                to compare broad structural trends across many subsets, or to verify whether activity gradients align with the
+                dominant directions of structural variability, PCA is usually the most robust starting point. It is also the
+                preferred method when a more reproducible and globally interpretable map is needed.
+            </p>
+
+            <p>
+                <strong>UMAP</strong> and <strong>t-SNE</strong> are <strong>non-linear</strong> methods that focus more strongly on
+                neighborhood preservation. They are therefore often more informative when the goal is to reveal compact chemotype
+                clusters, local transitions, or fine-grained subgrouping that may be hidden in a linear PCA projection. In
+                SARgate, this becomes particularly relevant when analysing <strong>single subsets</strong>, since subsets are
+                already structurally homogeneous by construction and consist of molecules sharing the same core scaffold. In this
+                scenario, non-linear methods can be more effective than PCA at exposing subtle internal organization driven by
+                R-group substitutions.
+            </p>
+
+            <p>
+                Between the two non-linear methods, <strong>UMAP</strong> is generally more suitable when the user wants a
+                balanced view that still retains part of the broader organization of the data. For example, when analysing the
+                <strong>entire dataset</strong>, UMAP can often separate subsets or chemotype families while preserving a useful
+                intermediate-scale structure across the whole map. <strong>t-SNE</strong>, in contrast, is usually more aggressive
+                in emphasizing <strong>very local structure</strong>. It is therefore particularly useful when the user wants to
+                resolve small analog series, subtle subgrouping inside a single subset, or local SAR discontinuities within a set
+                of molecules sharing a common core.
+            </p>
+
+            <p>
+                As a practical rule in SARgate:
+            </p>
+            <ul>
+                <li>Use <strong>PCA</strong> first when analysing the <strong>full dataset</strong> and you need a stable, globally interpretable structural overview.</li>
+                <li>Use <strong>UMAP</strong> when you want to inspect both <strong>subset-level separation</strong> and <strong>local structural neighborhoods</strong> in the same map.</li>
+                <li>Use <strong>t-SNE</strong> when the main goal is to inspect <strong>local organization inside one subset</strong> or to resolve fine-grained structural families among molecules that already share a common scaffold.</li>
+            </ul>
+            
+
+        <div class="footer-spacer"></div>
+
+    </main>
+
+</div>
+</body>
+</html>

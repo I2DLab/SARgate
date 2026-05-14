@@ -1,0 +1,15 @@
+dearpygui
+networkx
+numpy
+openpyxl
+pandas
+Pillow
+plotly
+pynput
+reportlab
+requests
+rdkit
+scikit-learn
+scipy
+screeninfo
+umap-learn

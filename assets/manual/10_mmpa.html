@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SARgate – MMPA (Matched Molecular Pairs Analysis)</title>
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/style.css">
+    <!-- Script -->
+    <script src="assets/script.js" defer></script>
+</head>
+
+<body>
+<div class="layout">
+
+    <!-- =====================
+         Sidebar / Navigation
+         ===================== -->
+    <nav class="sidebar"></nav>
+
+    <!-- =====================
+         Main Content
+         ===================== -->
+    <main class="content">
+
+        <h1>Matched Molecular Pairs Analysis (MMPA)</h1>
+
+        <p>
+            The <strong>MMPA</strong> tab in SARgate is composed of two interactive panels: 
+            <strong>MMPA Table</strong> and <strong>MMPA Network</strong>.
+        </p>
+
+        <!-- =====================
+            MMPA TABLE
+            ===================== -->
+        <h2>MMPA Table</h2>
+
+        <p>
+            The Matched Molecular Pairs Analysis (MMPA) identifies molecule pairs within a selected subset that differ 
+            exclusively by a <em>single</em> variable group at the <em>same attachment position</em> on the reference core.
+            Each row in the MMPA table corresponds to one unique <em>transformation</em>, defined as the substitution 
+            of fragment X with fragment Y at a specific R-position.
+        </p>
+
+        <p>
+            The column <strong>Freq.</strong> reports the total number of molecule pairs in the selected subset that exhibit 
+            the same fragmental transformation (X » Y) at the same R-position.
+            The column <strong>Mean ΔActivity</strong> reports the average activity difference between all molecule pairs involved
+            in that transformation, evaluated for the activity type selected by the user (e.g., IC50, EC50).
+            If the selected activity is <em>IC50-like</em>, potency relationships are internally analysed in 
+            logarithmic space when valid numeric values are available.
+        </p>
+
+        <p>
+            A global filter, controlled by the slider <strong>Min ΔActivity</strong>, retains only transformations 
+            where the mean activity difference meets or exceeds the selected threshold.
+            Upon selecting a row, the interface renders four molecular images:
+            the two left images represent the exchanged fragments (variable regions);
+            the two right images display the molecular pair(s) supporting that transformation.
+            Navigation buttons ◀ and ▶ allow browsing 
+            all available molecular pairs for a transformation when <strong>Freq. &gt; 1</strong>.
+        </p>
+
+        <p>
+            Additionally, a clarification on R-group interpretation:
+            when a molecule contains a <em>ring fragment</em> in a region that corresponds to two independent substituents in other
+            subset molecules, the ring is interpreted as the <em>variable connector</em> of that region.
+            Consequently, its two heavy-atom-defined attachment points are assigned as <strong>R2</strong> and <strong>R3</strong>,
+            not as classical monovalent substituents, ensuring positional consistency during pair matching.
+        </p>
+
+        <ul>
+            <li>The checkbox <strong>Include undefined</strong> extends matching to 
+                activity annotations using inequality operators.
+            Transformations involving at least one molecule with undefined activity are colored in yellow.</li>
+            <li>The checkbox <strong>Include inactive</strong> includes molecules lacking the selected activity label, 
+                assigning a dummy value of 0 for comparison purposes.
+            Transformations involving at least one inactive molecule are colored in red.</li>
+        </ul>
+
+        <h3>Example Analysis</h3>
+
+        <p>
+            The following example illustrate an MMPA case study conducted on Subset 15 using IC50 as the 
+            selected activity type and Min ΔpIC50 = 1.8.
+        </p>
+
+        <img src="assets/images/MMPA_ex1.png">
+
+        <p>
+            The transformation frequency distribution plot on the right panel (subset-specific) is restricted to
+            ΔpIC50 values between 1.8 and 3, where the most significant peaks are observed.
+            For example, within Subset 15:
+            <ul>
+                <li>3 transformations fall within ΔpIC50 = 1.8-1.9,</li>
+                <li>2 transformations fall within ΔpIC50 = 2.0-2.1,</li>
+                <li>0 transformations are observed at ΔpIC50 = 2.4-2.5, and</li>
+                <li>2 transformations are observed at ΔpIC50 = 3.0-3.1.</li>
+            </ul>
+        </p>
+
+        <img src="assets/images/MMPA_ex2.png">
+
+        <p>
+            The second image displays the selected transformation row:
+            <strong>R3: CH3 → H</strong>,
+            supported by 9 molecule pairs.
+            Although the exchanged fragment is identical in all 9 cases,
+            individual molecule pairs may present different absolute IC50 values,
+            which explains why the <em>mean ΔpIC50</em> (2.5339) is lower than the highest individual ΔpIC50 values
+            observed in the distribution plot (equal to 3).
+        </p>
+
+
+        <!-- =====================
+            MMPA NETWORK
+            ===================== -->
+        <h2>MMPA Network</h2>
+
+        <p>
+            The <strong>MMPA Network</strong> panel visualises the connected components generated by the transformations
+            identified in the MMPA Table. Each node corresponds to one molecule, and each edge represents a valid
+            matched-pair relationship between two molecules that differ by a single local modification.
+            Molecules connected through chains of transformations are displayed together as structural families.
+        </p>
+
+        <p>
+            The network layout can be interactively tuned to emphasise three complementary views:
+        </p>
+
+        <ul>
+            <li><strong>Circle</strong>, which distributes the molecules on a circular arrangement.</li>
+            <li><strong>Network</strong>, which emphasises graph connectivity and local neighbourhood structure.</li>
+            <li><strong>Activity</strong>, which progressively aligns nodes according to their biological activity values.</li>
+        </ul>
+
+        <p>
+            Additional sliders control node size, rendering detail, and edge length, allowing the user to balance
+            structural readability and network compactness even for larger connected components.
+        </p>
+
+        <p>
+            When a molecule is hovered, SARgate swaps its depiction to a highlighted version where the
+            <strong>common scaffold region</strong> is shown in blue and the <strong>variable R-group regions</strong>
+            are shown in red. The hovered node and its directly connected neighbours are also emphasised by an outer ring,
+            while the node image itself displays the molecule identifier, optional name, and activity value.
+            This supports rapid inspection of how local structural edits propagate through the MMPA graph.
+        </p>
+
+        <p>
+            The internode connections also follow the currently active discrete colormap of the program, so the
+            appearance of the network remains visually consistent with the rest of the application and updates
+            immediately when the user changes the global discrete palette.
+        </p>
+
+        <div class="footer-spacer"></div>
+
+    </main>
+</div>
+</body>
+</html>

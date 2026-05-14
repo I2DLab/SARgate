@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SARgate Manual – GUI Overview</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <script src="assets/script.js" defer></script>
+</head>
+
+<body>
+<div class="layout">
+
+    <nav class="sidebar"></nav>
+
+    <main class="content">
+
+        <h1>Graphical User Interface (GUI) Overview</h1>
+
+        <p> 
+            This chapter provides a comprehensive overview of the SARgate graphical user interface (GUI).
+        </p>
+
+        <ul>
+        <li> Tab Structure </li>
+        <li> Menu Bar </li>
+        <li> Slith Minigame </li>
+        </ul>
+
+        <h2>Tab Structure</h2>
+
+        <p>
+            The SARgate graphical user interface is organised around a
+            <strong>tab-based layout</strong>.
+            Each tab corresponds to a specific type of task or analysis,
+            allowing a clear separation between data preparation, analysis
+            execution, and result exploration.
+        </p>
+
+        <h3>Initial Tabs</h3>
+
+        <p>
+            When SARgate is launched, only <strong>two tabs</strong> are visible:
+        </p>
+
+        <img src="assets/images/Tab_bar_1.png">
+
+        <h4>Input Tab</h4>
+
+        <p>
+            The <strong>Input</strong> tab represents the
+            <strong>starting point of any SARgate analysis</strong>.
+        </p>
+
+        <p>From this tab, the user:</p>
+
+        <ul>
+            <li>Selects the input molecular library to analyse.</li>
+            <li>Configures all analysis parameters.</li>
+            <li>Defines the output file name and destination.</li>
+            <li>Launches the analysis workflow.</li>
+        </ul>
+
+        <p>
+            Once the analysis is started, SARgate processes the input library
+            according to the selected options.
+        </p>
+
+        <h4>Utilities Tab</h4>
+
+        <p>
+            The <strong>Utilities</strong> tab provides a collection of standalone
+            tools designed to assist with the preparation and manipulation of
+            input files.
+            These tools are <strong>independent from the main SARgate analysis
+            workflow</strong> and can be used on their own.
+        </p>
+
+        <p>Typical utilities include, for example:</p>
+
+        <ul>
+            <li>File format conversion (e.g. CSV &lt;-&gt; SDF).</li>
+            <li>Simple data inspection or preprocessing tasks.</li>
+        </ul>
+
+        <p>
+            Using the Utilities tab is <strong>not required</strong> to run an
+            analysis on a molecular library, and none of the tools in this tab
+            are intrinsically linked to a specific SARgate project.
+        </p>
+
+        <h3>Analysis Tab</h3>
+
+        <p>
+            After the analysis has been launched, a new tab called
+            <strong>Analysis</strong> appears automatically.
+        </p>
+
+        <img src="assets/images/Tab_bar_2.png">
+
+        <p>This tab displays:</p>
+
+        <ul>
+            <li>The progress of the running analysis.</li>
+            <li>Intermediate statistics and counters.</li>
+            <li>Informative messages related to the current processing step.</li>
+        </ul>
+
+        <p>
+            The Analysis tab is primarily intended for
+            <strong>monitoring the execution</strong> and verifying that the
+            workflow is proceeding correctly.
+        </p>
+
+        <h3>Result Tabs</h3>
+
+        <p>
+            Once the analysis is completed,
+            <strong>seven additional tabs</strong> become available.
+        </p>
+
+        <img src="assets/images/Tab_bar_3.png">
+
+        <p>
+            Each of these tabs focuses on a different aspect of result
+            exploration and interpretation.
+        </p>
+
+        <h4>Overview Tab</h4>
+        <p>
+            The <strong>Overview</strong> tab allows the user to explore the
+            subsets generated from the original library, the molecules
+            belonging to each subset, and the associated R-groups for each
+            molecule.
+        </p>
+
+        <p>
+            Both numerical summaries and graphical representations are provided
+            to describe the distribution of R-groups across subsets.
+        </p>
+
+        <h4>Similarity Tab</h4>
+        <p>
+            The <strong>Similarity</strong> tab enables the construction of
+            similarity matrices to explore molecular similarity within each
+            subset.
+        </p>
+
+        <p>
+            Two different similarity matrix types can be generated, allowing
+            complementary views of structural relationships between molecules.
+        </p>
+
+        <h4>R-counts Tab</h4>
+        <p>
+            The <strong>R-counts</strong> tab provides a detailed analysis of
+            R-group distributions.
+        </p>
+
+        <ul>
+            <li>Frequency statistics for each R-group.</li>
+            <li>Associated biological activity values.</li>
+            <li>An interactive table.</li>
+            <li>An interactive boxplot for visual comparison.</li>
+        </ul>
+
+        <p>
+            This tab is designed for in-depth
+            <strong>Structure–Activity Relationship (SAR)</strong> inspection at
+            the R-group level.
+        </p>
+
+        <h4>Stereo Tab</h4>
+        <p>
+            The <strong>Stereo</strong> tab focuses on stereochemistry.
+        </p>
+
+        <p>
+            It allows the user to visualise groups of
+            <strong>stereoisomers</strong>, either across the entire dataset or
+            within individual subsets.
+        </p>
+
+        <p>
+            This provides rapid insight into activity differences that can be
+            attributed specifically to stereochemical variations.
+        </p>
+
+        <h4>MMPA Tab</h4>
+        <p>
+            The <strong>MMPA</strong> tab performs
+            <strong>Matched Molecular Pairs Analysis</strong>.
+        </p>
+
+        <p>
+            This analysis identifies pairs or groups of molecules that differ by
+            a single R-group substitution and exhibit a significant change in
+            biological activity as a result of that single modification.
+        </p>
+
+        <p>
+            MMPA is a powerful tool for pinpointing chemically meaningful
+            transformations driving activity changes.
+        </p>
+
+        <h4>Plots Tab</h4>
+        <p>
+            The <strong>Plots</strong> tab allows the generation of several types
+            of graphical representations, including:
+        </p>
+
+        <ul>
+            <li>R-group matrices (R-groups table).</li>
+            <li>Scatter plots (2D and 3D).</li>
+            <li>Principal Component Analysis (PCA) plots (2D and 3D).</li>
+            <li>Structure–Activity Landscape (SAL) plots.</li>
+        </ul>
+
+        <p>
+            These visual tools support both qualitative and quantitative
+            interpretation of the analysed chemical space.
+        </p>
+
+        <h4>SAR Notes Tab</h4>
+        <p>
+            The <strong>SAR Notes</strong> tab opens a dedicated window that
+            displays the common substructure identified for each subset,
+            together with the corresponding R-groups.
+        </p>
+
+        <p>
+            Within this interface, the user can add textual annotations for each
+            R-group independently, in order to record observations related to
+            structure–activity relationships (SAR) identified during the
+            different analyses performed in SARgate.
+        </p>
+
+        <p>
+            All annotations are saved automatically.
+            When a previously generated job is loaded, the corresponding SAR
+            Notes are restored and displayed, ensuring continuity between
+            analysis sessions.
+        </p>
+
+        <div class="footer-spacer"></div>
+
+    
+        <h2>Menu Bar</h2>
+
+        <p>
+            The SARgate menu bar provides access to core application-level actions, including
+            path configuration, job loading, interface customisation, and documentation utilities.
+            It includes four main entries: <strong>File</strong>, <strong>View</strong>, <strong>Help</strong>,
+            and the contextual <strong>?</strong> button.
+        </p>
+
+        <h3>File</h3>
+
+        <ul>
+            <li>
+                <strong>Set input directory</strong><br>
+                Sets the default folder used as the starting location for the input library file dialog.
+                This directory acts as a convenience “entry point” only: the user can still browse and
+                select files located outside the chosen input folder.
+            </li>
+
+            <li>
+                <strong>Set results directory</strong><br>
+                Sets the root directory used to store SARgate job outputs. For each executed job, SARgate
+                creates a dedicated subfolder within this path, named either after the input file or
+                according to the job name provided in the <em>Input</em> tab. The job folder contains:
+                log files required to reproduce and audit the analysis, images generated during execution,
+                and the internal files required to reload the job state in a future session.
+            </li>
+
+            <li>
+                <strong>Load job</strong><br>
+                Opens a file dialog within the configured results directory, allowing the user to select
+                a previously generated job folder and restore its analysis session.
+            </li>
+
+            <li>
+                <strong>Quit SARgate</strong><br>
+                Terminates the application and closes the current SARgate session.
+            </li>
+        </ul>
+
+        <h3>View</h3>
+
+        <ul>
+            <li>
+                <strong>Style editor</strong><br>
+                Opens the interface appearance manager, enabling advanced GUI customisation. From this panel,
+                the user can:
+                <ul>
+                    <li>Set the global application font.</li>
+                    <li>Adjust the global font scale (GUI scaling).</li>
+                    <li>Select a predefined theme (<em>Dark</em> or <em>Light</em>).</li>
+                    <li>Create and apply a <em>Custom</em> theme.</li>
+                    <li>Select a plot colormap for data visualisation (<em>TrafficLight</em>, <em>Viridis</em>, <em>Plasma</em>, <em>Cool</em>, or <em>Jet</em>).</li>
+                </ul>
+            </li>
+
+            <li>
+                <strong>Fullscreen mode</strong><br>
+                Switches the main window to fullscreen display mode.
+            </li>
+        </ul>
+
+        <h3>Help</h3>
+
+        <ul>
+            <li>
+                <strong>User Manual</strong><br>
+                Opens this user manual at the main landing page.
+            </li>
+
+            <li>
+                <strong>Documentation</strong><br>
+                Opens the online SARgate documentation (for example, the project repository page).
+            </li>
+
+            <li>
+                <strong>Support</strong><br>
+                Opens a contextual submenu with the following options:
+                <ul>
+                    <li>
+                        <strong>Contact</strong><br>
+                        Displays the reference email address for communications and support requests.
+                    </li>
+                    <li>
+                        <strong>Report an issue</strong><br>
+                        Opens the project’s issue tracker page to report bugs, inconsistencies, or other problems.
+                        SARgate is an open-source toolkit developed by a small research group; user reports are valuable
+                        for improving robustness and feature completeness.
+                    </li>
+                </ul>
+            </li>
+
+            <li>
+                <strong>About SARgate</strong><br>
+                Displays application metadata, including the currently installed version and licensing information
+                for third-party dependencies.
+            </li>
+        </ul>
+
+        <h3>Contextual Help Button</h3>
+
+        <p>
+            The <strong>?</strong> button provides contextual help: it opens this manual directly at the chapter
+            corresponding to the tab currently active in the SARgate GUI.
+        </p>    
+
+        <div class="footer-spacer"></div>
+
+
+        <h2>Slith Minigame</h2>
+
+        <p>
+            SARgate includes a chemistry-themed mini-game called <strong>Slith</strong>, inspired by the classic <em>Snake</em> gameplay.
+        </p>
+
+        <p>
+            The mini-game is launched via a hidden tab shortcut:
+        </p>
+
+        <ul>
+            <li><em>Windows / Linux:</em> Press <code>Ctrl</code> + <code>Shift</code> (<code>⇧</code>) + <code>S</code> simultaneously.</li>
+            <li><em>macOS:</em> Press <code>Command</code> (<code>⌘</code>) + <code>Shift</code> (<code>⇧</code>) + <code>S</code> simultaneously.</li>
+        </ul>
+
+        <p>
+            Once activated, a new tab labelled <em>Slith</em> appears in the main interface and loads the game environment.
+        </p>
+
+        <h3>Game Concept</h3>
+
+        <p>
+            The player controls a growing <strong>fatty acid chain</strong> using
+            <code>Left Arrow</code> (<code>←</code>) and <code>Right Arrow</code> (<code>→</code>), 
+            starting as <em>butanoic acid</em> (C4).
+        </p>
+
+        <p>
+            The chain moves along a hexagonal reaction board, representing a simplified model of fatty-acid biosynthesis.
+        </p>
+
+        <p>
+            The goal is to elongate the molecule as much as possible by reaching <strong>malonyl-CoA</strong> units.
+        </p>
+
+        <p>
+            Each malonyl-CoA capture extends the chain by 2 carbon atoms, mimicking the two-carbon iterative growth 
+            step of fatty-acid synthesis. Chain speed increases progressively after each elongation step.
+        </p>
+
+        <p>
+            The game terminates when the fatty acid chain collides with itself (self-intersection).
+            At that point, the longest synthesised chain is reported as the final result.
+        </p>
+
+        <div class="footer-spacer"></div>     
+        
+    </main>
+
+</div>
+</body>
+</html>

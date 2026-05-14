@@ -1,0 +1,558 @@
+<!--
+=====================
+3d_pca.html
+=====================
+
+HTML template for 3D PCA visualisation.
+
+Acts as a reusable layout for displaying molecular PCA plots with adjustable
+activity-based colouring and subset sliders. Injected dynamically from Python
+to generate interactive visualisations in the SARgate environment.
+-->
+
+<!-- === IMPORTS === -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.js"></script>
+
+
+<!-- === FILE ROADMAP (STEP MAP) ===
+     STEP 1: Styles (sliders, masks, colour bars)
+     STEP 2: Fixed control panel layout (sliders + buttons + counters)
+     STEP 3: Core script variables and data placeholders
+     STEP 4: Colour mapping utilities (Activity → RGBA)
+     STEP 5: Plot colouring + visibility update pipeline
+     STEP 6: Sliders creation and configuration
+     STEP 7: Slider event handlers (range labels + re-colour)
+     STEP 8: Colour mode switching (Activity / Subset / Cluster)
+     STEP 9: Initial activation of Activity colour mode
+     STEP 10: Mask overlay logic for the Activity slider (top/bottom covers)
+-->
+
+
+<style>
+/* STEP 1: STYLE — Handle aesthetics and z-index layering */
+.noUi-handle {
+    transform: scale(0.7);
+    z-index: 5;
+    background-color: #999;
+    border: 1px solid #111;
+}
+
+/* STEP 1.1: STYLE — Vertical gradient for the Activity slider track */
+#activity_slider .noUi-base {
+  background: __css_activity_gradient__;
+}
+
+/* STEP 1.2: STYLE — The segment between handles is transparent */
+#activity_slider .noUi-connect {
+  background: transparent;
+}
+
+/* STEP 1.3: STYLE — Grey masks above and below the selected Activity range */
+.slider-mask {
+  position: absolute;
+  left: 1px;
+  width: calc(100% - 4px);
+  background: rgb(80, 80, 80);
+  z-index: 4;
+  pointer-events: none;
+}
+
+/* STEP 1.4: STYLE — Subset slider colours */
+#subset_slider .noUi-base {
+  background: rgb(80, 80, 80);
+}
+#subset_slider .noUi-connect {
+  background: transparent;
+}
+
+/* STEP 1.5: STYLE — Cluster slider colours */
+#cluster_slider .noUi-base {
+  background: rgb(80, 80, 80);
+}
+#cluster_slider .noUi-connect {
+  background: transparent;
+}
+</style>
+
+
+
+<!-- STEP 2: FIXED CONTROL PANEL — Sliders + Buttons + Visible counter -->
+<div style="
+    position:fixed; 
+    top:10px; 
+    left:10px; 
+    z-index:999; 
+    background-color:white; 
+    padding:10px; 
+    border:1px solid #ccc; 
+    border-radius:8px; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 10px;
+">
+
+    <!-- STEP 2.1: ROW — Columns for the three sliders -->
+    <div style="
+        display: flex;
+        flex-direction: row;
+        gap: 2px;
+    ">
+
+        <!-- STEP 2.1.1: COLUMN — Activity slider + label + mode button -->
+        <div style="
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 15px;
+            height: calc(100vh - 68px); 
+            justify-content: space-between;
+            width: 70px;
+        ">
+            <div id="activity_range_label" style="
+                width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                text-align: center;
+            ">Activity Range</div>
+
+            <div id="activity_slider_container" style="position: relative; height: 80vh; width: 20px;">
+                <div id="activity_slider" style="height: 100%;"></div>
+                <div id="mask-top" class="slider-mask slider-mask-top"></div>
+                <div id="mask-bottom" class="slider-mask slider-mask-bottom"></div>
+            </div>
+
+            <button onclick="setColorMode('Activity')">Activity</button>
+        </div>
+
+        <!-- STEP 2.1.2: COLUMN — Subset slider + label + mode button -->
+        <div style="
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 15px;
+            height: calc(100vh - 68px); 
+            justify-content: space-between;
+            width: 70px;
+        ">
+            <div id="subset_range_label" style="
+                width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                text-align: center;
+            ">Subset Range</div>
+
+            <div id="subset_slider" style="height: 80vh;"></div>
+
+            <button onclick="setColorMode('Subset')">Subset</button>
+        </div>
+
+        <!-- STEP 2.1.3: COLUMN — Cluster slider + label + mode button -->
+        <div style="
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 15px;
+            height: calc(100vh - 68px); 
+            justify-content: space-between;
+            width: 70px;
+        ">
+            <div id="cluster_range_label" style="
+                width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                text-align: center;
+            ">Cluster Range</div>
+
+            <div id="cluster_slider" style="height: 80vh;"></div>
+
+            <button onclick="setColorMode('Cluster')">Cluster</button>
+        </div>
+    </div>
+
+    <!-- STEP 2.2: Visible points counter -->
+    <div id="visible_count" style="
+        font-size: 14px;
+        font-weight: bold;
+        color: #222;
+        text-align: center;
+    ">
+        Visible points: 0
+    </div>
+</div>
+
+
+
+<script>
+/**
+ * STEP 3: CORE DATA — Bind placeholders and runtime flags
+ * - activity_values / subset_values / cluster_values: arrays injected server-side
+ * - palette: RGB colour palette; original_tooltips: per-point hover text
+ * - text_color: colour for UI text; currentMode: colour map selection
+ * - Precompute global minima/maxima for ranges
+ */
+let activity_values = __js_activity__;
+let subset_values = __js_subset__;
+let cluster_values = __js_cluster__;
+let discrete_palette = __js_discrete_palette__;
+let all_subset_ids = __js_subset_ids__;
+let all_cluster_ids = __js_cluster_ids__;
+let original_tooltips = __js_tooltips__;
+let text_color = __js_textcolor__;
+let continuous_colorscale = __js_continuous_colorscale__;
+let currentMode = 'Activity';
+let activity_slider, subset_slider, cluster_slider;
+
+const minSubset = Math.min(...subset_values);
+const maxSubset = Math.max(...subset_values);
+const minAct = Math.min(...activity_values);
+const maxAct = Math.max(...activity_values);
+const minCluster = Math.min(...cluster_values)
+const maxCluster = Math.max(...cluster_values);
+             
+
+
+/**
+ * STEP 4: UTILITY — Map Activity value to RGBA colour using the active continuous colormap
+ *
+ * @param {number} val   Activity value
+ * @param {number} alpha Transparency (0..1)
+ * @returns {string}     CSS rgba() string
+ */
+function activityColor(val, alpha) {
+    const min = Math.min(...activity_values);
+    const max = Math.max(...activity_values);
+    const norm = max === min ? 0.5 : Math.max(0, Math.min(1, (val - min) / (max - min)));
+    const scaled = norm * (continuous_colorscale.length - 1);
+    const index = Math.floor(scaled);
+    const t = scaled - index;
+
+    let start = continuous_colorscale[Math.min(index, continuous_colorscale.length - 1)][1];
+    let end = continuous_colorscale[Math.min(index + 1, continuous_colorscale.length - 1)][1];
+    const parseRgb = (color) => color.match(/\d+/g).map(Number);
+    let [r1, g1, b1] = parseRgb(start);
+    let [r2, g2, b2] = parseRgb(end);
+    let r = Math.round(r1 + (r2 - r1) * t);
+    let g = Math.round(g1 + (g2 - g1) * t);
+    let b = Math.round(b1 + (b2 - b1) * t);
+
+    return `rgba(${r},${g},${b},${alpha})`;
+}
+
+
+function discreteColorForIndex(index, alpha = 1.0) {
+    const paletteSize = Math.max(discrete_palette.length, 1);
+    const wrappedIndex = ((index % paletteSize) + paletteSize) % paletteSize;
+    const c = discrete_palette[wrappedIndex] || [128, 128, 128, 255];
+    return `rgba(${c[0]},${c[1]},${c[2]},${alpha})`;
+}
+
+
+function discreteColorForValue(value, allIds, alpha = 1.0) {
+    const idx = allIds.indexOf(Number(value));
+    return discreteColorForIndex(idx >= 0 ? idx : 0, alpha);
+}
+
+
+function buildDiscreteSliderGradient(minValue, maxValue, visibleValuesSet, allIds, colorResolver) {
+    const segments = [];
+    const total = Math.max(1, maxValue - minValue + 1);
+
+    for (let value = maxValue; value >= minValue; value--) {
+        const start = ((maxValue - value) / total) * 100;
+        const end = ((maxValue - value + 1) / total) * 100;
+        const cssColor = visibleValuesSet.has(value)
+            ? colorResolver(value, allIds, 1.0)
+            : "rgb(80, 80, 80)";
+        segments.push(`${cssColor} ${start}%`, `${cssColor} ${end}%`);
+    }
+
+    return `linear-gradient(to bottom, ${segments.join(", ")})`;
+}
+
+
+function updateDiscreteSliderBackgrounds(minActVal, maxActVal, minSubVal, maxSubVal, minClusterVal, maxClusterVal) {
+    const visibleSubsets = new Set();
+    const visibleClusters = new Set();
+
+    for (let i = 0; i < subset_values.length; i++) {
+        const activity = activity_values[i];
+        const subset = Number(subset_values[i]);
+        const cluster = Number(cluster_values[i]);
+        const visible = (
+            activity >= minActVal && activity <= maxActVal &&
+            subset >= minSubVal && subset <= maxSubVal &&
+            cluster >= minClusterVal && cluster <= maxClusterVal
+        );
+        if (!visible) {
+            continue;
+        }
+        visibleSubsets.add(subset);
+        visibleClusters.add(cluster);
+    }
+
+    const subsetBase = document.querySelector("#subset_slider .noUi-base");
+    if (subsetBase) {
+        subsetBase.style.background = buildDiscreteSliderGradient(
+            minSubset,
+            maxSubset,
+            visibleSubsets,
+            all_subset_ids,
+            discreteColorForValue
+        );
+    }
+
+    const clusterBase = document.querySelector("#cluster_slider .noUi-base");
+    if (clusterBase) {
+        clusterBase.style.background = buildDiscreteSliderGradient(
+            minCluster,
+            maxCluster,
+            visibleClusters,
+            all_cluster_ids,
+            discreteColorForValue
+        );
+    }
+}
+                
+
+
+/**
+ * STEP 5: PIPELINE — Recompute colours, visibility, tooltips and colourbar
+ *  STEP 5.1: Read ranges from sliders
+ *  STEP 5.2: For each point, decide visibility and colour by current mode
+ *  STEP 5.3: Count visible points and update the UI counter
+ *  STEP 5.4: Apply marker colours and hover text via Plotly.restyle
+ *  STEP 5.5: Maintain a synthetic hidden trace to show Activity colourbar (when needed)
+ */
+function updatePlotColors() {
+    const plot = document.querySelectorAll('.js-plotly-plot')[0];
+
+    // STEP 5.1: Current slider ranges
+    const activity_range = activity_slider.noUiSlider.get();
+    const minActVal = parseFloat(activity_range[0]);
+    const maxActVal = parseFloat(activity_range[1]);
+
+    const subset_range = subset_slider.noUiSlider.get();
+    const minSubVal = parseInt(subset_range[0]);
+    const maxSubVal = parseInt(subset_range[1]);
+
+    const cluster_range = cluster_slider.noUiSlider.get();
+    const minClusterVal = parseInt(cluster_range[0]);
+    const maxClusterVal = parseInt(cluster_range[1]);
+    
+    // STEP 5.2: Build colour arrays and visibility-driven alpha
+    let rgba_colors = [];
+    let line_colors = [];
+    let new_tooltips = [];
+    let colorbar_values = [];
+
+    for (let i = 0; i < subset_values.length; i++) {
+        let activity = activity_values[i];
+        let subset = subset_values[i];
+        let cluster = cluster_values[i];
+        let visible = (
+            activity >= minActVal && activity <= maxActVal &&
+            subset >= minSubVal && subset <= maxSubVal &&
+            cluster >= minClusterVal && cluster <= maxClusterVal
+        );
+        let alpha = visible ? 1.0 : 0.0;
+
+        if (currentMode === "Subset") {
+            // Colour by subset (categorical palette)
+            rgba_colors.push(discreteColorForValue(subset, all_subset_ids, alpha));
+            line_colors.push(`rgba(0,0,0,${alpha * 0.2})`);
+            
+        } else if (currentMode === "Cluster") {
+            // Colour by cluster (categorical palette)
+            rgba_colors.push(discreteColorForValue(cluster, all_cluster_ids, alpha));
+            line_colors.push(`rgba(0,0,0,${alpha * 0.2})`);
+
+        } else if (currentMode === "Activity") {
+            // Colour by activity (continuous gradient)
+            let [r, g, b] = activityColor(activity_values[i], 1.0).match(/[\d.]+/g).slice(0, 3);
+            rgba_colors.push(`rgba(${r},${g},${b},${alpha})`);
+            line_colors.push(`rgba(0,0,0,${alpha * 0.2})`);
+            colorbar_values.push(maxAct === minAct ? 0.5 : Math.max(0, Math.min(1, (activity_values[i] - minAct) / (maxAct - minAct))));
+        }
+
+        new_tooltips.push(visible ? original_tooltips[i] : '');
+    }
+
+    updateDiscreteSliderBackgrounds(
+        minActVal,
+        maxActVal,
+        minSubVal,
+        maxSubVal,
+        minClusterVal,
+        maxClusterVal
+    );
+
+    // STEP 5.3: Count currently visible points (alpha == 1)
+    let visibleCount = rgba_colors.filter(c => c.includes(",1)")).length;
+    document.getElementById("visible_count").innerText = `Visible points: ${visibleCount}`;
+
+    // STEP 5.4: Apply colours and hover texts to the primary trace
+    Plotly.restyle(plot, {
+        'marker': [{
+            size: 5,
+            color: rgba_colors,
+            line: {
+                color: line_colors,
+                width: 0.5
+            },
+            showscale: false
+        }],
+        'text': [new_tooltips],
+        'hovertemplate': ['%{text}<extra></extra>']
+    });
+
+    // STEP 5.5: Ensure only one helper colourbar trace exists
+    if (plot.data.length > 1) {
+        Plotly.deleteTraces(plot, plot.data.length - 1);
+    }
+
+    // STEP 5.6: When colouring by Activity, add a hidden trace to display the colourbar
+    if (currentMode === "Activity") {
+        Plotly.addTraces(plot, [{
+            x: [null],
+            y: [null],
+            z: [null],
+            mode: 'markers',
+            type: 'scatter3d',
+            name: '',
+            marker: {
+                color: colorbar_values,
+                colorscale: continuous_colorscale,
+                cmin: 0,
+                cmax: 1,
+                showscale: true,
+                colorbar: {
+                    title: {
+                        text: __activity_label__,
+                        font: {
+                            color: text_color
+                        }
+                    },                        
+                    tickvals: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+                    ticktext: Array.from({length: 11}, (_, i) => (minAct + i * (maxAct - minAct) / 10).toFixed(1)),
+                    tickfont: {
+                        color: text_color
+                    }
+                },
+                opacity: 0,
+                size: 0.1
+            }
+        }]);
+    }
+}
+    
+
+/* STEP 6: SLIDER CREATION — Build three vertical sliders with ranges and formats */
+activity_slider = document.createElement("div");
+document.getElementById("activity_slider").appendChild(activity_slider);
+noUiSlider.create(activity_slider, {
+    start: [minAct, maxAct],
+    connect: true,
+    orientation: 'vertical',
+    direction: 'rtl',
+    step: 0.1,
+    range: { 'min': minAct, 'max': maxAct },
+    format: {to: v => v.toString(), from: v => parseFloat(v)}
+});
+
+subset_slider = document.createElement("div");
+document.getElementById("subset_slider").appendChild(subset_slider);
+noUiSlider.create(subset_slider, {
+    start: [minSubset, maxSubset],
+    connect: true,
+    orientation: 'vertical',
+    direction: 'rtl',
+    step: 1,
+    range: {'min': minSubset, 'max': maxSubset},
+    format: {to: v => Math.round(v), from: v => Math.round(v)}
+});
+
+cluster_slider = document.createElement("div");
+document.getElementById("cluster_slider").appendChild(cluster_slider);
+noUiSlider.create(cluster_slider, {
+    start: [minCluster, maxCluster],
+    connect: true,
+    orientation: 'vertical',
+    direction: 'rtl',
+    step: 1,
+    range: {'min': minCluster, 'max': maxCluster},
+    format: {to: v => Math.round(v), from: v => Math.round(v)}
+});
+
+
+/* STEP 7: SLIDER EVENTS — Update labels and recolour on each change */
+activity_slider.noUiSlider.on('update', function(values) {
+    document.getElementById("activity_range_label").innerText =
+        parseFloat(values[0]).toFixed(1) + "–" + parseFloat(values[1]).toFixed(1);
+    updatePlotColors();
+});
+
+subset_slider.noUiSlider.on('update', function(values) {
+    document.getElementById("subset_range_label").innerText = values[0] + "–" + values[1];
+    updatePlotColors();
+});
+
+cluster_slider.noUiSlider.on('update', function(values) {
+    document.getElementById("cluster_range_label").innerText = values[0] + "–" + values[1];
+    updatePlotColors();
+});
+
+
+/**
+ * STEP 8: MODE SWITCH — Toggle colouring scheme and refresh plot
+ * @param {('Activity'|'Subset'|'Cluster')} mode
+ */
+function setColorMode(mode) {
+    currentMode = mode;
+    updatePlotColors();
+}
+
+
+/* STEP 9: INITIALISE — Activate Activity mode shortly after load (ensures Plotly presence) */
+setTimeout(() => setColorMode('Activity'), 100);
+</script>
+
+
+
+<script>
+/**
+ * STEP 10: ACTIVITY MASKS — Grey masks above and below the selected Activity range
+ * Maintains two overlay divs sized to the handle positions.
+ */
+const topMask = document.getElementById("mask-top");
+const bottomMask = document.getElementById("mask-bottom");
+
+/**
+ * STEP 10.1: Compute mask heights from handle positions
+ */
+function updateActivityMasks() {
+    const handles = activity_slider.querySelectorAll('.noUi-handle');
+    const sliderRect = activity_slider.getBoundingClientRect();
+    const topHandleRect = handles[1].getBoundingClientRect();
+    const bottomHandleRect = handles[0].getBoundingClientRect();
+
+    const topHeight = topHandleRect.top - sliderRect.top - 1.5;
+    const bottomHeight = sliderRect.bottom - bottomHandleRect.bottom - 0.5;
+
+    topMask.style.top = "1px";
+    topMask.style.height = `${topHeight}px`;
+
+    bottomMask.style.bottom = "-1px";
+    bottomMask.style.height = `${bottomHeight}px`;
+}
+
+/* STEP 10.2: Bind mask updates to slider and layout changes */
+activity_slider.noUiSlider.on('update', updateActivityMasks);
+updateActivityMasks();
+
+window.addEventListener('resize', updateActivityMasks);
+new ResizeObserver(updateActivityMasks).observe(document.getElementById("activity_slider_container"));
+</script>

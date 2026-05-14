@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SARgate Manual – Input Files & Settings</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <script src="assets/script.js" defer></script>
+</head>
+
+<body>
+<div class="layout">
+
+    <nav class="sidebar"></nav>
+
+    <main class="content">
+
+        <h1>Input Files</h1>
+
+        <p>
+            SARgate accepts compound libraries either as a <strong>local file</strong> in one of the supported formats
+            (SDF, CSV, TSV, XLSX, TXT, SMI) or as an <strong>automatically compiled SDF library</strong>
+            retrieved from online repositories, specifically <strong>ChEMBL</strong> and/or <strong>PubChem</strong>.
+        </p>
+
+        <p>
+            SARgate supports multiple local input file formats for chemical compound libraries.
+            Regardless of the original format, all input data are internally converted to the
+            <strong>SDF</strong> format during the analysis workflow. The SDF format therefore 
+            represents the internal reference format used by SARgate.
+        </p>
+
+        <p>
+            The TXT and SMI formats support <strong>structural analysis only</strong>,
+            as they cannot store metadata related to biological activity.
+        </p>
+
+        <p>
+            To process a local library, select <strong>Create from Local</strong> in the <em>File Selection</em> panel.
+            To retrieve compounds from online repositories, select <strong>Create from Database</strong>.
+        </p>
+
+        <h2>SDF Format</h2>
+
+        <p>
+            The Structure Data File (SDF) is the native and preferred format for SARgate analyses.<br>
+            An SDF file stores molecular structures together with associated properties (metadata)
+            for each molecule.
+        </p>
+
+        <h3>How an SDF File is Structured</h3>
+
+        <p>An SDF file contains molecular records, each composed of:</p>
+        <ul>
+        <li><strong>Title line</strong> (molecule name)</li>
+        <li><strong>MOL block</strong> (atom coordinates + bond table)</li>
+        <li><strong>Property block</strong> (metadata as key–value pairs)</li>
+        <li><strong>Record separator</strong>: <code>$$$$</code></li>
+        </ul>
+
+        <p>Each record follows this anatomy:</p>
+        <ul>
+        <li>First line = <strong>Title</strong> (molecule name or identifier)</li>
+        <li>MOL format header inside MOL block:
+            <ul>
+            <li><code>V2000</code> or <code>V3000</code></li>
+            </ul>
+        </li>
+        <li>Atom block:
+            <ul>
+            <li>Contains 3D coordinates, or <code>0 0 0</code> if 2D/no 3D data</li>
+            </ul>
+        </li>
+        <li>Bond block:
+            <ul>
+            <li>Connectivity table (bond index pairs)</li>
+            </ul>
+        </li>
+        <li><code>M  END</code> → closes MOL block</li>
+        <li>Property declaration:
+            <ul>
+            <li><code>&gt;  &lt;PropertyName&gt;</code> followed by value on next line(s)</li>
+            </ul>
+        </li>
+        <li><code>$$$$</code> → closes record and starts a new one</li>
+        </ul>
+
+        <p><strong>Aspirin (acetylsalicylic acid) - Example SDF record with explanatory properties:</strong></p>
+
+        <pre>
+        Aspirin
+        SARgate Manual Example
+        21 21  0  0  0  0  0  0  0  0999 V2000
+            1.2040   -0.6980    0.0000 C  
+            2.0080   -0.2320    0.0000 C  
+            2.0080    0.6980    0.0000 C  
+            1.2040    1.1630    0.0000 C  
+            0.4010    0.6980    0.0000 C  
+            0.4010   -0.2320    0.0000 C  
+            2.8120   -0.6980    0.0000 C  
+            3.6160   -0.2320    0.0000 C  
+            3.6160    0.6980    0.0000 C  
+            2.8120    1.1630    0.0000 C  
+            4.4200   -0.6980    0.0000 O  
+            5.2230   -0.2320    0.0000 C  
+            5.2230    0.6980    0.0000 O  
+            4.4200    1.1630    0.0000 C  
+            3.6160    1.6280    0.0000 O  
+            2.0080    1.6280    0.0000 O  
+            0.4010    1.6280    0.0000 C  
+            0.4010    2.5580    0.0000 O  
+            0.4010    0.0000    0.0000 O  
+            1.2040   -1.6280    0.0000 O  
+            0.4010   -1.1630    0.0000 C  
+        M  END
+        >  &lt;Molecular Weight&gt;
+        180.16 g/mol
+        >  &lt;pKa&gt;
+        3.5
+        >  &lt;Solubility&gt;
+        37 mg/mL
+        $$$$</pre>
+
+        <h3>Biological Activity in SDF Files</h3>
+
+        <p>
+            In SARgate, biological activity in SDF files must be specified in a property named exactly:
+        </p>
+
+        <pre>&lt;Activity&gt;</pre>
+
+        <p>
+            The activity value must follow a four-element format:
+        </p>
+
+        <pre>&lt;Type&gt; &lt;Relation&gt; &lt;Value&gt; &lt;Units&gt;</pre>
+
+        <p>Where:</p>
+        <ul>
+            <li>Type is the activity type (e.g. IC50, EC50, Inhibition, DockingScore).</li>
+            <li>Relation is one of: =, &lt;, &lt;=, &gt;=, &gt;.</li>
+            <li>Value is a numeric value.</li>
+            <li>Units is the measurement unit.</li>
+        </ul>
+
+        <p>Valid examples:</p>
+
+        <pre>
+&lt;Activity&gt;
+IC50 = 89.45 nM</pre>
+
+        <pre>
+&lt;Activity&gt;
+DockingScore = 89.45 kcal/mol</pre>
+
+        <pre>
+&lt;Activity&gt;
+Inhibition = 75 %</pre>
+
+        <p>
+            This format allows SARgate to correctly parse activity type, quantitative value,
+            inequality relations, and measurement units.
+        </p>
+
+        <h2>Tabular Formats (CSV, TSV, XLSX)</h2>
+
+        <p>
+            When using tabular input formats, each row represents a molecule.<br>
+            The mandatory element required to translate a row into a molecule is a
+            <strong>SMILES string</strong>, which must be provided in a dedicated column.
+        </p>
+
+        <p>
+            When a tabular file is loaded, SARgate opens a GUI dialog that allows the user to select:
+        </p>
+
+        <ul>
+            <li>the column containing SMILES strings.</li>
+            <li>optional identifier columns (e.g. molecule name, pubchem_cid, chembl_id).</li>
+            <li>one or more activity-related columns.</li>
+        </ul>
+
+        <h3>Biological Activity in Tabular Files</h3>
+
+        <p>
+            SARgate supports two alternative modes for specifying biological activity
+            in tabular files.
+        </p>
+
+        <h4>ChEMBL-style Mode</h4>
+
+        <p>
+            In ChEMBL-style mode, biological activity is defined using four separate columns,
+            following the same structure used in SDF files.
+        </p>
+
+        <p>The required column names are:</p>
+
+        <pre>
+Standard Type
+Standard Relation
+Standard Value
+Standard Units</pre>
+
+        <p>
+            This format mirrors the structure of CSV and TSV files downloaded directly
+            from the ChEMBL database, allowing SARgate to process ChEMBL datasets
+            without prior modification.
+        </p>
+
+        <h4>Single-column Mode</h4>
+
+        <p>
+            In single-column mode, biological activity is defined using the column header
+            as the activity type (e.g. IC50, Kd, Inhibition) and a numeric value in each cell.
+        </p>
+
+        <ul>
+            <li>inequality relations (&lt;, &gt;, &lt;=, &gt;=) are not supported.</li>
+            <li>units are assigned automatically based on the activity type.</li>
+        </ul>
+
+        <p>
+            Automatic unit assignment is performed according to predefined
+            activity-type lists embedded in the SARgate codebase.
+        </p>
+
+        <p>Examples:</p>
+
+        <pre>
+EC50 = 10 nM
+Inhibition = 45 %
+pIC50 = 8.24</pre>
+
+        <h3>Predefined Activity Type Lists</h3>
+
+        <p>
+            The following predefined activity lists are derived from common
+            ChEMBL records.
+        </p>
+
+        <h4>nM activity types (unit = nM)</h4>
+
+        <pre>IC50, EC50, GI50, AC50, DC50, CC50, LD50, ED50, ID50, k, Ka, Kd, Km, Ki</pre>
+
+        <p>
+            SARgate automatically converts units in nM. For example, if the input
+            value is given in µM, it is multiplied by 1,000 to convert it to nM.
+        </p>
+
+        <h4>Dimensionless activity types (unit = none)</h4>
+
+        <pre>pIC50, pEC50, pGI50, pAC50, pDC50, pCC50, pLD50, pED50, pID50, pK, pKa, pKi, pKd, pKm</pre>
+
+        <p>
+            Dimensionless activity types in SARgate represent the negative base-10 logarithm of 
+            the corresponding activity values expressed in molar units, following the standard 
+            p-notation used in medicinal chemistry (for example, pIC50 = −log₁₀(IC50 in M)).
+        </p>
+
+        <h4>Percent activity types (unit = %)</h4>
+
+        <pre>Inhibition, Activity, ResidualActivity, %Control, %ofcontrol, %Ctrl, Fluintensity</pre>
+        
+        <h4>µg/mL activity types (unit = µg/mL)</h4>
+
+        <pre>MIC, MEC, MMC, MBC</pre>
+
+        <h4>µM/min activity types (unit = µM/min)</h4>
+
+        <pre>Vmax</pre>
+
+        <p>
+            These lists cover the most common activity types found in ChEMBL records.<br>
+            For custom or uncommon activity types, the <strong>ChEMBL-style mode</strong>
+            is strongly recommended, as it allows explicit definition of activity type,
+            relation, value, and measurement unit.
+        </p>
+
+        <h2>Create from Database</h2>
+
+        <p>
+            When <strong>Create from Database</strong> is selected, SARgate builds an SDF library by querying online
+            compound repositories and collecting all molecules tested against a specific biological target.
+        </p>
+
+        <p>
+            The target of interest must be provided using one of the following:
+        </p>
+
+        <ul>
+            <li>
+                <strong>ChEMBL Target ID:</strong> Returns compounds tested against the selected target.
+                This ID is used for compound retrieval from <em>ChEMBL</em> and can also be mapped to
+                corresponding records in <em>PubChem</em>.
+            </li>
+
+            <li>
+                <strong>UniProt Accession ID:</strong> Searches <em>PubChem</em> only, returning compounds
+                tested against the UniProt-defined protein.
+                This mode does <em>not</em> query ChEMBL.
+            </li>
+        </ul>
+
+        <p>
+            <strong>Technical note:</strong> Database retrieval requires Internet connectivity and may fail due to
+            external API availability, database downtime, or network issues. The generated SDF library is saved
+            into SARgate’s default input directory and passed to the next stages of the LMM workflow.
+        </p>
+        
+        <div class="footer-spacer"></div>
+
+
+    <h1>Settings</h1>
+
+    <p>
+        In the <em>Settings</em> window of the <em>Input</em> tab, the user defines all parameters
+        controlling the analysis of the compound library selected in the file selection panel.
+    </p>
+
+    <p>
+        The Settings window is organised into two main sections:
+        <strong>Library Preparation</strong> and <strong>Substructure Analysis</strong>.
+        Each section includes multiple subsections dedicated to specific preprocessing
+        and analysis steps.
+    </p>
+
+    <h2>Library Preparation</h2>
+
+    <p>
+        The Library Preparation section controls the preprocessing of the input library,
+        including the handling of duplicate compounds and the application of filtering
+        criteria based on structure, activity, target, and assay metadata.
+    </p>
+
+    <h3>Duplicates Handling</h3>
+
+    <p>
+        Chemical libraries may contain the same compound multiple times, often associated
+        with different biological activity values.
+        In this subsection, the user can select one of four strategies for handling duplicate entries.
+    </p>
+
+    <ul>
+        <li>
+            <strong>Keep one entry with multiple activities</strong><br>
+            A single representative molecule is retained for each group of duplicates.
+            All associated activity values are preserved and can be inspected individually,
+            each with its corresponding target and assay metadata.
+        </li>
+
+        <li>
+            <strong>Keep one entry with the best activity</strong><br>
+            A single representative molecule is retained for each group of duplicates.
+            For each activity type, only the best activity value is kept.
+        </li>
+
+        <li>
+            <strong>Keep one entry with average activities</strong><br>
+            A single representative molecule is retained for each group of duplicates.
+            Activity values are averaged across all duplicate entries for each activity type.
+        </li>
+
+        <li>
+            <strong>Keep duplicates separated</strong><br>
+            All duplicate entries are retained as separate records,
+            each preserving its original activity, target, and assay information.
+        </li>
+    </ul>
+
+    <h3>Structure Similarity Filter</h3>
+
+    <p>
+        This subsection allows the user to filter the selected library based on structural
+        similarity to a query structure.
+        The query can be defined using a SMILES, SMARTS, InChI, or MolBlock representation.
+    </p>
+
+    <p>
+        Structural similarity is computed using the
+        <strong>Tanimoto similarity index</strong> calculated on
+        <strong>Morgan fingerprints</strong> of the query structure and library molecules.
+    </p>
+
+    <p>
+        The user can choose one of the following options:
+    </p>
+
+    <ul>
+        <li>
+            <strong>No filters</strong><br>
+            No structure-based similarity filtering is applied.
+        </li>
+
+        <li>
+            <strong>Filter by exact structure similarity</strong><br>
+            The query structure is used exactly as defined, taking into account atom types
+            and connectivity.
+        </li>
+
+        <li>
+            <strong>Filter by generalized structure similarity</strong><br>
+            Only molecular connectivity is considered.
+            Both the query structure and the library molecules are converted to a generalized
+            topological representation, ignoring atom types.
+            For example, a benzene ring and a pyridine ring would be considered 100% similar.
+        </li>
+    </ul>
+
+    <h3>Target Filter</h3>
+
+    <p>
+        The Target Filter allows the user to specify up to two molecular targets.
+        Only molecules containing a target metadata field exactly matching
+        one <em>or</em> the other of the specified targets are retained.
+    </p>
+
+    <h3>Activity Filter</h3>
+
+    <p>
+        The Activity Filter allows the user to specify up to two biological activity types.
+        Only molecules containing an activity metadata field whose type exactly matches
+        one <em>or</em> the other of the specified activity types are retained.
+    </p>
+
+    <p>
+        An additional option, <strong>Enable ambiguous activities</strong>, can be activated
+        to retain activity values associated with inequality relations different from
+        the equality operator (<code>=</code>), such as
+        <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;=</code>, or <code>&gt;</code>.
+    </p>
+
+    <h3>Assay Filter</h3>
+
+    <p>
+        The Assay Filter allows the user to specify up to two biological assay types.
+        Only molecules containing assay metadata exactly matching
+        one <em>or</em> the other of the specified assay types are retained.
+    </p>
+
+    <p>
+        This filter is primarily intended for libraries downloaded from ChEMBL.
+        In SARgate, biological activity types are derived according to internal rules
+        that combine assay metadata, including:
+    </p>
+
+    <ul>
+        <li>
+        <strong>assay_type</strong>, defined by a single-letter code:
+        <code>B</code> = binding (affinity or direct interaction),
+        <code>F</code> = functional (biological effect or modulation),
+        <code>A</code> = ADME-related (pharmacokinetic proxies),
+        <code>T</code> = toxicity (safety or cytotoxicity),
+        <code>P</code> = physicochemical (compound properties),
+        <code>U</code> = unknown (not classified or not mappable).
+        </li>
+
+        <li>
+            <strong>BAO_label</strong>, for example
+            <em>single protein format</em> or <em>cell-based format</em>
+        </li>
+    </ul>
+
+
+    <h4>How assay classifications are derived in SARgate</h4>
+    
+    <p><strong>Assay classification is determined by combining BAO_label and assay_type.</strong></p>
+
+    <table class="assay-table">
+    <thead>
+    <tr>
+    <th></th>
+    <th>B</th><th>F</th><th>A</th><th>T</th><th>P</th><th>U</th>
+    </tr>
+    </thead>
+    <tbody>
+
+    <tr><td><strong>single protein format</strong></td>
+    <td class="bio-bind"><em>in vitro</em> biochemical (binding)</td>
+    <td class="bio-func"><em>in vitro</em> biochemical (functional)</td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td></tr>
+
+    <tr><td><strong>protein complex format</strong></td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td></tr>
+
+    <tr><td><strong>protein-substrate format</strong></td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td></tr>
+
+    <tr><td><strong>membrane format</strong></td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td></tr>
+
+    <tr><td><strong>cell-free format</strong></td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td></tr>
+
+    <tr><td><strong>biochemical format</strong></td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td>
+    <td class="bio-othr"><em>in vitro</em> biochemical (other)</td></tr>
+
+    <tr><td><strong>cell-based format</strong></td>
+    <td class="cell-bind"><em>in vitro</em> cellular (binding)</td>
+    <td class="cell-func"><em>in vitro</em> cellular (functional)</td>
+    <td class="cell-adme"><em>in vitro</em> cellular (ADME)</td>
+    <td class="cell-tox"><em>in vitro</em> cellular (toxicity)</td>
+    <td class="cell-othr"><em>in vitro</em> cellular (other)</td>
+    <td class="cell-othr"><em>in vitro</em> cellular (other)</td></tr>
+
+    <tr><td><strong>phenotypic format</strong></td>
+    <td class="cell-pheno"><em>in vitro</em> cellular (phenotypic)</td>
+    <td class="cell-pheno"><em>in vitro</em> cellular (phenotypic)</td>
+    <td class="cell-pheno"><em>in vitro</em> cellular (phenotypic)</td>
+    <td class="cell-pheno"><em>in vitro</em> cellular (phenotypic)</td>
+    <td class="cell-pheno"><em>in vitro</em> cellular (phenotypic)</td>
+    <td class="cell-pheno"><em>in vitro</em> cellular (phenotypic)</td></tr>
+
+    <tr><td><strong>subcellular format</strong></td>
+    <td class="cell-subcell"><em>in vitro</em> (subcellular)</td>
+    <td class="cell-subcell"><em>in vitro</em> (subcellular)</td>
+    <td class="cell-subcell"><em>in vitro</em> (subcellular)</td>
+    <td class="cell-subcell"><em>in vitro</em> (subcellular)</td>
+    <td class="cell-subcell"><em>in vitro</em> (subcellular)</td>
+    <td class="cell-subcell"><em>in vitro</em> (subcellular)</td></tr>
+
+    <tr><td><strong>tissue format</strong></td>
+    <td class="cell-tissue"><em>in vitro</em> (tissue)</td>
+    <td class="cell-tissue"><em>in vitro</em> (tissue)</td>
+    <td class="cell-tissue"><em>in vitro</em> (tissue)</td>
+    <td class="cell-tissue"><em>in vitro</em> (tissue)</td>
+    <td class="cell-tissue"><em>in vitro</em> (tissue)</td>
+    <td class="cell-tissue"><em>in vitro</em> (tissue)</td></tr>
+
+    <tr><td><strong>tissue homogenate format</strong></td>
+    <td class="cell-tissue"><em>in vitro</em> (tissue)</td>
+    <td class="cell-tissue"><em>in vitro</em> (tissue)</td>
+    <td class="cell-tissue"><em>in vitro</em> (tissue)</td>
+    <td class="cell-tissue"><em>in vitro</em> (tissue)</td>
+    <td class="cell-tissue"><em>in vitro</em> (tissue)</td>
+    <td class="cell-tissue"><em>in vitro</em> (tissue)</td></tr>
+
+    <tr><td><strong>organism-based format</strong></td>
+    <td class="vivo-bind"><em>in vivo</em> (binding)</td>
+    <td class="vivo-func"><em>in vivo</em> (functional)</td>
+    <td class="vivo-adme"><em>in vivo</em> (ADME)</td>
+    <td class="vivo-tox"><em>in vivo</em> (toxicity)</td>
+    <td class="vivo-othr"><em>in vivo</em> (other)</td>
+    <td class="vivo-othr"><em>in vivo</em> (other)</td></tr>
+
+    <tr><td><strong>whole organism format</strong></td>
+    <td class="vivo-bind"><em>in vivo</em> (binding)</td>
+    <td class="vivo-func"><em>in vivo</em> (functional)</td>
+    <td class="vivo-adme"><em>in vivo</em> (ADME)</td>
+    <td class="vivo-tox"><em>in vivo</em> (toxicity)</td>
+    <td class="vivo-othr"><em>in vivo</em> (other)</td>
+    <td class="vivo-othr"><em>in vivo</em> (other)</td></tr>
+
+    <tr><td><strong>non-mammalian organism format</strong></td>
+    <td class="vivo-nonm"><em>in vivo</em> (non-mammalian)</td>
+    <td class="vivo-nonm"><em>in vivo</em> (non-mammalian)</td>
+    <td class="vivo-nonm"><em>in vivo</em> (non-mammalian)</td>
+    <td class="vivo-nonm"><em>in vivo</em> (non-mammalian)</td>
+    <td class="vivo-nonm"><em>in vivo</em> (non-mammalian)</td>
+    <td class="vivo-nonm"><em>in vivo</em> (non-mammalian)</td></tr>
+
+    <tr><td><strong>biophysical format</strong></td>
+    <td class="biophys">Biophysical</td>
+    <td class="biophys">Biophysical</td>
+    <td class="biophys">Biophysical</td>
+    <td class="biophys">Biophysical</td>
+    <td class="biophys">Biophysical</td>
+    <td class="biophys">Biophysical</td></tr>
+
+    <tr><td><strong>assay format</strong></td>
+    <td class="othrass">Binding (unspecified)</td>
+    <td class="othrass">Functional (unspecified)</td>
+    <td class="othrass">ADME (unspecified)</td>
+    <td class="othrass">Toxicity (unspecified)</td>
+    <td class="othrass">Physicochemical (unspecified)</td>
+    <td class="othrass"><em>Unknown</em></td></tr>
+
+    </tbody>
+    </table>
+
+
+    <h2>Substructure Analysis</h2>
+
+    <p>
+        The Substructure Analysis section controls how the prepared library
+        is partitioned into subsets of molecules sharing a common substructure.
+    </p>
+
+    <h3>Subset Collection</h3>
+
+    <p>
+        Subset collection defines the algorithm used to identify common substructures
+        and to group molecules into subsets.
+        SARgate provides four different subset collection methods (also called workflows).
+    </p>
+
+    <ul>
+        <li>
+            <strong>Unique Bemis-Murcko scaffolds (BMS)</strong><br>
+            Each subset contains molecules sharing the same Bemis-Murcko scaffold.
+            A parameter called <strong>Heavy atoms threshold</strong> defines <em>light scaffolds</em>
+            (heavy atom count &lt; threshold). The option
+            <strong>Populate light substructures with unassigned molecules only</strong>
+            applies a priority-based population rule: molecules are first associated with
+            heavy scaffolds (heavy atom count &ge; threshold), and light scaffolds are then
+            populated only with molecules that did not match any heavy scaffold. This reduces
+            redundant, low-specificity subsets that can arise from small scaffolds capturing
+            large fractions of the dataset.
+        </li>
+
+        <li>
+            <strong>BMS minimal substructures (MinBMS)</strong><br>
+            After extracting the Bemis-Murcko scaffold from each molecule,
+            all scaffold pairs are compared to detect substructure containment relationships.
+            When containment is confirmed, the smaller scaffold is retained as the <em>minimal substructure</em>.
+            The parameter <strong>Heavy atoms threshold</strong> has an additional role here:
+            it not only defines light scaffolds, but also sets the
+            minimum heavy atom count required for a scaffold to be considered a <em>minimal substructure</em>
+            candidate. Furthermore, this threshold determines whether a retained scaffold should be
+            treated as structurally <em>minimal</em> during subset construction.
+        </li>
+
+        <li>
+            <strong>MinBMS clustering (MSC)</strong><br>
+            The user defines a <strong>Similarity threshold</strong> expressed as a percentage.
+            After scaffold extraction and minimal substructures identification, scaffolds are 
+            clustered based on Tanimoto similarity (calculated on Morgan fingerprints). 
+            For each cluster, the <strong>Maximum Common Structure (MCS)</strong> 
+            is calculated and used as the representative substructure.
+        </li>
+
+        <li>
+            <strong>User-defined scaffold</strong><br>
+            The user defines a scaffold using a SMILES, SMARTS, InChI, or MolBlock representation.
+            A single subset is created containing all molecules in the prepared library
+            that contain exactly the specified query structure.
+        </li>
+    </ul>
+
+    <img src="assets/images/Analysis_ex_Workflows2.png">
+
+    <p>
+        The first three workflows are progressive:
+        the second workflow builds upon the first, and the third builds upon both
+        the first and second workflows.
+        While this progressive refinement can improve generalisation,
+        it may also lead to excessive abstraction, potentially resulting in very small
+        common substructures associated with large R-groups and reduced positional information.
+    </p>
+
+    <p>
+        Two additional subset collection methods are based on the concept of <strong>generalized scaffold</strong>.
+    <p>
+
+    <ul>
+        <li>
+            <strong>User-defined generalized scaffold</strong><br>
+            The user provide a custom scaffold (by SMILES, SMARTS, InChI or MolBlock). It will be <em>generalized</em> 
+            by converting all atoms to carbons and all bonds to single. Then extract the Murcko 
+            scaffold of each molecule in the library and retain only the molecules whose generalized 
+            Murcko scaffold contains the user-defined one (comparing the two generalized scaffolds). 
+            Then continue as with the <strong>Unique Bemis-Murcko scaffolds (BMS)</strong> method.
+        </li>
+
+        <li>
+            <strong>User-defined generalized scaffold + similarity</strong><br>
+            Same logic of the previous method, but with an additional step: the molecules whose generalized Murcko scaffold 
+            does not contain the user-defined one (also generalized), will be retained 
+            if they have a similarity to it above a defined threshold, set by the user, named 
+            <strong>Scaffold Similarity threshold</strong> (set to 85% by default).
+
+        </li>
+
+
+    </main>
+
+</div>  
+</body>
+</html>

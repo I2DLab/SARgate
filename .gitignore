@@ -1,0 +1,41 @@
+# Build outputs
+dist/
+build/
+*.zip
+*.app
+*.exe
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# OS/editor files
+.DS_Store
+.vscode/
+.idea/
+
+# Logs and temporary files
+*.log
+cursor_debug.log
+sketcher_stderr.log
+
+# PyInstaller
+*.spec.bak
+
+# Local environments
+.venv/
+venv/
+env/
+
+# Large local input datasets
+data/input/*.sdf
+!data/input/.gitkeep
+
+# Local generated data
+data/output/*
+!data/output/.gitkeep
+data/predictions/*
+!data/predictions/.gitkeep
+

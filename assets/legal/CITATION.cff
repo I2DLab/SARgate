@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+title: "SARgate: Molecular Toolkit for Chemical Space and Structure-Activity Relationship Analysis"
+message: "If you use SARgate in academic work, please cite it as follows."
+authors:
+  - name: I2D Lab
+    affiliation: Università degli Studi di Perugia, Dipartimento di Scienze Farmaceutiche
+version: 1.0
+date-released: 2026
+license: MIT

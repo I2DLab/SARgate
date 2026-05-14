@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stereoisomers</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <script src="assets/script.js" defer></script>
+</head>
+<body>
+<div class="layout">
+
+    <!-- =====================
+         Sidebar / Navigation
+         ===================== -->
+    <nav class="sidebar"></nav>
+
+    <!-- =====================
+         Main Content
+         ===================== -->
+    <main class="content">
+        <h1>Stereoisomers Analysis</h1>
+
+        <p>
+            The <strong>Stereo</strong> tab enables inspection of stereoisomeric clusters detected
+            either within a selected molecular subset or across the entire dataset.
+            Stereoisomer groups are indexed in a combo box populated by triggering <strong>Show Isomers</strong>.
+        </p>
+
+        <p>
+            Each entry follows the schema:<br>
+            <em>MolID: [list of MolIDs in the stereoisomer group] | Max ΔActivity = value</em>.<br>
+            The <strong>ΔActivity</strong> term quantifies the largest observed bioactivity difference within the group,
+            expressed in nanomolar units when IC50/EC50/EC50-like measurements are used, or in the original
+            assay units otherwise.
+        </p>
+
+        <p>
+            The notation <em>Mol30: [63, 30, 34, 35] | Max ΔActivity = 33</em> indicates that molecule 30 belongs
+            to a stereoisomeric cluster containing four constitutional entries (Mol63, Mol34, Mol35, and Mol30 itself),
+            with a maximal pairwise activity difference of 33 nM within the cluster.
+            In this example, the assay type is EC50, therefore the delta metric corresponds to
+            ΔEC50 = 33 nM.
+        </p>
+
+        <p>
+            By default, stereoisomer groups are sorted by ascending MolID. Enabling the option
+            <strong>Sort stereoisomers by deltaValue</strong> reorders groups by descending ΔActivity magnitude,
+            highlighting clusters with the most pronounced activity variation.
+        </p>
+
+        <h2>Example Analysis</h2>
+
+        <img src="assets/images/Stereo_ex.png">
+
+        <p>
+            In the illustrated example, subset 7 contains a stereoisomeric pair selected as
+            <em>Mol4: [4, 62] | Max ΔActivity = 975</em>, positioned at the top of the ranked list
+            (after sorting by deltaValue). The pair shares the same core topology and contains
+            two stereocenters, differing at only one configuration site. This single stereochemical
+            inversion, localised on an -OH substituent, produces a ~10³-fold shift in biological potency:
+            Mol4 shows EC50 = 11 nM, whereas its epimer Mol62 displays EC50 = 986 nM,
+            yielding ΔEC50 ≈ 975 nM.
+        </p>
+
+        <p>
+            This case exemplifies a stereochemistry-driven <strong>activity cliff</strong>, where a minimal
+            3D orientation change—without altering connectivity—results in an extreme bioactivity divergence,
+            underscoring the importance of stereochemical integrity during substructure and R-group analysis
+            whenever chirality is explicitly defined in the input representation (SMILES/SDF).
+        </p>
+
+        <div class="footer-spacer"></div>
+    </main>
+
+</div>
+</body>
+</html>

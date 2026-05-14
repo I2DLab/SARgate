@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SARgate Manual – Installation</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <script src="assets/script.js" defer></script>
+</head>
+
+<body>
+<div class="layout">
+
+    <nav class="sidebar"></nav>
+
+    <main class="content">
+
+        <h1>Installation</h1>
+
+        <p>
+            <strong>SARgate was developed and tested on Python 3.13.</strong><br>
+            It supports Python 3.13 and any newer Python release.<br>
+            Earlier Python versions may work but are not officially validated.
+        </p>
+
+        <p></p>
+
+        <p>
+        SARgate is distributed both as source code and as operating-system-specific executables.
+        The steps below describe how to prepare a Python environment and install dependencies
+        when running SARgate from source code.
+        These steps are required <strong>only when running SARgate from source code</strong>,
+        and are <strong>not required</strong> when running the executable build of SARgate.
+        </p>
+
+        <p>
+        If you are using a SARgate executable, no Python or dependency setup is required and you can launch the app directly.
+        </p>
+
+        <p></p>
+
+        <h2>Download & Install Python</h2>
+
+        <p><strong>macOS:</strong></p>
+        <p>
+        Install using the official Python installer, available at the <a href="https://www.python.org/downloads/" target="_blank">Python website</a>, or using a package manager such as <code>Homebrew</code>:
+        </p>
+
+        <pre>brew install python@3.13</pre>
+
+        <p><strong>Linux (Ubuntu / Debian):</strong></p>
+        <pre>sudo apt install python3</pre>
+
+        <p><strong>Windows:</strong></p>
+        <p>
+        Install Python from Microsoft Store, or the official Python installer available at the <a href="https://www.python.org/downloads/" target="_blank">Python website</a>.
+        During installation, enable the checkbox "Add to PATH" (important for CMD and PowerShell compatibility)
+        </p>
+
+        <p></p>
+
+        <h2>Choose an Installation Method</h2>
+
+        <p>
+        SARgate can be installed from source using either a standard Python virtual environment created with <code>venv</code>
+        or a Conda environment.
+        </p>
+
+        <p>
+        Both methods use the project <code>requirements.txt</code> file to install dependencies.
+        Choose the one that best matches your current Python workflow.
+        </p>
+
+        <p></p>
+
+        <h3>Install with venv + pip</h3>
+
+        <h4>Install / Enable pip</h4>
+
+        <p>
+        This step is only required for the <code>venv</code> workflow.
+        In many Python installations, <code>pip</code> is already available.
+        </p>
+
+        <p><strong>macOS / Linux:</strong></p>
+        <pre>python3 -m ensurepip --upgrade</pre>
+
+        <p><strong>Windows (CMD or PowerShell):</strong></p>
+        <pre>python -m ensurepip --upgrade</pre>
+
+        <h4>Check pip version</h4>
+        <p><strong>macOS / Linux:</strong></p>
+        <pre>python3 -m pip --version
+which pip</pre>
+
+        <p><strong>Windows CMD:</strong></p>
+        <pre>python -m pip --version
+where pip</pre>
+
+        <p><strong>Windows PowerShell:</strong></p>
+        <pre>python -m pip --version
+Get-Command pip</pre>
+
+        <h4>Create the Virtual Environment</h4>
+
+        <p><strong>macOS / Linux:</strong></p>
+        <pre>python3 -m venv SARgate-venv</pre>
+
+        <p><strong>Windows CMD / PowerShell:</strong></p>
+        <pre>python -m venv SARgate-venv</pre>
+
+        <h4>Activate the Virtual Environment</h4>
+
+        <p><strong>macOS / Linux:</strong></p>
+        <pre>source SARgate-venv/bin/activate</pre>
+
+        <p><strong>Windows CMD:</strong></p>
+        <pre>SARgate-venv\Scripts\activate</pre>
+
+        <p><strong>Windows PowerShell:</strong></p>
+        <pre>SARgate-venv\Scripts\Activate.ps1</pre>
+
+        <h4>Note for Windows</h4>
+        <p>
+        If script execution is blocked (error: "script execution is disabled"):
+        </p>
+
+        <p>
+        1. Open Windows PowerShell as Administrator
+        </p>    
+
+        <p>
+        2. Check current execution policy:
+        </p>
+
+        <pre>Get-ExecutionPolicy</pre>
+
+        <p>
+        3. If the result is `Restricted`, update it:
+        </p>
+
+        <pre>Set-ExecutionPolicy RemoteSigned</pre>
+        
+        <p>
+        4. Confirm the change by pressing:
+        </p>    
+
+        <pre>Y</pre>
+
+        <h4>Install Required Packages</h4>
+
+        <p><strong>macOS / Linux:</strong></p>
+        <pre>python3 -m pip install -r requirements.txt</pre>
+
+        <p><strong>Windows CMD / PowerShell:</strong></p>
+        <pre>python -m pip install -r requirements.txt</pre>
+
+        <p></p>
+
+        <h3>Install with Conda</h3>
+
+        <p>
+        If you prefer Conda, create and activate a dedicated environment first, then install SARgate dependencies
+        using the same <code>requirements.txt</code> file.
+        </p>
+
+        <h4>Create the Conda Environment</h4>
+
+        <p><strong>All OS:</strong></p>
+        <pre>conda create -n SARgate-env python=3.13</pre>
+
+        <h4>Activate the Conda Environment</h4>
+
+        <p><strong>All OS:</strong></p>
+        <pre>conda activate SARgate-env</pre>
+
+        <h4>Install Required Packages</h4>
+
+        <p><strong>Run this command after activating the Conda environment:</strong></p>
+        <pre>python -m pip install -r requirements.txt</pre>
+
+        <h4>Important</h4>
+
+        <p>
+        If <code>rdkit</code> or another scientific dependency fails to install via <code>pip</code> inside Conda,
+        install the missing package from <code>conda-forge</code> and then rerun the requirements command:
+        </p>
+
+        <pre>conda install -c conda-forge rdkit
+python -m pip install -r requirements.txt</pre>
+
+        <p></p>
+
+        <h4>Verify Installed Packages</h4>
+
+        <p><strong>macOS / Linux with venv:</strong></p>
+        <pre>python3 -m pip list</pre>
+
+        <p><strong>Windows or Conda:</strong></p>
+        <pre>python -m pip list</pre>
+
+        <p></p>
+
+        <h2>Run SARgate</h2>
+
+        <p>
+        Before launching SARgate, make sure your chosen environment is active.
+        </p>
+
+        <p><strong>macOS / Linux:</strong></p>
+        <pre>python3 launcher.py</pre>
+
+        <p><strong>Windows CMD / PowerShell:</strong></p>
+        <pre>python launcher.py</pre>
+
+    </main>
+
+</div>
+</body>
+</html>

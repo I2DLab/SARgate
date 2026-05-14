@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SARgate – Prediction</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <script src="assets/script.js" defer></script>
+</head>
+
+<body>
+<div class="layout">
+
+    <nav class="sidebar"></nav>
+
+    <main class="content">
+
+        <h1>Prediction</h1>
+
+        <p>
+            The <strong>Prediction</strong> tab provides a QSAR-oriented workflow for training a machine-learning model
+            on the current dataset and using it to estimate activities for molecules with missing labels or for newly
+            added external compounds.
+        </p>
+
+        <h2>Input Options</h2>
+
+        <p>
+            The manager bar allows the user to select:
+        </p>
+
+        <ul>
+            <li><strong>Training scope</strong>, choosing whether the model should be trained on the prepared dataset, the full dataset, or a specific subset.</li>
+            <li><strong>Activity type</strong>, defining the endpoint to be learned by the model.</li>
+            <li><strong>Feature set</strong>, including Morgan fingerprints alone or fingerprints combined with RDKit descriptors.</li>
+            <li><strong>Model</strong>, selecting a specific regression algorithm or an automatic model-selection mode based on cross-validation.</li>
+            <li><strong>Read undefined</strong>, enabling inclusion of activity annotations expressed with qualifiers such as &lt;, &lt;=, &gt;, or &gt;=.</li>
+        </ul>
+
+        <h2>Prediction Output</h2>
+
+        <p>
+            After the model is trained, SARgate displays the prediction output as a table and accompanying visual panels.
+            Rows corresponding to compounds with known activities report both real and predicted values, allowing direct
+            comparison between observed and estimated responses. Compounds lacking experimental labels are still predicted
+            and can therefore be prioritised for follow-up analysis.
+        </p>
+
+        <p>
+            Model-quality metrics are calculated from the same cross-validated predictions used during training, providing
+            a compact view of the reliability of the current model configuration. When automatic model selection is used,
+            SARgate evaluates multiple candidate estimators and keeps the best-performing one for the chosen scope and
+            activity endpoint.
+        </p>
+
+        <h2>External Compounds</h2>
+
+        <p>
+            Once a model has been fitted, the Prediction tab can also be used to score external molecules. These additional
+            compounds are merged into the visible prediction output so they can be compared directly against the original
+            library while preserving the trained model and the current activity scale.
+        </p>
+
+        <div class="footer-spacer"></div>
+
+    </main>
+</div>
+</body>
+</html>

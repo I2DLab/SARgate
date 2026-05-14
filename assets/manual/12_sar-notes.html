@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SARgate – SAR Notes</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <script src="assets/script.js" defer></script>
+</head>
+
+<body>
+<div class="layout">
+
+    <nav class="sidebar"></nav>
+
+    <main class="content">
+
+        <h1>SAR Notes</h1>
+
+        <p>
+            The <strong>SAR Notes</strong> section provides an interactive annotation workspace for subset scaffolds.
+            It is designed to support medicinal-chemistry interpretation by allowing the user to attach persistent
+            notes both to the full subset and to individual R-group anchor positions.
+        </p>
+
+        <h2>Subset-Oriented Annotation</h2>
+
+        <p>
+            The left panel lists the available subsets. Selecting one subset loads its representative scaffold into
+            the central workspace together with any notes already associated with that subset. A
+            <strong>General notes</strong> field is available for comments that apply to the entire subset, such as
+            synthetic considerations, SAR hypotheses, or prioritisation remarks.
+        </p>
+
+        <h2>R-Group Notes</h2>
+
+        <p>
+            The scaffold image contains interactive triggers positioned over the R-group anchors. Clicking one of
+            these anchors opens a small movable note window associated with that specific position. These notes are
+            useful for recording local SAR observations, for example preferred substituents, steric constraints,
+            tolerated polarity changes, or unresolved design questions for a given R position.
+        </p>
+
+        <p>
+            Notes are stored separately for each subset, so annotations remain aligned with the correct scaffold and
+            do not overwrite notes belonging to other subsets that may share a related core.
+        </p>
+
+        <h2>Persistence</h2>
+
+        <p>
+            SAR Notes are automatically saved to a JSON file in the current report directory. This means that notes
+            are preserved across sessions and can be reopened together with the corresponding job results without any
+            manual export step.
+        </p>
+
+        <div class="footer-spacer"></div>
+
+    </main>
+</div>
+</body>
+</html>

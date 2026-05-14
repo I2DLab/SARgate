@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SARgate User Manual</title>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/style.css">
+
+    <!-- Script -->
+    <script src="assets/script.js" defer></script>
+</head>
+
+<body>
+<div class="layout">
+
+    <!-- =====================
+         Sidebar / Navigation
+         ===================== -->
+    <nav class="sidebar"></nav>
+
+    <!-- =====================
+         Main Content
+         ===================== -->
+    <main class="content">
+
+        <h1>Similarity</h1>
+
+        <p>
+            The <strong>Similarity</strong> tab is organised into three sub-tabs,designed to 
+            highlight relationships between molecular similarity and bioactivity patterns:
+            <strong>Similarity Matrix</strong>, <strong>Clustered Similarity Matrix</strong>, 
+            and <strong>Structure-Activity Landscape</strong>, 
+        </p>
+
+        <!-- =====================
+             Similarity Matrix
+             ===================== -->
+        <h2>Similarity Matrix</h2>
+
+        <p>
+            This sub-tab displays a pairwise <strong>Tanimoto similarity matrix</strong> for all molecules
+            belonging to a user-selected subset. Similarities are computed on <strong>Morgan fingerprints</strong>.
+            The matrix is symmetric, and the diagonal corresponds to self-comparisons (similarity = 1.0).
+        </p>
+
+        <p>
+            Each cell is coloured according to its Tanimoto value, using a continuous colormap ranging from the
+            minimum similarity observed in the subset to the maximum value (1.0). The colour scale is reported
+            through a <strong>colormap bar</strong> positioned on the left of the matrix.
+        </p>
+
+        <p>
+            When a cell is selected, the two corresponding molecules are rendered on the left panel using RDKit
+            <strong>fingerprint similarity maps</strong>, which highlight conserved regions in <strong>green</strong>
+            and divergent regions in <strong>red</strong>.
+        </p>
+
+        <p>
+            By default, molecules are ordered by ascending identifier. If the option
+            <strong>Sort by overall similarity</strong> is enabled, molecules are reordered by a global similarity score:
+            for each molecule, SARgate computes the sum of its pairwise similarity values against all other molecules
+            in the subset, then sorts molecules from the highest (most globally similar) to the lowest
+            (most globally dissimilar).
+        </p>
+
+        <!-- =====================
+             Clustered Similarity Matrix
+             ===================== -->
+        <h2>Clustered Similarity Matrix</h2>
+
+        <p>
+            In this sub-tab, the user selects both a subset and an activity type, and defines a
+            <strong>similarity threshold (%)</strong> used to cluster the molecules within the selected subset.
+            Clusters represent groups of molecules whose mutual similarity values are above the specified threshold.
+            The matrix is reordered by cluster membership, from the largest cluster to the smallest one, and clusters
+            are visually delimited by a black outline.
+        </p>
+
+        <p>
+            In contrast to the standard similarity view, cell colours encode the <strong>activity difference</strong>
+            between the molecule on the X axis and the molecule on the Y axis for the selected activity type.
+            Whenever applicable, activity values are converted to a logarithmic scale prior to computing differences.
+            The activity difference can be displayed as a signed or absolute quantity by enabling
+            <strong>ΔActivity as absolute value</strong>.
+            The corresponding ΔActivity value is represented by the colormap scale on the left and can be inspected
+            by selecting a cell and comparing the activity annotations of the two molecules.
+        </p>
+
+        <p>
+            The option <strong>Read undefined</strong> includes molecules whose activity is reported with relational
+            operators other than "=" (e.g., &lt;, &le;, &ge;, &gt;). The option <strong>Read inactives</strong>
+            includes molecules that are not annotated with the selected activity type.
+        </p>
+
+        <p>
+            Selecting a matrix cell renders the two corresponding molecules in the left panel. This representation
+            supports the identification of <strong>activity cliffs</strong> within structurally similar clusters and
+            helps highlight subtle structural changes associated with large bioactivity shifts.
+        </p>
+
+        <h3>Example Analysis</h3>
+        
+        <img src="assets/images/Similarity_clustered_ex1.png">
+
+        <p>
+            In the example above, the selected activity is <strong>IC50</strong>, therefore activity differences are
+            expressed as <strong>ΔpIC50</strong>, and the similarity threshold is set to <strong>70%</strong>.
+            A single cluster is produced, indicating a high overall similarity across the dataset. Within this cluster,
+            two clearly separated molecular groups are observed: <strong>Mol1–Mol26</strong>, showing higher ΔpIC50 values,
+            and <strong>Mol27–Mol38</strong>, showing lower ΔpIC50 values (approximately 1–4 orders of magnitude smaller than
+            the first group).
+        </p>
+
+        <img src="assets/images/Similarity_clustered_ex2.png">
+
+        <p>
+            In the second example, the selected activity remains <strong>IC50</strong> and the similarity threshold is set
+            to <strong>77%</strong>. Three clusters in particular, <strong>Cluster 2</strong>, <strong>Cluster 4</strong>, 
+            and <strong>Cluster 5</strong>, show higher ΔpIC50 values relative to the other clusters (especially Cluster 4), 
+            suggesting that they contain, on average, more active molecules. Conversely, <strong>Cluster 1</strong> 
+            (the most populated cluster) displays generally lower ΔpIC50 values compared to the other clusters. 
+            This pattern may be especially informative, as it suggests that molecules in Cluster 1 share a structural 
+            feature that increases their mutual similarity while being associated with reduced biological potency.
+        </p>
+
+
+        <!-- =====================
+            Landscape
+            ===================== -->
+        <h2>Structure-Activity Landscape (SAL)</h2>
+
+        <p>
+            The Structure-Activity Landscape (SAL) plot enumerates all pairwise molecule comparisons within a selected subset and 
+            maps them into a 2D descriptor space defined by Tanimoto similarity versus ΔActivity.
+            Similarity is computed on molecular fingerprints, while ΔActivity is expressed as an absolute difference in molecular 
+            activity (or transformed p-value for IC50-like endpoints).
+        </p>
+
+        <p>
+            Each point in the plot represents a unique molecule pair (i, j), characterized by a Structure-Activity Landscape Index 
+            (SALI), a value that is calculated as:
+        </p>
+
+        <pre>
+        |Aᵢ - Aⱼ|
+SALIᵢⱼ = ───────────
+        (1 - Sᵢⱼ)</pre>
+
+        <p>
+            where:
+        </p>
+
+        <ul>
+            <li><strong>A</strong> = molecular activity or transformed p-value (e.g., pIC50 for IC50-like endpoints).</li>
+            <li><strong>Sᵢⱼ</strong> = Tanimoto similarity between molecules i and j.</li>
+        </ul>
+
+        <p>
+            High-SALI points emerge in the upper-right region of the landscape, identifying molecule pairs that are both 
+            structurally similar and activity-divergent—indicative of activity cliffs or sharp SAR discontinuities.
+            These points are color-mapped according to their SALI magnitude, enabling rapid prioritization of the 
+            most SAR-informative transformations.
+        </p>
+
+        <h3>Example Analysis</h3>
+
+        <img src="assets/images/Plots_Landscape_ex.png">
+
+        <p>
+            In the illustrated example, analysis was performed on subset 15 using Morgan fingerprints and IC50 activity.
+            The highlighted pair differs only by a minimal substituent variation (H ↔ CH3), yet shows ΔpIC50 = 3.05, 
+            corresponding to a potency gap of >1000-fold despite a Tanimoto similarity of 0.81.
+            This behavior typifies a pronounced activity cliff, where conservative structural edits induce extreme bioactivity shifts.
+            Similar patterns within the same subset often reveal that H-for-CH₃ substitutions (or halogen-for-CH₃) 
+            significantly enhance potency at a low structural cost.
+        </p>
+
+
+        <div class="footer-spacer"></div>
+
+    </main>
+
+</div>
+</body>
+</html>

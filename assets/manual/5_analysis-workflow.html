@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SARgate Manual – Analysis Workflow</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <script src="assets/script.js" defer></script>
+</head>
+
+<body>
+<div class="layout">
+
+    <nav class="sidebar"></nav>
+
+    <main class="content">
+
+        <h1>Analysis Workflow</h1>
+
+        <p>
+            The end-to-end manipulation of a molecular library in SARgate is orchestrated by a set of internal modules
+            collectively referred to as the <strong>Library Manipulation Module (LMM)</strong>.
+            The full pipeline is executed as <strong>three sequential processes</strong>, whose progress and status messages
+            are continuously reported to the user in the <strong>Analysis</strong> tab:
+            <strong>Library Preparation</strong>, <strong>Substructure Analysis</strong>, and <strong>R-Groups Decomposition</strong>.
+        </p>
+
+        <img src="assets/images/Full_workflow.png">
+
+        <h2>Library Preparation</h2>
+
+        <p>
+            In this phase, the user-selected molecular library (also referred to as the <strong>dataset</strong>)
+            is prepared and standardised for downstream processing.
+            The initial step depends on the chosen input source, while subsequent steps are shared across all sources.
+        </p>
+
+        <h3>Input Acquisition</h3>
+
+        <p><strong>Local file</strong></p>
+        <ul>
+            <li>
+                <strong>Conversion to SDF:</strong> Tabular files (CSV, TSV, XLSX) and text-based files
+                (TXT, SMI) are converted into <strong>SDF</strong>, which is the default internal format used by SARgate.
+            </li>
+        </ul>
+
+        <p><strong>Online database</strong></p>
+        <ul>
+            <li>
+                <strong>Fetching structures and metadata from online repositories:</strong> SARgate assembles an SDF library
+                by retrieving compound records and associated biological activities (and additional metadata) from sources such
+                as <strong>ChEMBL</strong> and/or <strong>PubChem</strong>. The generated SDF is saved into the default input directory.
+                <strong>Note:</strong> this step requires an active Internet connection and may fail due to external service availability
+                or connectivity issues.
+            </li>
+        </ul>
+
+        <h3>Common Post-processing Steps</h3>
+
+        <ul>
+            <li>
+                <strong>Duplicate handling:</strong> Duplicate molecules are managed according to the selected
+                <strong>Duplicates Handling</strong> option (see <em>Input Files &amp; Settings</em>). Depending on the chosen mode,
+                duplicates may be merged into a single entry or retained as separate records, with different strategies for
+                representing multiple activity measurements.
+                During this phase, SARgate also performs <strong>desalting</strong> to remove counterions and disconnected fragments
+                commonly associated with salt forms.
+            </li>
+
+            <li>
+                <strong>Property parsing and profiling:</strong> SARgate parses molecular properties and provides an overview of the
+                dataset content. In particular, it reports the diversity of:
+                <strong>activity types</strong>, <strong>biological targets</strong>, and <strong>assay classifications</strong>
+                (typically visualised as three separate pie charts).
+            </li>
+
+            <li>
+                <strong>Filtering:</strong> If enabled in <em>Input Files &amp; Settings</em>, filters are applied to the prepared dataset.
+                Supported filters include:
+                <ul>
+                    <li><strong>Structure similarity</strong> against a user-defined query structure.</li>
+                    <li><strong>Activity type</strong> selection (retain only molecules matching one or more activity types).</li>
+                    <li><strong>Target</strong> selection (retain only molecules matching one or more targets).</li>
+                    <li><strong>Assay type</strong> selection (retain only molecules matching one or more assay classifications).</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h2>Substructure Analysis</h2>
+
+        <p>
+            In this phase, the prepared dataset is partitioned into <strong>subsets</strong> of compounds that share a common
+            structural motif. This common motif may be referred to as <strong>substructure</strong>, <strong>core</strong>, or
+            <strong>scaffold</strong>. The exact sequence of steps depends on the selected <strong>Subsets Collection</strong>
+            method (see <em>Input Files &amp; Settings</em>).
+        </p>
+
+        <h3>Extracting Unique Bemis-Murcko Scaffolds (BMS)</h3>
+
+        <p>
+            If the selected method is <strong>Unique Bemis-Murcko Scaffolds (BMS)</strong>, <strong>BMS Minimal Substructures (minBMS)</strong>,
+            or <strong>MinBMS Clustering (MSC)</strong>, SARgate first extracts the <strong>Bemis-Murcko scaffold</strong>
+            for each molecule in the prepared dataset and enumerates the set of <strong>unique scaffolds</strong>.
+        </p>
+
+        <h4>Dominance Index (DI) of Scaffold Distribution</h4>
+
+        <p>
+            During scaffold extraction, SARgate estimates the structural homogeneity of the dataset using a
+            <strong>Dominance Index (DI)</strong>, which combines a <strong>richness component</strong> (how many distinct scaffolds
+            exist relative to the number of molecules) and a <strong>dominance component</strong> (how concentrated the dataset is
+            around one or a few scaffolds).
+        </p>
+
+        <pre>DI = w · D + (1 − w) · R</pre>
+        
+        <p>With <strong>D</strong> = normalised Simpson/Herfindahl dominance term computed from Σ pᵢ²
+                (0 for uniform distributions, 1 for strongly mono-dominant distributions; defined for S &gt; 1):
+        </p>
+
+        <pre>D = (Σ pᵢ² − 1/S) / (1 − 1/S)</pre>
+
+        <p>and <strong>R</strong> = 1 − S/M (richness deficit; increases when fewer scaffolds are present)</p>
+
+        <pre>R = 1 − S/M</pre>
+
+        <p>Where:</p>
+        <ul>
+            <li><strong>M</strong> = total number of molecules (after duplicate handling)</li>
+            <li><strong>S</strong> = number of unique Bemis-Murcko scaffolds</li>
+            <li><strong>pᵢ</strong> = nᵢ / M , where <strong>nᵢ</strong> = number of molecules associated with scaffold i</li>
+            <li><strong>w</strong> = 0.2 , weight assigned to dominance</li>
+        </ul>
+
+        <p>
+            The DI ranges from <strong>0</strong> (minimal homogeneity: essentially every molecule has a different scaffold)
+            to <strong>1</strong> (maximal homogeneity: the dataset is dominated by a single scaffold). SARgate reports DI and its
+            components in the <strong>Analysis</strong> tab, along with the most frequent scaffolds.
+        </p>
+
+        <h3>Identifying Minimal Substructures</h3>
+
+        <p>
+            If the selected method is <strong>BMS Minimal Substructures (minBMS)</strong> or <strong>MinBMS Clustering (MSC)</strong>,
+            SARgate analyses pairwise substructure relationships among the extracted BMS set and collapses redundant scaffolds.
+            When a substructure relationship is detected, SARgate retains the <strong>smaller</strong> scaffold, provided that the
+            substructure meets the user-defined <strong>Heavy Atoms Threshold</strong>.
+        </p>
+
+        <h3>Clustering Minimal Substructures and Computing MCS</h3>
+
+        <p>
+            This step is executed only when <strong>MinBMS Clustering (MSC)</strong> is selected. Minimal substructures are
+            clustered using <strong>Tanimoto similarity</strong>, keeping only scaffold pairs whose similarity is greater than or
+            equal to the user-defined <strong>Similarity Threshold (%)</strong>. For each cluster, SARgate computes the
+            <strong>Maximum Common Substructure (MCS)</strong>, and the MCS is retained as the representative scaffold.
+            <strong>Note:</strong> MCS computation is inherently sensitive and may occasionally fail for certain inputs due to
+            complexity or ambiguous matching constraints.
+        </p>
+
+        <h3>Populating the Subsets</h3>
+
+        <p>
+            At this point, SARgate has produced a set of representative scaffolds capturing the structural variability of the dataset.
+            Each molecule in the prepared dataset is then assigned to one or more scaffolds that it contains, thereby forming the
+            corresponding <strong>subsets</strong>.
+        </p>
+
+        <h3>Filtering Subsets by Size</h3>
+
+        <p>
+            Subsets are filtered by retaining only those with a number of molecules greater than or equal to the
+            <strong>Filtering Threshold</strong>. Surviving subsets are then re-indexed starting from 1 and sorted in
+            <strong>descending order by subset size</strong> (Subset 1 is the most populated).
+        </p>
+
+        <h2>R-Groups Decomposition</h2>
+
+        <h3>Decomposing Each Subset</h3>
+
+        <p>
+            For each generated subset, SARgate performs an <strong>R-Groups Decomposition (RGD)</strong> using the subset’s common
+            substructure as the reference core. The R-group assignments and associated metadata are serialised into a
+            <strong>JSON</strong> file that is foundational for downstream analyses.
+        </p>
+
+        <p>
+            The JSON output preserves not only the R-group decomposition itself, but also additional information derived from the
+            input dataset, such as biological activity values, target/assay metadata, and computed chemical descriptors.
+        </p>
+
+        <h3>MMPA ΔActivity Precomputation</h3>
+
+        <p>
+            As a final step, SARgate precomputes Matched Molecular Pair Analysis (MMPA) statistics by identifying, both globally and
+            within each subset, all molecule pairs that:
+            (i) share the same activity type, and
+            (ii) differ by a <strong>single R-group substitution</strong>.
+        </p>
+
+        <p>
+            For each activity type present in the dataset, SARgate stores (a) the frequency of each transformation and
+            (b) the corresponding biological activity difference (<strong>Δ</strong>Activity). Results are saved into
+            activity-specific CSV files named:
+        </p>
+
+        <pre>mmpa_delta_precomputation_&lt;activity_name&gt;.csv</pre>
+
+        <p>
+            These precomputed tables are subsequently used by the <strong>MMPA</strong> section of SARgate for interactive exploration
+            of activity-driving transformations.
+        </p>
+
+        <h3>User-defined Scaffold Mode</h3>
+
+        <p>
+            If <strong>User-defined Scaffold</strong> is selected, the BMS-based steps above are skipped.
+            Instead, each molecule in the prepared dataset is matched against the user-provided scaffold definition
+            (SMILES, SMARTS, InChI, or MolBlock). Molecules that contain the query scaffold are retained; all others are discarded.
+            The output is a <strong>single subset</strong> containing only molecules sharing the user-defined scaffold.
+        </p>
+
+        <p>
+            <strong>Technical note:</strong> BMS-based methods require ring-containing scaffolds by definition and therefore cannot
+            represent purely linear cores. The <strong>User-defined Scaffold</strong> mode is the only subset-collection method that
+            can explicitly generate <strong>linear scaffolds</strong> when appropriate.
+        </p>
+
+        <h3>Writing Reports and SDF Outputs</h3>
+
+        <p>
+            At the end of Substructure Analysis, SARgate writes summary artefacts describing the generated subsets, typically including:
+        </p>
+
+        <ul>
+            <li>CSV reports summarising subset composition (e.g., <code>clustering.csv</code>, <code>subset_counts.csv</code>).</li>
+            <li>
+                SDF outputs including:
+                <ul>
+                    <li>the original library in SDF form (if converted from a non-SDF format),</li>
+                    <li>the prepared dataset after preprocessing and filtering,</li>
+                    <li>an SDF containing only the extracted scaffolds/substructures.</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h2>Example Analysis on a Reference Dataset </h2>
+
+        <p>
+        The following paragraphs illustrate how SARgate executes Substructure Analysis and R-Group Decomposition
+        on a reference dataset composed of the four molecules depicted in the figure:
+        </p>
+
+        <img src="assets/images/Analysis_ex_Dataset.png">
+
+        <h3>Substructure Analysis - Workflow Comparison</h3>
+
+        <p>
+            The following figure illustrates how scaffolds/substructures are obtained using the different workflows. 
+            In this example, the following threshold values are set:
+        </p>
+
+        <ul>
+
+        <li><p>
+            <code>Heavy Atoms Threshold</code> = 9
+        </p></li>
+
+        <li><p>
+            <code>Filtering Threshold</code> = 2
+        </p></li>
+
+        <li><p>
+            <code>Similarity Threshold</code> = 50%
+        </p></li>
+
+        </ul>
+
+        <img src="assets/images/Analysis_ex_Workflows.png">
+
+        <p>
+            Starting from four molecules in the prepared dataset (Panel A), the initial step shared by all workflows is the
+            extraction of Bemis-Murcko scaffolds (1), producing four scaffold representations (<strong>S1-S4</strong>, Panel B).
+            Then, each colored box (C, D, E) represents one of the three workflows
+            defined by the selected <strong>Subsets Collection</strong> method (<code>User-Defined Scaffold</code> method is not represented here):
+        </p>
+
+        <ul>
+
+        <li><p>
+            <strong>Panel C:</strong> In <strong>workflow 1</strong>, scaffolds are deduplicated by structure (2). In this example,
+            <strong>S1</strong> and <strong>S2</strong> are duplicates, and <strong>S3</strong> and <strong>S4</strong> 
+            are already unique scaffolds, yielding three unique scaffolds (<strong>Us1-Us3</strong>). 
+            After the population step, workflow 1 generates three final subsets.
+        </p></li>
+
+        <li><p>
+            <strong>Panel D: Workflow 2</strong> performs pairwise scaffold comparison to detect substructure relationships. When a
+            substructure match is found, the smaller scaffold is retained only if it satisfies the <code>Heavy Atoms 
+            Threshold</code>. Here, the threshold is 9 heavy atoms. The comparison between <strong>Us1</strong> and 
+            <strong>Us2</strong> converges to a smaller valid minimal scaffold, <strong>Ms2</strong> (4). Since 
+            <strong>Us1</strong> already meets the criterion, it is preserved as minimal scaffold <strong>Ms1</strong> (5). 
+            Following the population step, workflow 2 produces two final subsets.
+        </p></li>
+
+        <li><p>
+            <strong>Panel E: Workflow 3</strong> clusters minimal scaffolds using the Tanimoto similarity index computed on Morgan
+            fingerprints. The <code>Similarity Threshold</code> in this example is intentionally low (50%), causing 
+            <strong>Ms1</strong> and <strong>Ms2</strong> to merge into a single similarity cluster. 
+            The Maximum Common Substructure (MCS) of the cluster is then computed via RDKit to derive the representative 
+            scaffold <strong>MCS1</strong> (6). After population, workflow 3 results in one final subset.
+        </p></li>
+
+        </ul>
+
+        <p>
+            The following figure illustrates how the three subsets obtained with the workflow 1 are populated:
+        </p>
+        <img src="assets/images/Analysis_ex_Population.png">
+
+        <p>
+            During population (7), each molecule in the prepared dataset is examined for the presence of each unique scaffold
+            (<strong>Us1-Us3</strong>). Molecules containing a given scaffold are assigned to the corresponding subset.
+            In this example, three molecules are assigned to the subset 1 and only one molecule is assigned to subset 2 
+            and subset 3.
+        </p>
+
+        <p>
+            Since the <code>Filtering Threshold</code> is set to 2 in this example, subset 2 and subset 3 will be discarded
+            and only subset 1 will be retained for R-Groups Decomposition.
+        </p>
+
+        <h3>R-Groups Decomposition on Subset 1</h3>
+
+        <p>
+            The following figure illustrates how R-Groups Decomposition is performed on the unfiltered Subset 1 (3 molecules).
+        </p>
+
+        <img src="assets/images/Analysis_ex_Decomposition.png">
+
+        <p>
+            Using the common core as the reference structure, each molecule in the subset is decomposed by
+            identifying and annotating its variable groups and their attachment positions.
+            The resulting R-group assignments are serialised into a JSON file for downstream analyses.
+        </p>
+        
+        <p>
+            In molecule 3, R2 and R3 encode two variable regions that, in the other molecules, correspond to
+            single substituents; here, instead, they represent the two distinct attachment sites of the same ring
+            system. This occurs because the variable regions in molecule 3 are not independent terminal substituents, 
+            but the pair of atoms defining the two linkage points through which the ring closes on the core. 
+            Consequently, even though the chemical fragment is the same ring, it is recorded as two separate R-group 
+            entries to preserve its positional connectivity on the scaffold.
+        </p>
+            
+        <div class="footer-spacer"></div>
+
+    </main>
+
+</div>
+</body>
+</html>
