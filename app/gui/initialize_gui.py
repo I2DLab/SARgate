@@ -577,7 +577,7 @@ def initialize_gui(state: dict[str, Any]) -> None:
                 "for more information:"
             )
             dpg.add_spacer(height=state["win_spacer"])
-            link = "https://github.com/"
+            link = "https://github.com/I2DLab/SARgate"
             dpg.add_button(label=link, tag="github_popup_button", callback=lambda: webbrowser.open(link))
             dpg.bind_item_theme("github_popup_button", link_button_theme)
             dpg.bind_item_theme("github_popup", apply_input_text_theme)
@@ -615,11 +615,11 @@ def initialize_gui(state: dict[str, Any]) -> None:
             no_resize=True,
         ):
             dpg.add_text(
-                "Report bugs, crashes or feature requests\n"
-                "using the GitHub Issues page:"
+                "Report bugs, crashes, or feature requests\n"
+                "on the GitHub Issues page:"
             )
             dpg.add_spacer(height=state["win_spacer"])
-            link = "https://github.com/your-repo/issues"
+            link = "https://github.com/I2DLab/SARgate/issues"
             dpg.add_button(label=link, tag="report_issue_popup_button", callback=lambda: webbrowser.open(link))
             dpg.bind_item_theme("report_issue_popup_button", link_button_theme)
             dpg.bind_item_theme("report_issue_popup", apply_input_text_theme)
