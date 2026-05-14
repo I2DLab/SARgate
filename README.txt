@@ -1,11 +1,29 @@
 SARgate
-README
+=======
 
-This guide is intended for users who want to run or modify the SARgate source code.
-If you only want to use the program, you do not need to follow the steps below: simply launch the packaged executable distributed with the project (the macOS application bundle, the Windows .exe executable, or the Linux packaged executable, depending on your platform).
+SARgate is a molecular toolkit for chemical space and structure-activity relationship analysis.
 
+Download SARgate
+----------------
 
-1. What You Need
+If you only want to use SARgate, download the pre-built executable for your operating system from the Releases page:
+
+https://github.com/I2DLab/SARgate/releases
+
+Available builds:
+- Windows: SARgate-win64.zip
+- macOS Apple Silicon: SARgate-mac-arm64.zip
+- Linux x86_64: SARgate-linux-x86_64.zip
+
+Installation and launch instructions for executable builds are provided in:
+
+README_EXECUTABLES.txt
+
+Source Code
+-----------
+
+The instructions below are intended for users who want to run or modify SARgate from source code.
+
 
 SARgate is a Python application. To run it from source, you need:
 
