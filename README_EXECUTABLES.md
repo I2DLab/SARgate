@@ -86,20 +86,16 @@ How to remove quarantine:
 
 1. Open Terminal.
 
-2. Type the following command, followed by a space:
+2. Type the following command:
 
 xattr -dr com.apple.quarantine
 
-3. Drag SARgate.app from Finder into the Terminal window. macOS will paste the
-   full path automatically.
-
-4. Press Enter.
-
+followed by the absolute path where SARgate.app is located (written between quotes). 
 The final command should look like this, with your own user name/path:
 
 xattr -dr com.apple.quarantine "/Users/yourname/Downloads/SARgate.app"
 
-5. After the command finishes, double-click SARgate.app to open it.
+3. After the command finishes, double-click SARgate.app to open it.
 
 Alternative macOS opening method:
 Sometimes Ctrl-click or right-click on SARgate.app, then Open, then Open again
