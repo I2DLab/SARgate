@@ -21,7 +21,6 @@ It can be used either as a pre-built executable or directly from source code.
   - [Features](#features)
   - [Quick Start](#quick-start)
   - [Download SARgate](#download-sargate)
-  - [Supported Platforms](#supported-platforms)
   - [Source Code](#source-code)
   - [Download the Source Code](#download-the-source-code)
   - [Recommended Installation: Conda / Miniconda](#recommended-installation-conda--miniconda)
@@ -105,18 +104,6 @@ Available builds:
 Installation and launch instructions for executable builds are provided in:
 
 [README_EXECUTABLES.md](README_EXECUTABLES.md)
-
----
-
-## Supported Platforms
-
-SARgate provides executable builds for:
-
-- Windows 64-bit;
-- macOS Apple Silicon;
-- Linux x86_64.
-
-Source execution is available on systems where Python 3.13 and the required dependencies can be installed.
 
 ---
 
@@ -207,13 +194,7 @@ If the command prints a version number, Conda is ready.
 Create a new environment for SARgate. Python 3.13 is the safest target for this project.
 
 ```bash
-conda create -n sargate python=3.13
-```
-
-When Conda asks for confirmation, type:
-
-```text
-y
+conda create -n sargate python=3.13 -y
 ```
 
 ### Activate the Environment
@@ -296,16 +277,10 @@ python --version
 
 Move to the SARgate project folder, then create a virtual environment.
 
-On macOS or Linux:
+On macOS or Linux or Windows:
 
 ```bash
 python3 -m venv .venv
-```
-
-On Windows:
-
-```bat
-python -m venv .venv
 ```
 
 ### Activate the Virtual Environment
@@ -316,15 +291,14 @@ On macOS or Linux:
 source .venv/bin/activate
 ```
 
-On Windows Command Prompt:
+On Windows :
 
 ```bat
+# Command Prompt
 .venv\Scripts\activate.bat
 ```
-
-On Windows PowerShell:
-
 ```powershell
+# PowerShell
 .venv\Scripts\Activate.ps1
 ```
 
