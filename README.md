@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 [![Releases](https://img.shields.io/badge/Downloads-GitHub%20Releases-informational)](https://github.com/I2DLab/SARgate/releases)
 
-![SARgate interface](assets/screenshots/sargate-main.png)
+![SARgate interface](assets/screenshots/UMAP.png)
 
 SARgate is a molecular toolkit for chemical space and structure-activity relationship analysis.
 
@@ -294,7 +294,7 @@ source .venv/bin/activate
 On Windows :
 
 ```bat
-# Command Prompt
+REM Command Prompt
 .venv\Scripts\activate.bat
 ```
 ```powershell
