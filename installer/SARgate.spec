@@ -48,12 +48,25 @@ def _collect_windows_expat_binaries():
     return binaries
 
 
+def _collect_root_documents():
+    """
+    Include root-level user-facing documents in the packaged application.
+    """
+    docs = []
+    for filename in ['BUILD.md', 'README.md', 'README_EXECUTABLES.md', 'LICENSE']:
+        source = os.path.join(PROJECT_ROOT, filename)
+        if os.path.isfile(source):
+            docs.append((source, '.'))
+    return docs
+
+
 datas = [
     (os.path.join(PROJECT_ROOT, 'app', 'analysis', 'chemspace', 'html'), 'app/analysis/chemspace/html'),
     (os.path.join(PROJECT_ROOT, 'app', 'analysis', 'tools', 'molecule_sketcher.py'), 'app/analysis/tools'),
     (os.path.join(PROJECT_ROOT, 'assets'), 'assets'),
     (os.path.join(PROJECT_ROOT, 'data'), 'data'),
 ]
+datas += _collect_root_documents()
 binaries = _collect_windows_expat_binaries()
 hiddenimports = [
     'app.main',

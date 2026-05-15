@@ -954,7 +954,8 @@ def register_plot_context_popup(
         show_coordinates = not bool(plot_cfg.get("no_mouse_pos", True))
         show_crosshairs = bool(plot_cfg.get("crosshairs", False))
         show_grid = False
-        for axis_tag in (x_axis_tag, y_axis_tag):
+        grid_default_axes = (y_axis_tag,) if theme_kind == "boxplot" else (x_axis_tag, y_axis_tag)
+        for axis_tag in grid_default_axes:
             if not dpg.does_item_exist(axis_tag):
                 continue
             try:
@@ -988,12 +989,24 @@ def register_plot_context_popup(
             dpg.configure_item(plot_tag, crosshairs=show_crosshairs, no_mouse_pos=not show_coordinates)
         except Exception:
             pass
-        for axis_tag in (x_axis_tag, y_axis_tag):
-            if dpg.does_item_exist(axis_tag):
+        if theme_kind == "boxplot":
+            if dpg.does_item_exist(x_axis_tag):
                 try:
-                    dpg.configure_item(axis_tag, no_gridlines=not show_grid)
+                    dpg.configure_item(x_axis_tag, no_gridlines=True)
                 except Exception:
                     pass
+            if dpg.does_item_exist(y_axis_tag):
+                try:
+                    dpg.configure_item(y_axis_tag, no_gridlines=not show_grid)
+                except Exception:
+                    pass
+        else:
+            for axis_tag in (x_axis_tag, y_axis_tag):
+                if dpg.does_item_exist(axis_tag):
+                    try:
+                        dpg.configure_item(axis_tag, no_gridlines=not show_grid)
+                    except Exception:
+                        pass
         theme_state_key = f"{context_key}_plot_context_theme_tag"
         old_theme = state.get(theme_state_key)
         if old_theme and dpg.does_item_exist(old_theme):

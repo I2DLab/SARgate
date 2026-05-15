@@ -24,10 +24,13 @@ Plotly, SciPy, scikit-learn, and ReportLab, producing a portable
 # === IMPORTS ===
 import os
 import platform
+import json
+import re
 import shutil
 import subprocess
 import sys
 from datetime import datetime
+from pathlib import Path
 import PyInstaller.__main__
 
 
@@ -42,6 +45,115 @@ os.chdir(PROJECT_ROOT)
 # - "universal2": one app for Apple Silicon + Intel, if all native libraries support it
 # - None: PyInstaller default for the current Python/environment
 MACOS_TARGET_ARCHITECTURE = "arm64"
+
+
+PROJECT_ROOT_PATH = Path(PROJECT_ROOT)
+CLEANUP_SCAN_DIR_NAMES = ("app", "assets", "installer", "install")
+COPY_NAME_RE = re.compile(r"(^|[\s_\-\(])(copy|copia|copie)(\)|$|[\s_\-\.])", re.IGNORECASE)
+DEFAULT_SETTINGS = {
+    "input_directory": "",
+    "results_directory": "",
+    "predictions_directory": "",
+    "show_tab_icons": False,
+    "tab_button_size": 40,
+    "font": "DejaVu Sans",
+    "font_scale": 1.0,
+    "theme_name": "SARgate",
+    "colormap_continuous": "Aurora",
+    "colormap_discrete": "Starfield",
+    "pca_point_size": "Small",
+    "pca_mcs_timeout": "10s",
+    "pca_mcs_features": True,
+    "umap_point_size": "Small",
+    "umap_mcs_timeout": "10s",
+    "umap_mcs_features": True,
+    "tsne_point_size": "Small",
+    "tsne_mcs_timeout": "10s",
+    "tsne_mcs_features": True,
+    "slith_record": 4,
+}
+
+
+def _is_copy_name(path: Path) -> bool:
+    """
+    Return True for accidental duplicate names such as 'file copy.py'.
+    """
+    return bool(COPY_NAME_RE.search(path.name))
+
+
+def _delete_cleanup_path(path: Path) -> None:
+    """
+    Delete a generated or accidental local file before packaging.
+    """
+    relative = path.relative_to(PROJECT_ROOT_PATH)
+    print(f"Removing: {relative}")
+    if path.is_dir():
+        shutil.rmtree(path)
+    else:
+        path.unlink()
+
+
+def _iter_cleanup_candidates() -> list[Path]:
+    """
+    Return cleanup candidates in child-before-parent order.
+    """
+    candidates: set[Path] = set()
+
+    for path in PROJECT_ROOT_PATH.iterdir():
+        if path.name == "__pycache__" or path.name == ".DS_Store" or _is_copy_name(path):
+            candidates.add(path)
+
+    for dirname in CLEANUP_SCAN_DIR_NAMES:
+        root = PROJECT_ROOT_PATH / dirname
+        if not root.exists() or not root.is_dir():
+            continue
+        for current_root, dirnames, filenames in os.walk(root):
+            current = Path(current_root)
+
+            for dirname in dirnames:
+                path = current / dirname
+                if dirname == "__pycache__" or _is_copy_name(path):
+                    candidates.add(path)
+
+            for filename in filenames:
+                path = current / filename
+                if filename == ".DS_Store" or _is_copy_name(path):
+                    candidates.add(path)
+
+    return sorted(candidates, key=lambda item: len(item.parts), reverse=True)
+
+
+def _write_default_settings() -> None:
+    """
+    Regenerate assets/config/settings.ssf with clean default values.
+    """
+    settings_path = PROJECT_ROOT_PATH / "assets" / "config" / "settings.ssf"
+    print(f"Resetting: {settings_path.relative_to(PROJECT_ROOT_PATH)}")
+    settings_path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = settings_path.with_suffix(f"{settings_path.suffix}.tmp")
+    with open(tmp_path, "w", encoding="utf-8") as f:
+        json.dump(DEFAULT_SETTINGS, f, indent=4, ensure_ascii=False)
+        f.write("\n")
+    tmp_path.replace(settings_path)
+
+
+def _run_pre_build_cleanup() -> None:
+    """
+    Clean local generated files and reset user-dependent settings before build.
+    """
+    print("Running pre-build cleanup...")
+    candidates = _iter_cleanup_candidates()
+    if not candidates:
+        print("Nothing to clean.")
+    else:
+        for path in candidates:
+            if path.exists():
+                _delete_cleanup_path(path)
+    _write_default_settings()
+    print("Cleanup complete.")
+
+
+_run_pre_build_cleanup()
 
 
 def _normalized_architecture_label() -> str:
@@ -101,7 +213,7 @@ def _create_release_archive(dist_dir: str) -> str:
     build_output = _build_output_path(dist_dir)
     archive_stem = f"SARgate-{_platform_label()}-{_normalized_architecture_label()}"
     archive_path = os.path.join(PROJECT_ROOT, f"{archive_stem}.zip")
-
+ 
     if os.path.exists(archive_path):
         os.remove(archive_path)
 
