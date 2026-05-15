@@ -1,3 +1,6 @@
+[![RDKit](https://img.shields.io/badge/RDKit-powered-green)](https://www.rdkit.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow)](https://opensource.org/licenses/MIT)
+
 # SARgate
 
 SARgate is a molecular toolkit for chemical space and structure-activity relationship analysis.
