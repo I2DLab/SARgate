@@ -771,6 +771,7 @@ def refresh_overrides(state: dict[str, Any]) -> None:
 
     locked_text_tab_buttons = state.get("locked_text_tab_buttons") or set()
     for item_tag in [
+        "sketcher_text_button",
         "event_log_text_button",
         "notes_text_button",
     ]:
@@ -813,6 +814,7 @@ def refresh_overrides(state: dict[str, Any]) -> None:
         "chemspace_nav_button",
         "prediction_nav_button",
         "notes_nav_button",
+        "sketcher_nav_button",
         "utilities_nav_button",
         "event_log_nav_button",
         "slith_nav_button",
