@@ -294,7 +294,7 @@ source .venv/bin/activate
 On Windows :
 
 ```bat
-REM Command Prompt
+:: Command Prompt
 .venv\Scripts\activate.bat
 ```
 ```powershell
