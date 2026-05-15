@@ -1,5 +1,5 @@
 # Building SARgate
-
+ 
 This document explains how to create a packaged SARgate executable from the source code.
 
 Executable builds are created with PyInstaller using the files stored in the `installer/` folder.
