@@ -82,9 +82,7 @@ The fastest way to use SARgate is to download a pre-built executable from the Gi
 
 After downloading the archive for your operating system, extract it and follow the executable-specific instructions provided in:
 
-```text
-README_EXECUTABLES.md
-```
+[README_EXECUTABLES.md](README_EXECUTABLES.md)
 
 For source-based execution, Conda or Miniconda is recommended because SARgate depends on RDKit.
 
@@ -106,9 +104,7 @@ Available builds:
 
 Installation and launch instructions for executable builds are provided in:
 
-```text
-README_EXECUTABLES.md
-```
+[README_EXECUTABLES.md](README_EXECUTABLES.md)
 
 ---
 
