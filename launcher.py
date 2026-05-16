@@ -41,13 +41,15 @@ the main window startup.
 
 
 # === IMPORTS (lightweight) ===
-import os, sys, time, importlib, runpy, subprocess, shlex, tempfile, json, ctypes, ctypes.util, multiprocessing
+import os, sys, time, importlib, runpy, subprocess, shlex, tempfile, json, ctypes, ctypes.util, multiprocessing, urllib.parse
 from collections.abc import Sequence
 import dearpygui.dearpygui as dpg
 
 
 MAIN_SKIP_SPLASH_ENV = "SARGATE_SKIP_SPLASH"
 MAIN_READY_FILE_ENV = "SARGATE_READY_FILE"
+MAIN_STARTUP_FILES_ENV = "SARGATE_STARTUP_FILES"
+SUPPORTED_INPUT_EXTENSIONS = {".sdf", ".csv", ".tsv", ".xlsx", ".smi", ".txt"}
 
 
 # ---------- Helpers cross-platform ----------
@@ -672,7 +674,41 @@ def cleanup_splash():
         pass
 
 
-def _launch_main_fresh(base_dir: str) -> subprocess.Popen[str]:
+def _coerce_startup_file_path(value: str) -> str:
+    """
+    Normalize a file argument received from macOS, Windows, Linux, or PyInstaller.
+    """
+    raw = str(value or "").strip().strip("\x00")
+    if not raw or raw.startswith("-psn_"):
+        return ""
+    if (raw.startswith('"') and raw.endswith('"')) or (raw.startswith("'") and raw.endswith("'")):
+        raw = raw[1:-1]
+    if raw.startswith("file://"):
+        parsed = urllib.parse.urlparse(raw)
+        raw = urllib.parse.unquote(parsed.path or "")
+    else:
+        raw = urllib.parse.unquote(raw)
+    return os.path.abspath(os.path.expanduser(raw)) if raw else ""
+
+
+def _startup_input_files(args: Sequence[str]) -> list[str]:
+    """
+    Return existing input files passed to SARgate by the operating system.
+    """
+    input_files: list[str] = []
+    for arg in args:
+        path = _coerce_startup_file_path(str(arg))
+        ext = os.path.splitext(path)[1].lower()
+        if ext in SUPPORTED_INPUT_EXTENSIONS and os.path.isfile(path):
+            input_files.append(path)
+    return input_files
+
+
+def _launch_main_fresh(
+    base_dir: str,
+    startup_files: Sequence[str] = (),
+    raw_startup_args: Sequence[str] = (),
+) -> subprocess.Popen[str]:
     """
     Launch the main GUI in a fresh child process.
 
@@ -693,15 +729,16 @@ def _launch_main_fresh(base_dir: str) -> subprocess.Popen[str]:
     child_env = os.environ.copy()
     child_env[MAIN_READY_FILE_ENV] = ready_path
     child_env[MAIN_SKIP_SPLASH_ENV] = "1"
+    child_env[MAIN_STARTUP_FILES_ENV] = json.dumps([*raw_startup_args, *startup_files])
 
     if getattr(sys, "frozen", False):
-        command = [sys.executable]
+        command = [sys.executable, *startup_files]
         child_cwd = os.path.dirname(sys.executable)
     else:
         main_path = os.path.join(base_dir, "app", "main.py")
         if not os.path.exists(main_path):
             raise FileNotFoundError(main_path)
-        command = [sys.executable, main_path]
+        command = [sys.executable, main_path, *startup_files]
         child_cwd = base_dir
 
     process = subprocess.Popen(command, cwd=child_cwd, env=child_env)
@@ -734,6 +771,8 @@ def _wait_for_main_ready(ready_path: str, timeout_s: float = 6.0) -> None:
 # === MAIN (launcher) ===
 if __name__ == "__main__":
     multiprocessing.freeze_support()
+    raw_startup_args = list(sys.argv[1:])
+    startup_files = _startup_input_files(raw_startup_args)
 
     if len(sys.argv) >= 2 and sys.argv[1] == "--sketcher-helper":
         from app.analysis.tools.molecule_sketcher import main as sketcher_main
@@ -760,7 +799,7 @@ if __name__ == "__main__":
     if ok:
         try:
             ui_update("Launching SARgate...", 1.0)
-            child = _launch_main_fresh(base_dir)
+            child = _launch_main_fresh(base_dir, startup_files, raw_startup_args)
             ready_path = getattr(child, "_sargate_ready_path", "")
             if ready_path:
                 _wait_for_main_ready(ready_path)
