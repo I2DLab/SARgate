@@ -175,15 +175,27 @@ def _append_event_log_file_line(state: dict[str, Any], line: str) -> None:
     """
     Persist one formatted GUI log line to the session log file.
     """
-    log_path = state.get("event_log_file")
-    if not isinstance(log_path, str) or not log_path.strip():
-        return
+    log_paths = []
+    primary_path = state.get("event_log_file")
+    if isinstance(primary_path, str) and primary_path.strip():
+        log_paths.append(primary_path)
 
-    try:
-        with open(log_path, "a", encoding="utf-8") as f:
-            f.write(f"{line}\n")
-    except Exception:
-        pass
+    mirror_paths = state.get("event_log_mirror_files", [])
+    if isinstance(mirror_paths, list):
+        log_paths.extend(path for path in mirror_paths if isinstance(path, str) and path.strip())
+
+    seen = set()
+    for log_path in log_paths:
+        normalized = os.path.normcase(os.path.abspath(log_path))
+        if normalized in seen:
+            continue
+        seen.add(normalized)
+        try:
+            os.makedirs(os.path.dirname(log_path), exist_ok=True)
+            with open(log_path, "a", encoding="utf-8") as f:
+                f.write(f"{line}\n")
+        except Exception:
+            pass
 
 
 def append_event_log_line(state: dict[str, Any], message: str) -> None:
@@ -270,17 +282,13 @@ def install_event_log_capture(state: dict[str, Any]) -> None:
     if not isinstance(log_path, str) or not log_path.strip():
         runtime_dir = state.get("user_data_dir")
         if isinstance(runtime_dir, str) and runtime_dir.strip():
-            log_path = os.path.join(runtime_dir, "logs", "log.txt")
+            log_path = os.path.join(runtime_dir, "event_log.log")
             os.makedirs(os.path.dirname(log_path), exist_ok=True)
         else:
-            log_path = str(user_data_path("logs", "log.txt"))
+            log_path = str(user_data_path("event_log.log"))
         state["event_log_file"] = log_path
-    try:
-        with open(log_path, "w", encoding="utf-8") as f:
-            started = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            f.write(f"{started}  [SYSTEM]  Event log started\n")
-    except Exception:
-        pass
+    started = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    _append_event_log_file_line(state, f"{started}  [SYSTEM]  Event log started")
     state["_event_log_stdout_original"] = sys.stdout
     state["_event_log_stderr_original"] = sys.stderr
     sys.stdout = _EventLogStream(state, sys.stdout)

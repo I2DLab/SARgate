@@ -187,7 +187,6 @@ def show_input_selection_window(state: dict[str, Any]) -> None:
         Returns:
             None: This callback updates the UI and state in place.
         """
-
         selected_file_name = os.path.basename(selected_file)
         extension = os.path.splitext(selected_file)[1].lower()
         state["selected_file_path"] = selected_file

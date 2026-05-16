@@ -495,6 +495,7 @@ def show_library_table_confirm_popup(state: dict[str, Any]) -> None:
         no_resize=True,
         no_collapse=True,
         autosize=True,
+        show=True,
         on_close=lambda: skip_build_library_table(state),
     ):
         dpg.add_text(

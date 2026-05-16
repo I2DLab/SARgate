@@ -31,6 +31,8 @@ import warnings
 import multiprocessing
 import faulthandler
 import shutil
+import urllib.parse
+import subprocess
 from typing import Any
 
 if sys.stderr is not None:
@@ -96,6 +98,50 @@ os.chdir(PROJECT_ROOT)
 USER_DATA_DIR = str(user_data_path())
 
 
+def _runtime_log_files(filename: str) -> list[str]:
+    paths = [str(user_data_path(filename))]
+    exe_dir = os.path.dirname(os.path.abspath(sys.executable))
+    internal_dir = os.path.join(exe_dir, "_internal")
+    if getattr(sys, "frozen", False) and os.path.isdir(internal_dir):
+        bases = (internal_dir,)
+    else:
+        bases = (
+            getattr(sys, "_MEIPASS", ""),
+            internal_dir,
+            exe_dir,
+            PROJECT_ROOT,
+        )
+
+    for base in bases:
+        if base:
+            paths.append(os.path.join(base, filename))
+
+    unique_paths = []
+    seen = set()
+    for path in paths:
+        normalized = os.path.normcase(os.path.abspath(path))
+        if normalized not in seen:
+            seen.add(normalized)
+            unique_paths.append(path)
+    return unique_paths
+
+
+def _preferred_runtime_log_file(filename: str) -> str:
+    fallback = str(user_data_path(filename))
+    for path in _runtime_log_files(filename)[1:]:
+        directory = os.path.dirname(path)
+        try:
+            os.makedirs(directory, exist_ok=True)
+            probe_path = os.path.join(directory, ".sargate_log_probe")
+            with open(probe_path, "w", encoding="utf-8") as f:
+                f.write("")
+            os.remove(probe_path)
+            return path
+        except Exception:
+            continue
+    return fallback
+
+
 def _config_file_path(filename: str) -> str:
     """
     Resolve a config file path, using writable per-user copies in frozen builds.
@@ -114,6 +160,8 @@ SETTINGS_FILE = _config_file_path("settings.ssf")
 THEMES_FILE = _config_file_path("themes.stf")
 COLORMAPS_FILE = _config_file_path("colormaps.scf")
 RECENT_FILES_FILE = _config_file_path("recent_files.srf")
+SUPPORTED_STARTUP_INPUT_EXTENSIONS = {".sdf", ".csv", ".tsv", ".xlsx", ".smi", ".txt"}
+STARTUP_FILES_ENV = "SARGATE_STARTUP_FILES"
 with open(SETTINGS_FILE, "r", encoding="utf-8") as f:
     settings = json.load(f)
 
@@ -270,6 +318,127 @@ checkbox_states = {
 }
 
 
+def _startup_input_candidates(args: list[str]) -> list[str]:
+    """
+    Return supported input files passed through argv or the launcher environment.
+    """
+    candidates = list(args)
+    raw_env = os.environ.get(STARTUP_FILES_ENV, "").strip()
+    if raw_env:
+        try:
+            env_paths = json.loads(raw_env)
+            if isinstance(env_paths, list):
+                candidates.extend(str(path) for path in env_paths)
+        except Exception:
+            pass
+    return candidates
+
+
+def _startup_input_file(args: list[str]) -> str:
+    """
+    Return the first supported input file passed through the command line.
+    """
+    raw_env = os.environ.get(STARTUP_FILES_ENV, "")
+    candidates = _startup_input_candidates(args)
+    if not candidates and not raw_env.strip():
+        return ""
+
+    for arg in candidates:
+        path = _coerce_startup_file_path(str(arg))
+        ext = os.path.splitext(path)[1].lower()
+        if ext in SUPPORTED_STARTUP_INPUT_EXTENSIONS and os.path.isfile(path):
+            return path
+    return ""
+
+
+def _coerce_startup_file_path(value: str) -> str:
+    """
+    Normalize file arguments received from OS file associations.
+    """
+    raw = str(value or "").strip().strip("\x00")
+    if not raw or raw.startswith("-psn_"):
+        return ""
+    if (raw.startswith('"') and raw.endswith('"')) or (raw.startswith("'") and raw.endswith("'")):
+        raw = raw[1:-1]
+    if raw.startswith("file://"):
+        parsed = urllib.parse.urlparse(raw)
+        raw = urllib.parse.unquote(parsed.path or "")
+    else:
+        raw = urllib.parse.unquote(raw)
+    return os.path.abspath(os.path.expanduser(raw)) if raw else ""
+
+
+def _install_linux_file_associations() -> None:
+    """
+    Register SARgate as an Open With target for supported input files on Linux.
+    """
+    if not sys.platform.startswith("linux") or not getattr(sys, "frozen", False):
+        return
+
+    try:
+        executable = os.path.abspath(sys.executable)
+        icon_path = resource_path("assets", "icons", "SARgate_icon.png")
+        applications_dir = os.path.expanduser("~/.local/share/applications")
+        mime_package_dir = os.path.expanduser("~/.local/share/mime/packages")
+        os.makedirs(applications_dir, exist_ok=True)
+        os.makedirs(mime_package_dir, exist_ok=True)
+
+        desktop_id = "it.unipg.i2dlab.sargate.desktop"
+        desktop_path = os.path.join(applications_dir, desktop_id)
+        mime_types = [
+            "text/csv",
+            "text/tab-separated-values",
+            "text/plain",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "chemical/x-mdl-sdfile",
+            "chemical/x-mdl-sdf",
+            "chemical/x-daylight-smiles",
+            "application/x-sargate-sdf",
+            "application/x-sargate-smi",
+        ]
+        with open(desktop_path, "w", encoding="utf-8") as f:
+            f.write(
+                "[Desktop Entry]\n"
+                "Type=Application\n"
+                "Name=SARgate\n"
+                "Comment=Chemical Space and SAR Analysis\n"
+                f"Exec=\"{executable}\" %F\n"
+                f"Icon={icon_path}\n"
+                "Terminal=false\n"
+                "Categories=Science;Chemistry;\n"
+                f"MimeType={';'.join(mime_types)};\n"
+            )
+
+        mime_xml_path = os.path.join(mime_package_dir, "it.unipg.i2dlab.sargate.xml")
+        with open(mime_xml_path, "w", encoding="utf-8") as f:
+            f.write(
+                '<?xml version="1.0" encoding="UTF-8"?>\n'
+                '<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">\n'
+                '  <mime-type type="application/x-sargate-sdf">\n'
+                '    <comment>Structure-data file</comment>\n'
+                '    <glob pattern="*.sdf"/>\n'
+                '    <glob pattern="*.SDF"/>\n'
+                '  </mime-type>\n'
+                '  <mime-type type="application/x-sargate-smi">\n'
+                '    <comment>SMILES file</comment>\n'
+                '    <glob pattern="*.smi"/>\n'
+                '    <glob pattern="*.SMI"/>\n'
+                '  </mime-type>\n'
+                '</mime-info>\n'
+            )
+
+        for command in (
+            ["update-mime-database", os.path.expanduser("~/.local/share/mime")],
+            ["update-desktop-database", applications_dir],
+        ):
+            try:
+                subprocess.run(command, check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=5)
+            except Exception:
+                pass
+    except Exception:
+        pass
+
+
 MANUAL_SECTIONS = {
     "input_tab": "4_input-files-and-settings.html",
     "analysis_tab": "5_analysis-workflow.html",
@@ -294,6 +463,8 @@ state = {
     "themes_file": THEMES_FILE,
     "colormaps_file": COLORMAPS_FILE,
     "recent_files_file": RECENT_FILES_FILE,
+    "event_log_file": _preferred_runtime_log_file("event_log.log"),
+    "event_log_mirror_files": _runtime_log_files("event_log.log"),
     "themes_store": THEMES_STORE,
     "colormaps_store": COLORMAPS_STORE,
     "recent_files": RECENT_FILES,
@@ -341,6 +512,7 @@ state = {
     "predictions_dir": predictions_dir,
     "selected_file_path": "",
     "selected_file_name": "",
+    "startup_input_file": _startup_input_file(sys.argv[1:]),
     "prepared_sdf": "",
     "output_sdf": "",
     "work_dir": "",
@@ -445,6 +617,7 @@ state = {
     "slith_is_paused": False
 }
 
+_install_linux_file_associations()
 state["add_recent_file"] = lambda path: add_recent_file(state, path)
 install_event_log_capture(state)
 
@@ -469,7 +642,7 @@ def _build_state_backup(source_state: dict[str, Any]) -> dict[str, Any]:
         if key not in excluded_keys
     }
     return copy.deepcopy(safe_state)
- 
+
 
 # -----------------------------------------------------------------------------
 # 4. Run the module entry point
@@ -546,10 +719,55 @@ if __name__ == "__main__":
     _startup_trace("computing widget sizes")
     setup_widgets_size(state)
 
+    startup_input_before_gui = str(state.get("startup_input_file", "") or "")
 
     _startup_trace("building GUI hierarchy")
     initialize_gui(state)
     ensure_event_log_window(state)
+    if startup_input_before_gui and not state.get("startup_input_file"):
+        state["startup_input_file"] = startup_input_before_gui
+
+    def open_external_input_file(input_file: str, source: str, attempt: int = 0) -> bool:
+        """
+        Open an input file supplied by the operating system through "Open with".
+        """
+        input_file = str(input_file or "")
+        if not input_file:
+            return True
+        opener = state.get("open_input_file_from_path")
+        label_ready = dpg.does_item_exist("file_name_text")
+        if callable(opener) and (label_ready or attempt >= 30):
+            state["checkbox_states"]["Input source"] = "Local"
+            for item_tag, visible in (
+                ("select_file_button", True),
+                ("load_results_button", True),
+                ("Database_to_search_group", False),
+                ("chembl_input_group", False),
+                ("file_name_text", True),
+            ):
+                if dpg.does_item_exist(item_tag):
+                    dpg.configure_item(item_tag, show=visible)
+            opener(input_file)
+            return True
+        return False
+
+    def open_startup_input_file(attempt: int = 0) -> None:
+        startup_file = str(state.get("startup_input_file", "") or "")
+        if not startup_file:
+            return
+        if open_external_input_file(startup_file, "startup", attempt):
+            state.pop("startup_input_file", None)
+            return
+        if attempt < 30:
+            dpg.set_frame_callback(
+                dpg.get_frame_count() + 2,
+                lambda *_: open_startup_input_file(attempt + 1),
+            )
+
+    if state.get("startup_input_file"):
+        open_startup_input_file()
+        if state.get("startup_input_file"):
+            dpg.set_frame_callback(dpg.get_frame_count() + 2, open_startup_input_file)
 
 
     def start_responsive_image_poller(state: dict[str, Any]) -> None:
