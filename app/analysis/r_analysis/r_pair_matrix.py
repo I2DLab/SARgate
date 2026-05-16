@@ -12,7 +12,6 @@ bioactivity.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Draw rgroups table
@@ -98,7 +97,6 @@ def draw_rgroups_table(
 
     # Identify the block of activity columns and validate the requested 'activity'.
 
-    # --- STEP 1.1: Validate target activity column presence ---
     activity_columns = list(data.columns)
     chi4_index = activity_columns.index("Chi4")
     activity_cols = activity_columns[chi4_index + 1:]
@@ -112,15 +110,6 @@ def draw_rgroups_table(
     # 2.1. Parse activity value
     # -----------------------------------------------------------------------------
     def parse_activity_value(val: Any) -> Any:
-        """
-        Parse activity value.
-        
-        Args:
-            val (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         val = str(val).strip()
         if val.startswith((">", "<", ">=", "<=", "=")):
             for sym in [">=", "<=", ">", "<", "="]:
@@ -449,19 +438,6 @@ def draw_rgroups_table(
         label: str | None = None,
         label_pos: str = "top"
     ) -> Any:
-        """
-        Return flattened float32 RGBA for a molecule image (with optional label).
-        
-        Args:
-            smiles (str): Parameter accepted by this routine.
-            w (int): Parameter accepted by this routine. Defaults to the configured value.
-            h (int): Parameter accepted by this routine. Defaults to the configured value.
-            label (str): Parameter accepted by this routine. Defaults to the configured value.
-            label_pos (Any): Parameter accepted by this routine. Defaults to the configured value.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         try:
             mol = Chem.MolFromSmiles(smiles, sanitize=False)
             drawer = rdMolDraw2D.MolDraw2DCairo(w, h)
@@ -487,17 +463,6 @@ def draw_rgroups_table(
     # -----------------------------------------------------------------------------
     def render_rgroup_image(smiles: str, texture_tag: str, label_text: str | None = None) -> None:
         # Render an R-group thumbnail to a dynamic texture with an optional label.
-        """
-        Execute the render rgroup image routine.
-        
-        Args:
-            smiles (str): Parameter accepted by this routine.
-            texture_tag (Any): Parameter accepted by this routine.
-            label_text (Any): Parameter accepted by this routine. Defaults to the configured value.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         img_data = _smiles_to_texture_data(
             smiles,
             heatmap_group_render_width,
@@ -514,17 +479,6 @@ def draw_rgroups_table(
     # 2.5. Format activity value
     # -----------------------------------------------------------------------------
     def _format_activity_value(row: Any, activity: str, state: dict[str, Any]) -> Any:
-        """
-        Return a string 'activity = value unit' or 'N/A' if empty/NaN.
-        
-        Args:
-            row (Any): Parameter accepted by this routine.
-            activity (str): Parameter accepted by this routine.
-            state (dict[str, Any]): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         val = row.get(activity, "")
         if pd.isna(val) or str(val).strip() == "":
             return "N/A"
@@ -542,17 +496,6 @@ def draw_rgroups_table(
     # -----------------------------------------------------------------------------
     def handle_click_heatmap(sender: Any, app_data: Any, user_data: Any = None) -> Any:
         # Handle left-click on the heatmap area: update selected R1/R2 images and list matching molecules.
-        """
-        Execute the handle click heatmap routine.
-        
-        Args:
-            sender (Any): Parameter accepted by this routine.
-            app_data (Any): Parameter accepted by this routine.
-            user_data (Any): Parameter accepted by this routine. Defaults to the configured value.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         mouse_pos = dpg.get_mouse_pos()
         plot_min = dpg.get_item_rect_min("heatmap_plot")
         plot_max = dpg.get_item_rect_max("heatmap_plot")
@@ -586,15 +529,6 @@ def draw_rgroups_table(
         # 2.6.1. Key sort
         # -----------------------------------------------------------------------------
         def _key_sort(row: Any) -> Any:
-            """
-            Execute the key sort routine.
-            
-            Args:
-                row (Any): Parameter accepted by this routine.
-            
-            Returns:
-                Any: Value produced by the routine.
-            """
             v = row.get("__parsed_activity__", "N/A")
             return (0, -float(v)) if isinstance(v, (int, float)) else (1, 0.0)
         matching_rows = sorted(matching_rows.to_dict("records"), key=_key_sort)
@@ -617,15 +551,6 @@ def draw_rgroups_table(
         else:
             # matching_rows is already a list of dicts.
             def _id_key(r: Any) -> Any:
-                """
-                Execute the id key routine.
-                
-                Args:
-                    r (Any): Input accepted by this routine.
-                
-                Returns:
-                    Any: Value returned by the routine.
-                """
                 v = r.get("Mol_sub_ID", r.get("MolID", None))
                 try:
                     return float(v)
@@ -650,17 +575,6 @@ def draw_rgroups_table(
     # -----------------------------------------------------------------------------
     def handle_hover_heatmap(sender: Any, app_data: Any, user_data: Any = None) -> None:
         # Handle mouse move: show/hide tooltip window with cell statistics near the cursor.
-        """
-        Execute the handle hover heatmap routine.
-        
-        Args:
-            sender (Any): Parameter accepted by this routine.
-            app_data (Any): Parameter accepted by this routine.
-            user_data (Any): Parameter accepted by this routine. Defaults to the configured value.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         if state["current_r_analysis_subtab"] != "r_analysis_table_subtab" and dpg.does_item_exist("heatmap_tooltip_window"):
             state["last_hovered_heatmap_cell"] = None
             if dpg.does_item_exist("heatmap_tooltip_window"):
@@ -880,7 +794,7 @@ def draw_rgroups_table(
                     with dpg.draw_layer(parent=plot, tag="heatmap_drawlist"):
 
                         cell_size = 1.0
-                        cell_tags = []  # <-- nuovo: raccolgo i tag per ogni cella
+                        cell_tags = []
 
                         # Grid cells: compute colour per cell and draw as unit squares offset by 0.5 to centre ticks.
                         rendered_cells = 0
@@ -896,7 +810,7 @@ def draw_rgroups_table(
                                 x0, y0 = j, y_plot
                                 x1, y1 = j + cell_size, y_plot + cell_size
 
-                                cell_tag = f"hm_cell_{i}_{j}"   # <-- tag univoco per cella
+                                cell_tag = f"hm_cell_{i}_{j}"
                                 dpg.draw_rectangle(
                                     pmin=(x0 + 0.5, y0 + 0.5),
                                     pmax=(x1 + 0.5, y1 + 0.5),
@@ -911,7 +825,7 @@ def draw_rgroups_table(
                                     set_loading_screen_progress(state, 60 + (rendered_cells / total_cells) * 12)
                             cell_tags.append(row_tags)
 
-                        # salva ciò che serve per il refresh colori
+                        # Store heatmap state for color refreshes.
                         state["rg_heatmap_matrix"] = heatmap_matrix
                         state["rg_tooltip_matrix"] = tooltip_matrix
                         state["rg_cell_tags"] = cell_tags

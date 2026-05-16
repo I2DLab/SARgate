@@ -11,7 +11,6 @@ and subsequent analyses, ensuring proper task sequencing and consistent logging.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Confirm and run
@@ -63,15 +62,6 @@ from app.lmm.lmm_abort import confirm_cancellation
 # 2. Confirm and run
 # -----------------------------------------------------------------------------
 def confirm_and_run(state: dict[str, Any]) -> None:
-    """
-    Callback function triggered by the "RUN" button.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     close_current_job(state)
 
@@ -169,15 +159,6 @@ def confirm_and_run(state: dict[str, Any]) -> None:
 # 3. Prepare working directory
 # -----------------------------------------------------------------------------
 def prepare_working_directory(state: dict[str, Any]) -> None:
-    """
-    Creates all required subdirectories and starts the execution timer.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     # Define subfolders to store subsets, images, reports, and summaries.
     state["subset_dir"] =     os.path.join(state["work_dir"], "sdf_files")
@@ -218,15 +199,6 @@ def prepare_working_directory(state: dict[str, Any]) -> None:
 # 4. Run script threaded
 # -----------------------------------------------------------------------------
 def run_script_threaded(state: dict[str, Any]) -> None:
-    """
-    Launches the analysis in a separate thread.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     thread = threading.Thread(target=run_script, args=(state,), daemon=True)
     state["analysis_thread"] = thread
@@ -237,15 +209,6 @@ def run_script_threaded(state: dict[str, Any]) -> None:
 # 5. Try run script
 # -----------------------------------------------------------------------------
 def try_run_script(state: dict[str, Any]) -> None:
-    """
-    Wrapper to run the main analysis function with error handling.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     try:
         run_script(state)
@@ -270,15 +233,6 @@ def try_run_script(state: dict[str, Any]) -> None:
 # 6. Run script
 # -----------------------------------------------------------------------------
 def run_script(state: dict[str, Any]) -> None:
-    """
-    Executes the full chemoinformatics workflow:.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     if state.get("abort_analysis", False):
         return

@@ -7,7 +7,6 @@ MMPA network visualisation module.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Build mmpa network map
@@ -468,17 +467,6 @@ def _ensure_mmpa_hover_texture(state: dict[str, Any], mol_id: int) -> Any:
 # 2. Build mmpa network map
 # -----------------------------------------------------------------------------
 def build_mmpa_network_map(sender: Any, app_data: Any, user_data: Any) -> None:
-    """
-    Entrypoint to open the MMPA Network Map in a dedicated, movable window.
-    
-    Args:
-        sender (Any): Parameter accepted by this routine.
-        app_data (Any): Parameter accepted by this routine.
-        user_data (Any): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     log_event("MMPA", "Drawing 'MMPA Network'", indent=1)
     state = user_data
     log_settings("MMPA", indent=2, y_axis_label=state.get("mmpa_y_axis_label"), nodes=len(state.get("mmpa_graph_connections", {})))
@@ -566,7 +554,6 @@ def build_mmpa_network_map(sender: Any, app_data: Any, user_data: Any) -> None:
         ):
             pass
 
-    # --- STEP 1.2: Build graph and components (sorted by size) ---
     G = nx.Graph()
     connections = state.get("mmpa_graph_connections", {})
     for node, neighbors in connections.items():
@@ -580,7 +567,6 @@ def build_mmpa_network_map(sender: Any, app_data: Any, user_data: Any) -> None:
     state["mmpa__graph"] = G
     state["mmpa__components"] = components
 
-    # --- STEP 1.3: Populate sidebar buttons ---
     _populate_group_buttons(state)
 
 
@@ -588,17 +574,6 @@ def build_mmpa_network_map(sender: Any, app_data: Any, user_data: Any) -> None:
 # 3. Render group callback
 # -----------------------------------------------------------------------------
 def _render_group_callback(sender: Any, app_data: Any, user_data: Any) -> None:
-    """
-    Activity-cliff plot:.
-    
-    Args:
-        sender (Any): Parameter accepted by this routine.
-        app_data (Any): Parameter accepted by this routine.
-        user_data (Any): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     from app.gui.loading_win import set_loading_screen_progress
 
@@ -967,7 +942,6 @@ def _render_group_callback(sender: Any, app_data: Any, user_data: Any) -> None:
         dpg.delete_item("cover_layer")
 
 
-# --- STEP 3.1: Circular node painter (PIL) ---
 # -----------------------------------------------------------------------------
 # 4. Make circular node
 # -----------------------------------------------------------------------------
@@ -1041,18 +1015,6 @@ def _separate_overlaps(
     iterations: int = 25,
     step: float = 0.5
 ) -> None:
-    """
-    Push apart point pairs that are closer than 'min_dist'.
-    
-    Args:
-        points_dict (Any): Parameter accepted by this routine.
-        min_dist (Any): Parameter accepted by this routine.
-        iterations (Any): Parameter accepted by this routine. Defaults to the configured value.
-        step (Any): Parameter accepted by this routine. Defaults to the configured value.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     import math
     keys = list(points_dict.keys())
     for _ in range(iterations):
@@ -1129,15 +1091,6 @@ def _separate_overlaps_elliptic(
 # 6. Clear previous rendering
 # -----------------------------------------------------------------------------
 def _clear_previous_rendering(state: dict[str, Any]) -> None:
-    """
-    Remove previous plot and textures to avoid leaks when switching groups.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     clear_mmpa_network_memory(state, clear_plot=True, clear_structure=False)
 
 
@@ -1351,16 +1304,6 @@ def _compute_mcs_for_mols(mols: list[Any]) -> Any:
 
 
 def _compute_mcs_for_component(component_nodes: Any, state: dict[str, Any]) -> Any:
-    """
-    Compute an MCS SMARTS for all molecules in a component (robust parameters).
-    
-    Args:
-        component_nodes (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     mols = []
     for mol_id in component_nodes:
         smi = state["mol_smiles_dict"].get(int(mol_id))
@@ -1427,16 +1370,6 @@ def _compute_component_rgd_highlights(component_nodes: Any, state: dict[str, Any
 # 8. Compute highlight sets
 # -----------------------------------------------------------------------------
 def _compute_highlight_sets(mol: Any, mcs_mol: Any) -> Any:
-    """
-    Return (mcs_atoms, mcs_bonds, variable_atoms, variable_bonds, link_bonds).
-    
-    Args:
-        mol (Chem.Mol): Parameter accepted by this routine.
-        mcs_mol (Any): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     if mcs_mol:
         match_atoms = mol.GetSubstructMatch(mcs_mol)
         mcs_atoms = list(match_atoms) if match_atoms else []
@@ -1497,15 +1430,6 @@ def _merge_highlight_sets_for_hovered(mol: Any, highlight_sets: list[Any]) -> An
 # 9. Populate group buttons
 # -----------------------------------------------------------------------------
 def _populate_group_buttons(state: dict[str, Any]) -> None:
-    """
-    Create one button per component, ordered by size (desc).
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     container = "mmpa_group_sidebar_window"
     if not dpg.does_item_exist(container):
         return
@@ -1560,16 +1484,6 @@ def _populate_group_buttons(state: dict[str, Any]) -> None:
 # 10. Read activity value
 # -----------------------------------------------------------------------------
 def _read_activity_value(state: dict[str, Any], mol_id: Any) -> Any:
-    """
-    Robust pValue reader for Y placement:.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-        mol_id (Any): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     import math
 
     # Prefer the authoritative DataFrame
@@ -1626,17 +1540,6 @@ def _ensure_ring_texture(
     ring_width_px: int = 6,
     color_rgba: tuple[int, int, int, int] = (255, 220, 80, 128),
 ) -> Any:
-    """
-    Creates (once) a transparent ring RGBA texture used to highlight nodes on hover.
-    
-    Args:
-        tag (str): Parameter accepted by this routine. Defaults to the configured value.
-        size_px (int): Parameter accepted by this routine. Defaults to the configured value.
-        ring_width_px (int): Parameter accepted by this routine. Defaults to the configured value.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     if dpg.does_item_exist(tag):
         return tag
 
@@ -1705,22 +1608,6 @@ def _setup_hover_interaction(
     node_lods_base: Any,
     node_lods_high: Any
 ) -> Any:
-    """
-    Hover robusto:.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-        axis_y_tag (Any): Parameter accepted by this routine.
-        positions (Any): Parameter accepted by this routine.
-        edges (Any): Parameter accepted by this routine.
-        node_radius_units (Any): Parameter accepted by this routine.
-        node_series_map (Any): Parameter accepted by this routine.
-        node_lods_base (Any): Parameter accepted by this routine.
-        node_lods_high (Any): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     from collections import defaultdict
 
     # derive the plot from the parent of the Y axis (more reliable than a fixed name)
@@ -1781,15 +1668,6 @@ def _setup_hover_interaction(
     # 12.1. Apply highlight for
     # -----------------------------------------------------------------------------
     def _apply_highlight_for(nodes_set: Any) -> None:
-        """
-        Execute the apply highlight for routine.
-        
-        Args:
-            nodes_set (Any): Parameter accepted by this routine.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         highlighted = set(nodes_set)
         state["mmpa__highlighted_nodes"] = highlighted
         for mid, series_id in (state.get("mmpa__lod_series", {}) or {}).items():
@@ -1809,15 +1687,6 @@ def _setup_hover_interaction(
     # 12.2. Safe is item hovered
     # -----------------------------------------------------------------------------
     def _safe_is_item_hovered(item: Any) -> Any:
-        """
-        Execute the safe is item hovered routine.
-        
-        Args:
-            item (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         if not item or not dpg.does_item_exist(item):
             return False
         try:
@@ -1829,15 +1698,6 @@ def _setup_hover_interaction(
     # 12.3. Safe get plot mouse pos
     # -----------------------------------------------------------------------------
     def _safe_get_plot_mouse_pos(p_tag: str) -> Any:
-        """
-        Execute the safe get plot mouse pos routine.
-        
-        Args:
-            p_tag (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         try:
             return dpg.get_plot_mouse_pos(p_tag)
         except TypeError:
@@ -1852,16 +1712,6 @@ def _setup_hover_interaction(
     # 12.4. On mouse move
     # -----------------------------------------------------------------------------
     def _on_mouse_move(sender: Any, app_data: Any) -> None:
-        """
-        Execute the on mouse move routine.
-        
-        Args:
-            sender (Any): Parameter accepted by this routine.
-            app_data (Any): Parameter accepted by this routine.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         p_tag = state.get("mmpa__hover_plot")
         y_axis = state.get("mmpa__hover_axis_y")
 
@@ -1966,15 +1816,6 @@ def _setup_hover_interaction(
 # 13. Clear hover overlay
 # -----------------------------------------------------------------------------
 def _clear_hover_overlay(state: dict[str, Any]) -> None:
-    """
-    Remove previous highlight items (lines/rings) added during hover.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     items = state.get("mmpa__hover_items", [])
     for it in items:
         if dpg.does_item_exist(it):
@@ -2036,16 +1877,6 @@ def _refresh_mmpa_edge_colors(state: dict[str, Any]) -> None:
 # 15. Get or make line theme
 # -----------------------------------------------------------------------------
 def _get_or_make_line_theme(color_rgba: Any = (255, 220, 80, 255), thickness: int = 1) -> Any:
-    """
-    Theme for highlighted lines (per-series).
-    
-    Args:
-        color_rgba (Any): Parameter accepted by this routine. Defaults to the configured value.
-        thickness (Any): Parameter accepted by this routine. Defaults to the configured value.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     tag = f"mmpa__line_theme_{color_rgba}_{thickness}"
     if dpg.does_item_exist(tag):
         return tag
@@ -2095,23 +1926,6 @@ def _build_node_lods(
     highlight_style: str = "hover",
     texture_render_specs: dict[str, Any] | None = None,
 ) -> Any:
-    """
-    Crea una texture dinamica singola per il nodo.
-    
-    Args:
-        mol (Chem.Mol): Parameter accepted by this routine.
-        label_str (Any): Parameter accepted by this routine.
-        rdw (Any): Parameter accepted by this routine.
-        rdh (Any): Parameter accepted by this routine.
-        legend_fs (Any): Parameter accepted by this routine.
-        bond_w (Any): Parameter accepted by this routine.
-        inner_margin_px (Any): Parameter accepted by this routine.
-        ss_factor (Any): Parameter accepted by this routine. Defaults to the configured value.
-        highlight (Any): Parameter accepted by this routine. Defaults to the configured value.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     lod = int(max(128, lod_size))
     detail_scale = float(_quantize_mmpa_detail_scale(
         texture_render_specs.get("__detail_scale__", MMPA_DETAIL_SCALE_DEFAULT)
@@ -2166,20 +1980,6 @@ def _setup_lod_autoswap(
     node_lods_high: Any,
     node_diameter_units: Any
 ) -> Any:
-    """
-    Calculate px-per-unit from axis limits and swap the texture to the best LOD.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-        axis_x_tag (Any): Parameter accepted by this routine.
-        node_series_map (Any): Parameter accepted by this routine.
-        node_lods_base (Any): Parameter accepted by this routine.
-        node_lods_high (Any): Parameter accepted by this routine.
-        node_diameter_units (Any): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     plot_tag = "mmpa_network_plot"
 
     state["mmpa__lod_series"] = node_series_map
@@ -2193,30 +1993,12 @@ def _setup_lod_autoswap(
     # 17.1. Choose lod
     # -----------------------------------------------------------------------------
     def choose_lod(px: Any) -> Any:
-        """
-        Execute the choose lod routine.
-        
-        Args:
-            px (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         return 1024
 
     # -----------------------------------------------------------------------------
     # 17.2. Maybe swap
     # -----------------------------------------------------------------------------
     def _maybe_swap() -> None:
-        """
-        Execute the maybe swap routine.
-        
-        Args:
-            None.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         try:
             x_min, x_max = dpg.get_axis_limits(axis_x_tag)
         except Exception:
@@ -2299,15 +2081,6 @@ def _setup_lod_autoswap(
 # 18. Mmpa lod maybe swap
 # -----------------------------------------------------------------------------
 def _mmpa_lod_maybe_swap(state: dict[str, Any]) -> None:
-    """
-    Utility to call swap from hover without duplicating logic.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     fn = state.get("_mmpa_lod_maybe_swap")
     if callable(fn):
         fn()

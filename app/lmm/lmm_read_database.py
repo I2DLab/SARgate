@@ -11,7 +11,6 @@ automatically generating a comprehensive dataset for analysis (in SDF format).
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Create sdf from chembl
@@ -48,15 +47,6 @@ from app.lmm.lmm_abort import confirm_cancellation
 # 2. Create sdf from chembl
 # -----------------------------------------------------------------------------
 def create_sdf_from_chembl(state: dict[str, Any]) -> None:
-    """
-    Download biological activity data from ChEMBL for the provided ChEMBL target.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     update_library_preparation_status("[CHEMBL] SEARCHING FOR BIOACTIVITY DATA", state, step_id=True)
     checkbox_states = state["checkbox_states"]
@@ -203,7 +193,7 @@ def create_sdf_from_chembl(state: dict[str, Any]) -> None:
 
         molecules.append(molecule_entry)
 
-    print(f"\nGot biological activitiy data for {len(molecules)} compound entries")
+    print(f"\nGot biological activity data for {len(molecules)} compound entries")
 
     # Build SDF path and stream all curated molecules to disk while updating UI.
     print("Writing molecules in SDF...")
@@ -285,30 +275,11 @@ def create_sdf_from_chembl(state: dict[str, Any]) -> None:
 # 3. Create sdf from pubchem
 # -----------------------------------------------------------------------------
 def create_sdf_from_pubchem(state: dict[str, Any]) -> Any:
-    """
-    Download biological assay data from PubChem for a target resolvable via.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
 
     # -----------------------------------------------------------------------------
     # 3.1. Explain exc
     # -----------------------------------------------------------------------------
     def _explain_exc(e: Any, ctx: Any) -> Any:
-        """
-        Execute the explain exc routine.
-        
-        Args:
-            e (Any): Parameter accepted by this routine.
-            ctx (str): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         if isinstance(e, requests.HTTPError):
             r = getattr(e, "response", None)
             code = getattr(r, "status_code", None)
@@ -348,18 +319,6 @@ def create_sdf_from_pubchem(state: dict[str, Any]) -> Any:
     # 3.2. Get
     # -----------------------------------------------------------------------------
     def _get(url: str, accept: Any = None, retry: int = 7, base_sleep: float = 1.0) -> Any:
-        """
-        Return the requested value.
-        
-        Args:
-            url (str): Parameter accepted by this routine.
-            accept (Any): Parameter accepted by this routine. Defaults to the configured value.
-            retry (Any): Parameter accepted by this routine. Defaults to the configured value.
-            base_sleep (Any): Parameter accepted by this routine. Defaults to the configured value.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         hdr = dict(H);  hdr["Accept"] = accept or H["Accept"]
         last = None
         for n in range(retry+1):
@@ -420,15 +379,6 @@ def create_sdf_from_pubchem(state: dict[str, Any]) -> Any:
     # 3.5. Chembl to uniprot
     # -----------------------------------------------------------------------------
     def chembl_to_uniprot(tid: Any) -> Any:
-        """
-        Execute the chembl to uniprot routine.
-        
-        Args:
-            tid (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         d = jget(URL_CHEMBL_TGT.format(tid=quote(tid)))
         if d.get("target_chembl_id","").upper()!=tid.upper():
             raise requests.HTTPError("ChEMBL ID mismatch")
@@ -443,15 +393,6 @@ def create_sdf_from_pubchem(state: dict[str, Any]) -> Any:
     # 3.6. Uniprot gene
     # -----------------------------------------------------------------------------
     def uniprot_gene(acc: Any) -> Any:
-        """
-        Execute the uniprot gene routine.
-        
-        Args:
-            acc (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         d = jget(URL_UNIPROT_JSON.format(acc=quote(acc)))
         sym=None
         try: sym=(d.get("genes",[{}])[0].get("geneName") or {}).get("value")
@@ -469,17 +410,6 @@ def create_sdf_from_pubchem(state: dict[str, Any]) -> Any:
     # 3.7. Concise for target
     # -----------------------------------------------------------------------------
     def concise_for_target(acc: Any, sym: Any = None, gid: Any = None) -> Any:
-        """
-        Execute the concise for target routine.
-        
-        Args:
-            acc (Any): Parameter accepted by this routine.
-            sym (Any): Parameter accepted by this routine. Defaults to the configured value.
-            gid (Any): Parameter accepted by this routine. Defaults to the configured value.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         for tag, url in [
             (f"accession {acc}", URL_TGT_ACC_CSV.format(acc=quote(acc))),
             (f"genesymbol {sym}", URL_TGT_SYM_CSV.format(sym=quote(sym))) if sym else (None,None),
@@ -492,7 +422,7 @@ def create_sdf_from_pubchem(state: dict[str, Any]) -> Any:
                 txt = tget(url)
                 lines = txt.splitlines()
                 if len(lines)>=2 and ("," in lines[0] or "\t" in lines[0]):
-                    print(f"  -> {len(lines)-1} righe")
+                    print(f"  -> {len(lines)-1} rows")
                     return txt
                 print("  -> empty/unexpected")
             except Exception as e:
@@ -504,31 +434,12 @@ def create_sdf_from_pubchem(state: dict[str, Any]) -> Any:
     # 3.8. Detect delim
     # -----------------------------------------------------------------------------
     def detect_delim(first_line: Any) -> Any:
-        """
-        Detect delim.
-        
-        Args:
-            first_line (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         return "\t" if ("\t" in first_line and first_line.count("\t")>=first_line.count(",")) else ","
 
     # -----------------------------------------------------------------------------
     # 3.9. Find col
     # -----------------------------------------------------------------------------
     def find_col(headers: Any, candidates: Any) -> Any:
-        """
-        Find col.
-        
-        Args:
-            headers (Any): Parameter accepted by this routine.
-            candidates (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         for c in candidates:
             if c in headers: return c
         norm = {h: re.sub(r"[_\s]+"," ",h).strip().lower() for h in headers}
@@ -543,15 +454,6 @@ def create_sdf_from_pubchem(state: dict[str, Any]) -> Any:
     # 3.10. Strings from value
     # -----------------------------------------------------------------------------
     def _strings_from_value(valobj: Any) -> Any:
-        """
-        Execute the strings from value routine.
-        
-        Args:
-            valobj (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         if not isinstance(valobj, dict): return []
         out = []
         if "StringWithMarkup" in valobj:
@@ -569,16 +471,6 @@ def create_sdf_from_pubchem(state: dict[str, Any]) -> Any:
     # 3.11. Walk sections
     # -----------------------------------------------------------------------------
     def _walk_sections(sections: Any, want: Any) -> Any:
-        """
-        Execute the walk sections routine.
-        
-        Args:
-            sections (Any): Parameter accepted by this routine.
-            want (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         found = {k: [] for k in want}
         if not isinstance(sections, list): return found
         for sec in sections:
@@ -598,15 +490,6 @@ def create_sdf_from_pubchem(state: dict[str, Any]) -> Any:
     # 3.12. Fetch compound fields via pugview
     # -----------------------------------------------------------------------------
     def fetch_compound_fields_via_pugview(cid: Any) -> Any:
-        """
-        Execute the fetch compound fields via pugview routine.
-        
-        Args:
-            cid (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         d = jget(URL_PUGVIEW_COMPOUND.format(cid=quote(str(cid))))
         rec = d.get("Record") or {}
         title = rec.get("RecordTitle","") or ""
@@ -621,15 +504,6 @@ def create_sdf_from_pubchem(state: dict[str, Any]) -> Any:
     # 3.13. Get props for cid
     # -----------------------------------------------------------------------------
     def get_props_for_cid(cid: Any) -> Any:
-        """
-        Return props for cid.
-        
-        Args:
-            cid (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         key = str(cid)
         if key in _PROP_CACHE:
             return _PROP_CACHE[key]
@@ -644,16 +518,6 @@ def create_sdf_from_pubchem(state: dict[str, Any]) -> Any:
     # 3.14. Pick
     # -----------------------------------------------------------------------------
     def pick(row: Any, names: str) -> Any:
-        """
-        Execute the pick routine.
-        
-        Args:
-            row (Any): Parameter accepted by this routine.
-            names (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         for n in names:
             if n in row and row[n] not in (None,""):
                 return str(row[n])
@@ -663,15 +527,6 @@ def create_sdf_from_pubchem(state: dict[str, Any]) -> Any:
     # 3.15. Extract units from header generic
     # -----------------------------------------------------------------------------
     def extract_units_from_header_generic(header: Any) -> Any:
-        """
-        Execute the extract units from header generic routine.
-        
-        Args:
-            header (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         if not header: return ""
         m = re.search(r"\[([^\]]+)\]", header)
         if m: return m.group(1).strip()
@@ -683,15 +538,6 @@ def create_sdf_from_pubchem(state: dict[str, Any]) -> Any:
     # 3.16. Find activity value col
     # -----------------------------------------------------------------------------
     def find_activity_value_col(headers: Any) -> Any:
-        """
-        Find activity value col.
-        
-        Args:
-            headers (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         for cand in ["Activity_Value","Activity Value","Result Value","Value","Readout Value"]:
             c = find_col(headers, [cand])
             if c: return c, extract_units_from_header_generic(c)
@@ -705,16 +551,6 @@ def create_sdf_from_pubchem(state: dict[str, Any]) -> Any:
     # -----------------------------------------------------------------------------
     def choose_primary_activity(row: Any, headers: Any) -> Any:
         # Pick the primary activity fields from the concise table (fallback to specific measures).
-        """
-        Execute the choose primary activity routine.
-        
-        Args:
-            row (Any): Parameter accepted by this routine.
-            headers (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         type_col = find_col(headers, ["Activity Name","Activity_Type","Activity Type","Result Type","Measurement Type"])
         rel_col  = find_col(headers, ["Activity Relation","Activity_Qualifier","Activity Qualifier","Qualifier","Relation","Value Relation","Result Qualifier"])
         value_col, units_from_header = find_activity_value_col(headers)
@@ -756,16 +592,6 @@ def create_sdf_from_pubchem(state: dict[str, Any]) -> Any:
     # -----------------------------------------------------------------------------
     def fetch_activity_from_aid(aid: Any, cid: Any) -> Any:
         # Retrieve per-AID activity details for a compound (CID) and parse primary fields.
-        """
-        Execute the fetch activity from aid routine.
-        
-        Args:
-            aid (Any): Parameter accepted by this routine.
-            cid (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         try:
             if aid in _AID_CACHE:
                 rdr = _AID_CACHE[aid]
@@ -830,7 +656,7 @@ def create_sdf_from_pubchem(state: dict[str, Any]) -> Any:
         return
 
     if not csv_text:
-        # Distinzione: target valido ma nessuna riga utile dai concise
+        # Valid target, but no usable concise table rows.
         msg = "   No concise results for this target. Either no assays " \
               "   are indexed or the server returned empty data." \
               "   Analysis aborted"
@@ -876,15 +702,6 @@ def create_sdf_from_pubchem(state: dict[str, Any]) -> Any:
 
         # Choose a readable record name: empty if Title equals IUPAC, otherwise Title.
         def _norm(s: Any) -> Any:
-            """
-            Execute the norm routine.
-            
-            Args:
-                s (Any): Input accepted by this routine.
-            
-            Returns:
-                Any: Value returned by the routine.
-            """
             return re.sub(r"[^a-z0-9]+","", (s or "").lower())
         molecule_name = "" if (_norm(iupac) and _norm(iupac)==_norm(title)) else title
 
@@ -999,15 +816,6 @@ def create_sdf_from_pubchem(state: dict[str, Any]) -> Any:
 # 4. Merge fetched sdfs
 # -----------------------------------------------------------------------------
 def merge_fetched_sdfs(state: dict[str, Any]) -> Any:
-    """
-    Merge SDF files from ChEMBL and PubChem when both exist and are valid.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
 
     update_library_preparation_status("[MERGE] MERGING ChEMBL + PubChem SDF", state, step_id=True)
     input_dir  = state["input_dir"]
@@ -1027,15 +835,6 @@ def merge_fetched_sdfs(state: dict[str, Any]) -> Any:
     # 4.1. Load valid
     # -----------------------------------------------------------------------------
     def _load_valid(path: str) -> Any:
-        """
-        Load valid.
-        
-        Args:
-            path (str): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         if not os.path.isfile(path):
             return [], 0
         suppl = Chem.SDMolSupplier(path)

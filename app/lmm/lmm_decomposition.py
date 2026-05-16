@@ -11,7 +11,6 @@ structures, enabling downstream frequency and SAR analyses.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. R groups decomposition
@@ -67,15 +66,6 @@ def _build_rgd_parameters(num_mols: int) -> Any:
 # 2. R groups decomposition
 # -----------------------------------------------------------------------------
 def r_groups_decomposition(state: dict[str, Any]) -> Any:
-    """
-    Perform R-groups decomposition on all valid molecular subsets and generate reports.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
 
     scaffold_dict = state["scaffold_dict"] 
     total_subsets = state["scaffold_id"]                    

@@ -11,7 +11,6 @@ table used by the MMPA visualisation modules.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Run mmpa analysis
@@ -34,15 +33,6 @@ from app.analysis.mmpa.mmpa_table import draw_mmpa_table
 # 2. Run mmpa analysis
 # -----------------------------------------------------------------------------
 def run_mmpa_analysis(state: dict[str, Any]) -> Any:
-    """
-    Executes the Matched Molecular Pairs Analysis (MMPA) based on the selected subset and activity.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     log_event("MMPA", "Running matched molecular pairs analysis", indent=1)
     # Show light loading overlay
     draw_loading_screen(state, bg=False)
@@ -210,15 +200,6 @@ def run_mmpa_analysis(state: dict[str, Any]) -> Any:
 
                     # Define a function to count dummy atoms
                     def count_dummies(smi: Any) -> Any:
-                        """
-                        Execute the count dummies routine.
-                        
-                        Args:
-                            smi (Any): Input accepted by this routine.
-                        
-                        Returns:
-                            Any: Value returned by the routine.
-                        """
                         return smi.count("[*:") >= 2
 
                     # Apply check to both fragments

@@ -11,7 +11,6 @@ in quantitative SAR analysis.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Draw counts boxplot
@@ -195,17 +194,6 @@ def draw_counts_boxplot(
     # 2.1. Ensure group image texture
     # -----------------------------------------------------------------------------
     def _ensure_group_image_texture(tex_tag: str, smiles: str, px_size: int = 128) -> None:
-        """
-        Create or update a DPG dynamic texture with the 2D drawing of the fragment 'smiles'.
-        
-        Args:
-            tex_tag (Any): Parameter accepted by this routine.
-            smiles (str): Parameter accepted by this routine.
-            px_size (Any): Parameter accepted by this routine. Defaults to the configured value.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         mol = None
         if smiles:
             mol = Chem.MolFromSmiles(smiles, sanitize=False)
@@ -246,7 +234,6 @@ def draw_counts_boxplot(
 
     # Prepare a clean list of (R-group, numeric activity) pairs honouring undefined/inactive settings.
 
-    # --- STEP 1.1: Extract and filter valid numerical values ---
     # Parse qualifiers (<=, >=, <, >) and read numeric parts; control inclusion via 'read_undefined' and 'read_inactives'.
     valid_rows = []
     for _, row in data.iterrows():
@@ -271,11 +258,9 @@ def draw_counts_boxplot(
                 valid_rows.append((row[r], num_val))
             # Otherwise, silently skip the row.
             
-    # --- STEP 1.2: Create DataFrame from valid entries ---
     # Build a compact DataFrame with just the R-group and activity columns for plotting.
     df = pd.DataFrame(valid_rows, columns=[r, activity])
 
-    # --- STEP 1.3: Convert to pActivity if applicable ---
     # Convert nM activities to the pX scale: pX = -log10(X [M]).
     if activity in state["nM_activity_types"]:
         df[activity] = -np.log10(df[activity] * 1e-9)
@@ -284,7 +269,6 @@ def draw_counts_boxplot(
         activity_label = activity
 
 
-    # --- STEP 1.4: Filter and sort groups by mean activity / frequency + min_count ---
     # Filter out groups with no actives and those below 'min_count', then sort by mean activity or frequency.
     valid_groups = df.groupby(r).filter(lambda g: (g[activity] > 0).any())
     group_counts = valid_groups.groupby(r)[activity].count()
@@ -341,7 +325,6 @@ def draw_counts_boxplot(
 
     # Build the container window and the horizontal layout with the plot on the left and details on the right.
 
-    # --- STEP 2.1: Horizontal group with plot and detail panel ---
     with dpg.child_window(parent="counts_boxplot_window", 
                           no_scrollbar=False, horizontal_scrollbar=False, no_scroll_with_mouse=True, border=False,
                           width=-1, height=-1):
@@ -355,7 +338,6 @@ def draw_counts_boxplot(
                         no_menus=True, no_mouse_pos=False, zoom_rate=0.05, crosshairs=True):
 
 
-            # --- STEP 3.1: Define axes ---
             # Build X as nominal positions 1..N and Y as the activity axis (lock min at 0 for inactives).
             lock_min = True if read_inactives else False
             dpg.add_plot_axis(dpg.mvXAxis, label=r, tag="counts_boxplot_x_axis",
@@ -460,7 +442,6 @@ def draw_counts_boxplot(
 
             box_fill_tags = []
 
-            # --- STEP 3.4: Draw individual boxplots ---
             # Compute quartiles/whiskers and render scatter points and box glyphs for each group.
             for i, g in enumerate(groups):
                 group_data = df[df[r] == g][activity].values
@@ -534,7 +515,6 @@ def draw_counts_boxplot(
                 
                 line_color = (55, 55, 55, 255)
 
-                # --- STEP 3.5: Draw box elements ---
                 # Render the filled rectangle (Q1–Q3), the median line, whiskers and end caps.
                 box_width = 0.2
                 cap_width = 0.2
@@ -664,19 +644,6 @@ def draw_counts_boxplot(
                 return float(plot_width), float(plot_height)
 
             def _aspect_height_4_3(width_x_data: Any, x0: Any, x1: Any, y0: Any, y1: Any) -> Any:
-                """
-                Execute the aspect height 4 3 routine.
-                
-                Args:
-                    width_x_data (Any): Input accepted by this routine.
-                    x0 (Any): Input accepted by this routine.
-                    x1 (Any): Input accepted by this routine.
-                    y0 (Any): Input accepted by this routine.
-                    y1 (Any): Input accepted by this routine.
-                
-                Returns:
-                    Any: Value returned by the routine.
-                """
                 x_span = max(1e-12, (x1 - x0))
                 y_span = max(1e-12, (y1 - y0))
                 current_plot_width, current_plot_height = _current_plot_pixel_size()
@@ -689,17 +656,6 @@ def draw_counts_boxplot(
                 )
 
             def _width_x_to_pixels(width_x_data: float, x0: float, x1: float) -> int:
-                """
-                Execute the width x to pixels routine.
-                
-                Args:
-                    width_x_data (float): Input accepted by this routine.
-                    x0 (float): Input accepted by this routine.
-                    x1 (float): Input accepted by this routine.
-                
-                Returns:
-                    int: Value returned by the routine.
-                """
                 x_span = max(1e-12, (x1 - x0))
                 current_plot_width, _ = _current_plot_pixel_size()
                 return int(round((width_x_data / x_span) * current_plot_width))
@@ -781,15 +737,6 @@ def draw_counts_boxplot(
                     width_px = _width_x_to_pixels(side_x, final_x0, final_x1)
 
                     def _px_bounds_for_num_groups(n: int) -> Any:
-                        """
-                        Execute the px bounds for num groups routine.
-                        
-                        Args:
-                            n (int): Input accepted by this routine.
-                        
-                        Returns:
-                            Any: Value returned by the routine.
-                        """
                         if n <= 8:    return (192, 384)
                         if n <= 20:   return (144, 256)
                         if n <= 40:   return (112, 192)
@@ -820,15 +767,6 @@ def draw_counts_boxplot(
             # --- Reflow on zoom/pan/double-click to maintain 4:3 aspect ratio in real time ---
 
             def _reflow_thumbnails() -> None:
-                """
-                Execute the reflow thumbnails routine.
-                
-                Args:
-                    None.
-                
-                Returns:
-                    None: This routine performs in-place updates or side effects only.
-                """
                 if state["current_r_analysis_subtab"] != "r_analysis_counts_subtab":
                     return
 

@@ -13,7 +13,6 @@ which handles the splash screen in a separate startup path.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Define module configuration and shared state
@@ -111,7 +110,6 @@ def _config_file_path(filename: str) -> str:
     return str(runtime_path)
 
 
-# --- STEP 2.1: Load persistent settings ---
 SETTINGS_FILE = _config_file_path("settings.ssf")
 THEMES_FILE = _config_file_path("themes.stf")
 COLORMAPS_FILE = _config_file_path("colormaps.scf")
@@ -159,7 +157,6 @@ settings["umap_mcs_features"] = _normalize_mcs_features_setting(settings.get("um
 settings["tsne_mcs_features"] = _normalize_mcs_features_setting(settings.get("tsne_mcs_features", True))
 
 
-# --- STEP 2.2: Normalize user-defined paths ---
 settings["input_directory"] = os.path.expanduser(settings.get("input_directory", "") or "")
 settings["results_directory"] = os.path.expanduser(settings.get("results_directory", "") or "")
 settings["predictions_directory"] = os.path.expanduser(settings.get("predictions_directory", "") or "")
@@ -224,14 +221,12 @@ COLORMAPS_STORE = LAYOUT["colormaps_store"]
 RECENT_FILES = load_recent_files(RECENT_FILES_FILE)
 
 
-# --- STEP 2.3: Persist normalized settings atomically ---
 try:
     persist_layout_settings(SETTINGS_FILE, settings)
 except Exception as e:
     print(f"Warning: could not update {SETTINGS_FILE}: {e}")
 
 
-# --- STEP 2.4: Cache frequently used settings fields ---
 font = settings["font"]
 font_scale = settings["font_scale"]
 colormap_continuous = LAYOUT["colormap_continuous"]
@@ -242,7 +237,6 @@ theme_name = LAYOUT["theme_name"]
 theme = LAYOUT["theme"]
 
 
-# --- STEP 2.6: Define default checkbox state ---
 checkbox_states = {
     "Input source": "Local",
     "Database to search": "ChEMBL",
@@ -276,7 +270,6 @@ checkbox_states = {
 }
 
 
-# --- STEP 2.7: Build the shared application state ---
 MANUAL_SECTIONS = {
     "input_tab": "4_input-files-and-settings.html",
     "analysis_tab": "5_analysis-workflow.html",
@@ -483,16 +476,13 @@ def _build_state_backup(source_state: dict[str, Any]) -> dict[str, Any]:
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":
 
-    # --- STEP 4.1: Create the Dear PyGui context ---
     _startup_trace("creating Dear PyGui context")
     dpg.create_context()
 
 
-    # --- STEP 4.2: Register application colormaps ---
     _startup_trace("registering startup colormaps")
     register_startup_colormaps(state)
 
-    # --- STEP 4.3: Create registries and global handlers ---
     _startup_trace("creating texture and handler registries")
     with dpg.texture_registry(tag="texture_registry"):
         pass
@@ -514,7 +504,6 @@ if __name__ == "__main__":
         dpg.add_mouse_wheel_handler(callback=_refresh_responsive_images_after_layout_input)
 
 
-    # --- STEP 4.4: Register fonts and apply the default typography ---
     _startup_trace("registering fonts")
     FONTS = {
         "Arial": ["assets/fonts/Arial.ttf", "assets/fonts/Arial-Bold.ttf"],
@@ -542,33 +531,27 @@ if __name__ == "__main__":
     dpg.set_global_font_scale(font_scale)
  
 
-    # --- STEP 4.5: Capture screen metrics ---
     _startup_trace("capturing screen metrics")
     get_screen_size(state)
 
 
-    # --- STEP 4.6: Create and stabilize the viewport ---
     _startup_trace("creating viewport")
     setup_viewport(state, HOME_DIR, title="SARgate | Chemical Space & SAR Analysis")
 
 
-    # --- STEP 4.7: Create the main application window ---
     _startup_trace("creating main window")
     setup_main_window(state)
 
 
-    # --- STEP 4.8: Compute responsive widget sizing ---
     _startup_trace("computing widget sizes")
     setup_widgets_size(state)
 
 
-    # --- STEP 4.9: Build the GUI hierarchy ---
     _startup_trace("building GUI hierarchy")
     initialize_gui(state)
     ensure_event_log_window(state)
 
 
-    # --- STEP 4.10: Start the responsive image layout watcher ---
     def start_responsive_image_poller(state: dict[str, Any]) -> None:
         """
         Schedule a lightweight polling loop for responsive image layout changes.
@@ -600,29 +583,24 @@ if __name__ == "__main__":
     start_responsive_image_poller(state)
 
 
-    # --- STEP 4.11: Apply the active theme ---
     _startup_trace("applying theme")
     apply_theme_callback("change_theme", theme_name, state)
 
 
-    # --- STEP 4.12: Prepare the custom style editor ---
     _startup_trace("preparing style editor")
     state["state_backup"] = _build_state_backup(state)
     custom_style_editor(state)
     dpg.hide_item("custom_style_editor")
 
 
-    # --- STEP 4.13: Register keyboard navigation handlers ---
     _startup_trace("registering keyboard handlers")
     setup_key_handlers(state)
 
 
-    # --- STEP 4.14: Notify the launcher that the main interface is ready ---
     _startup_trace("signaling launcher readiness")
     _signal_launcher_ready()
 
 
-    # --- STEP 4.15: Start the Dear PyGui event loop ---
     _startup_trace("starting Dear PyGui event loop")
     dpg.start_dearpygui()
     restore_event_log_capture(state)

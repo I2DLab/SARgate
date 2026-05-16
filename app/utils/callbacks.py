@@ -11,7 +11,6 @@ user interaction and consistent state synchronisation throughout the interface.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Update checkbox state
@@ -60,17 +59,6 @@ from app.analysis.mmpa.mmpa_network import clear_mmpa_network_memory
 # 2. Update checkbox state
 # -----------------------------------------------------------------------------
 def update_checkbox_state(sender: Any, app_data: Any, user_data: Any) -> Any:
-    """
-    Update the application state dictionary when a checkbox is toggled.
-    
-    Args:
-        sender (Any): Parameter accepted by this routine.
-        app_data (Any): Parameter accepted by this routine.
-        user_data (Any): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
 
     # -----------------------------------------------------------------------------
     # 2.1. Validate job name
@@ -117,39 +105,16 @@ def update_checkbox_state(sender: Any, app_data: Any, user_data: Any) -> Any:
 
     state["checkbox_states"][checkbox_key] = value
 
-    # Keep a compact echo of UI interactions for debugging runs.
-    print(f"{checkbox_key} is now {app_data}")
-
 
 # -----------------------------------------------------------------------------
 # 3. On button click
 # -----------------------------------------------------------------------------
 def on_button_click(button_tag: str, state: dict[str, Any]) -> None:
-    """
-    Handle button highlighting for the last clicked button in each overview subsection.
-    
-    Args:
-        button_tag (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     # -----------------------------------------------------------------------------
     # 3.1. Change button color
     # -----------------------------------------------------------------------------
     def change_button_color(button_tag: str, last_clicked_button: Any) -> None:
-        """
-        Update the visual theme of a button to reflect its selection state.
-        
-        Args:
-            button_tag (Any): Parameter accepted by this routine.
-            last_clicked_button (Any): Parameter accepted by this routine.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         if last_clicked_button and dpg.does_item_exist(last_clicked_button):
             dpg.bind_item_theme(last_clicked_button, "overview_choice_button_theme")
 
@@ -190,15 +155,6 @@ def on_button_click(button_tag: str, state: dict[str, Any]) -> None:
 # -----------------------------------------------------------------------------
 def open_manual(state: dict[str, Any]) -> None:
     
-    """
-    Open manual.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     manual_dir = os.path.join(state["Home_dir_path"], "assets", "manual")
 
     page = "1_introduction.html"
@@ -213,15 +169,6 @@ def open_manual(state: dict[str, Any]) -> None:
 # -----------------------------------------------------------------------------
 def open_contextual_help(state: dict[str, Any]) -> None:
     
-    """
-    Open contextual help.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     manual_dir = os.path.join(state["Home_dir_path"], "assets", "manual")
 
     page = state["manual_sections"].get(state.get("current_tab"), "1_introduction.html")
@@ -283,15 +230,6 @@ def activate_main_tab(selected_tab: str, state: dict[str, Any]) -> None:
 
 
 def change_tab(state: dict[str, Any]) -> None:
-    """
-    Switch the visible GUI elements based on the selected main tab.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     selected_value = dpg.get_value("tab_bar")
     selected_tab = dpg.get_item_alias(selected_value) if selected_value is not None else None
     locked_text_tabs = state.get("locked_text_tabs", set())
@@ -312,15 +250,6 @@ def change_tab(state: dict[str, Any]) -> None:
 # 7. Change chemspace subtab
 # -----------------------------------------------------------------------------
 def change_chemspace_subtab(state: dict[str, Any]) -> None:
-    """
-    Update the current chemical space subtab selection in the shared state.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     selected_chemspace_subtab = dpg.get_item_alias(dpg.get_value("chemspace_tab_bar"))
     state["current_chemspace_subtab"] = selected_chemspace_subtab
     request_responsive_image_update(state, frames=4)
@@ -330,15 +259,6 @@ def change_chemspace_subtab(state: dict[str, Any]) -> None:
 # 8. Change overview subtab
 # -----------------------------------------------------------------------------
 def change_overview_subtab(state: dict[str, Any]) -> None:
-    """
-    Update the current overview subtab selection in the shared state.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     selected_overview_subtab = dpg.get_item_alias(dpg.get_value("overview_tab_bar"))
     state["current_overview_subtab"] = selected_overview_subtab
     request_responsive_image_update(state, frames=4)
@@ -348,15 +268,6 @@ def change_overview_subtab(state: dict[str, Any]) -> None:
 # 9. Change similarity subtab
 # -----------------------------------------------------------------------------
 def change_similarity_subtab(state: dict[str, Any]) -> None:
-    """
-    Update the current similarity subtab selection in the shared state.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     selected_similarity_subtab = dpg.get_item_alias(dpg.get_value("similarity_tab_bar"))
     state["current_similarity_subtab"] = selected_similarity_subtab
     request_responsive_image_update(state, frames=4)
@@ -366,15 +277,6 @@ def change_similarity_subtab(state: dict[str, Any]) -> None:
 # 10. Change r analysis subtab
 # -----------------------------------------------------------------------------
 def change_r_analysis_subtab(state: dict[str, Any]) -> None:
-    """
-    Update the current r_analysis subtab selection in the shared state.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     selected_r_analysis_subtab = dpg.get_item_alias(dpg.get_value("r_analysis_tab_bar"))
     state["current_r_analysis_subtab"] = selected_r_analysis_subtab
     request_responsive_image_update(state, frames=4)
@@ -384,15 +286,6 @@ def change_r_analysis_subtab(state: dict[str, Any]) -> None:
 # 11. Close current job
 # -----------------------------------------------------------------------------
 def close_current_job(state: dict[str, Any]) -> None:
-    """
-    Close all windows and handlers from the current job and reset.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     clear_mmpa_network_memory(state, clear_plot=True)
 
     # These are single-instance items shared across several windows.
@@ -592,15 +485,6 @@ def close_current_job(state: dict[str, Any]) -> None:
 # 12. Show library table confirm popup
 # -----------------------------------------------------------------------------
 def show_library_table_confirm_popup(state: dict[str, Any]) -> None:
-    """
-    Ask the user whether to build the library summary table, which can be slow.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     if dpg.does_item_exist("library_table_confirm_popup"):
         dpg.delete_item("library_table_confirm_popup")
 
@@ -633,15 +517,6 @@ def show_library_table_confirm_popup(state: dict[str, Any]) -> None:
 # 13. Confirm build library table
 # -----------------------------------------------------------------------------
 def confirm_build_library_table(state: dict[str, Any]) -> None:
-    """
-    User accepted: build the library table and show the window.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     if dpg.does_item_exist("library_table_confirm_popup"):
         dpg.delete_item("library_table_confirm_popup")
 
@@ -662,15 +537,6 @@ def confirm_build_library_table(state: dict[str, Any]) -> None:
 # 14. Skip build library table
 # -----------------------------------------------------------------------------
 def skip_build_library_table(state: dict[str, Any]) -> None:
-    """
-    User declined: do not build the table, just close the confirmation popup.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     if dpg.does_item_exist("library_table_confirm_popup"):
         dpg.delete_item("library_table_confirm_popup")
 
@@ -683,17 +549,6 @@ def skip_build_library_table(state: dict[str, Any]) -> None:
 # 15. Export png popup
 # -----------------------------------------------------------------------------
 def export_png_popup(tag: str, texture_id: str, state: dict[str, Any]) -> None:
-    """
-    Create a right-click popup menu attached to an image widget that allows exporting the.
-    
-    Args:
-        tag (str): Parameter accepted by this routine.
-        texture_id (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     # Provide a lightweight UI with filename input and an export action.
     with dpg.popup(
         tag,
@@ -724,17 +579,6 @@ def export_png_popup(tag: str, texture_id: str, state: dict[str, Any]) -> None:
 # 16. Export png callback
 # -----------------------------------------------------------------------------
 def export_png_callback(sender: Any, app_data: Any, user_data: Any) -> None:
-    """
-    Export a DearPyGui texture to a PNG image file at 300 DPI.
-    
-    Args:
-        sender (Any): Parameter accepted by this routine.
-        app_data (Any): Parameter accepted by this routine.
-        user_data (Any): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     texture_tag, input_tag, popup_tag, state = user_data
 
     # Read filename from the dedicated input field and ensure .png extension.
@@ -767,17 +611,6 @@ def export_png_callback(sender: Any, app_data: Any, user_data: Any) -> None:
 # 17. Export svg callback
 # -----------------------------------------------------------------------------
 def export_svg_callback(sender: Any, app_data: Any, user_data: Any) -> None:
-    """
-    Export a molecule (given as SMILES) to a true vector SVG file.
-    
-    Args:
-        sender (Any): Parameter accepted by this routine.
-        app_data (Any): Parameter accepted by this routine.
-        user_data (Any): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     # Validate SMILES and generate a 2D depiction for vector drawing.
     smiles_str, state, label_tag = user_data
     mol = Chem.MolFromSmiles(smiles_str)
@@ -1144,16 +977,6 @@ def register_plot_context_popup(
 # 19. Append to log
 # -----------------------------------------------------------------------------
 def append_to_log(state: dict[str, Any], message: str) -> None:
-    """
-    Append a message to the log.txt file located in the report directory,.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-        message (Any): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     def _emit_lmm_line(line: str) -> None:
         if line.strip():
             print(f"[LMM] {line}")
@@ -1294,15 +1117,6 @@ def color_string_to_rgb255(color_value: Any, fallback: tuple[int, int, int] = (8
 # 21. Toggle fullscreen with check
 # -----------------------------------------------------------------------------
 def toggle_fullscreen_with_check(state: dict[str, Any]) -> None:
-    """
-    Toggle the viewport fullscreen mode and keep the corresponding menu item.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     current = state.get("is_fullscreen", False)
     state["is_fullscreen"] = not current
 
@@ -1325,21 +1139,6 @@ def register_responsive_image(
     default_pop_h: Any = None,
     tab: Any = None
 ) -> None:
-    """
-    Register an image to auto-resize based on its parent visible width.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-        image_tag (Any): Parameter accepted by this routine.
-        parent_tag (Any): Parameter accepted by this routine.
-        aspect_ratio (Any): Parameter accepted by this routine. Defaults to the configured value.
-        parent_of_parent (Any): Parameter accepted by this routine. Defaults to the configured value.
-        default_pop_h (Any): Parameter accepted by this routine. Defaults to the configured value.
-        tab (Any): Parameter accepted by this routine. Defaults to the configured value.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     state.setdefault("responsive_images", {})
     state["responsive_images"][image_tag] = {
         "parent": parent_tag,
@@ -1597,15 +1396,6 @@ def poll_responsive_image_layout_changes(state: dict[str, Any]) -> None:
 
 
 def update_responsive_images(state: dict[str, Any]) -> None:
-    """
-    Recompute sizes for all registered responsive images.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     if callable(state.get("refresh_top_nav_layout")):
         try:
             state["refresh_top_nav_layout"]()

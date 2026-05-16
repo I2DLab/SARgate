@@ -12,7 +12,6 @@ on macOS while preserving file-type filters and the standard system dialog UI.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Build command helpers
@@ -199,16 +198,6 @@ def save_file_dialog(
 # 5. Execute the tkinter helper entry point
 # -----------------------------------------------------------------------------
 def _run_tk_helper_main(payload: dict[str, Any]) -> int:
-    """
-    Execute the isolated tkinter helper process for native dialogs.
-
-    Args:
-        payload (dict[str, Any]): Serialized dialog configuration received from
-            the parent process.
-
-    Returns:
-        int: Process exit code.
-    """
     import tkinter as tk
     from tkinter import filedialog
 
@@ -296,7 +285,8 @@ def _run_tk_helper_main(payload: dict[str, Any]) -> int:
 
     root.destroy()
     if selected:
-        print(selected)
+        sys.stdout.write(str(selected))
+        sys.stdout.flush()
     return 0
 
 

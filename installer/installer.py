@@ -12,16 +12,6 @@ Plotly, SciPy, scikit-learn, and ReportLab, producing a portable
 `SARgate` bundle (app folder or executable) for macOS, Windows, and Linux.
 """
 
-# --- STEP MAP ---
-# STEP 1: Compute platform-specific path separator
-# STEP 2: Invoke PyInstaller with build options
-#   2.1: Basic spec (entry, name, GUI flags, mode, icon)
-#   2.2: Bundle assets (portable separator)
-#   2.3: Include code modules
-#   2.4: Collect data/submodules for capricious libraries
-
-
-# === IMPORTS ===
 import os
 import platform
 import json
@@ -29,6 +19,7 @@ import re
 import shutil
 import subprocess
 import sys
+import zipfile
 from datetime import datetime
 from pathlib import Path
 import PyInstaller.__main__
@@ -137,6 +128,20 @@ def _write_default_settings() -> None:
     tmp_path.replace(settings_path)
 
 
+def _write_default_recent_files() -> None:
+    """
+    Regenerate assets/config/recent_files.srf with an empty recent-files list.
+    """
+    recent_files_path = PROJECT_ROOT_PATH / "assets" / "config" / "recent_files.srf"
+    print(f"Resetting: {recent_files_path.relative_to(PROJECT_ROOT_PATH)}")
+    recent_files_path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = recent_files_path.with_suffix(f"{recent_files_path.suffix}.tmp")
+    with open(tmp_path, "w", encoding="utf-8") as f:
+        json.dump({"paths": []}, f, indent=4, ensure_ascii=False)
+        f.write("\n")
+    tmp_path.replace(recent_files_path)
+
+
 def _run_pre_build_cleanup() -> None:
     """
     Clean local generated files and reset user-dependent settings before build.
@@ -150,6 +155,7 @@ def _run_pre_build_cleanup() -> None:
             if path.exists():
                 _delete_cleanup_path(path)
     _write_default_settings()
+    _write_default_recent_files()
     print("Cleanup complete.")
 
 
@@ -206,6 +212,30 @@ def _build_output_path(dist_dir: str) -> str:
     raise FileNotFoundError(f"Could not find SARgate build output in {dist_dir}")
 
 
+def _clean_zip_metadata(archive_path: str) -> None:
+    """
+    Remove macOS metadata entries from the release zip archive.
+    """
+    source_path = Path(archive_path)
+    tmp_path = source_path.with_suffix(f"{source_path.suffix}.tmp")
+
+    with zipfile.ZipFile(source_path, "r") as source_zip:
+        entries = source_zip.infolist()
+        with zipfile.ZipFile(tmp_path, "w", compression=zipfile.ZIP_DEFLATED) as clean_zip:
+            for info in entries:
+                normalized_name = info.filename.replace("\\", "/")
+                parts = normalized_name.split("/")
+                if (
+                    "__MACOSX" in parts
+                    or any(part == ".DS_Store" for part in parts)
+                    or any(part.startswith("._") for part in parts)
+                ):
+                    continue
+                clean_zip.writestr(info, source_zip.read(info.filename))
+
+    tmp_path.replace(source_path)
+
+
 def _create_release_archive(dist_dir: str) -> str:
     """
     Create the redistributable zip archive for the current platform.
@@ -233,6 +263,7 @@ def _create_release_archive(dist_dir: str) -> str:
             base_dir=base_name,
         )
 
+    _clean_zip_metadata(archive_path)
     return archive_path
 
 
@@ -264,12 +295,10 @@ def _resolve_build_paths() -> tuple[str, str]:
         return fallback_dist, fallback_work
 
 
-# === STEP 1: Compute platform-specific path separator ===
 sep = os.pathsep  # ':' on mac/Linux, ';' on Windows
 dist_path, work_path = _resolve_build_paths()
 
 
-# === STEP 2: Invoke PyInstaller with the maintained spec file ===
 pyinstaller_args = [
     os.path.join(PROJECT_ROOT, "installer", "SARgate.spec"),
     "--noconfirm",

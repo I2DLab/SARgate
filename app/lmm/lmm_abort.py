@@ -11,7 +11,6 @@ without leaving temporary files or inconsistent results.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Confirm cancellation
@@ -27,15 +26,6 @@ from typing import Any
 # 2. Confirm cancellation
 # -----------------------------------------------------------------------------
 def confirm_cancellation(state: dict[str, Any]) -> None:
-    """
-    Confirm the cancellation of the analysis and perform clean-up operations.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     print("Analysis aborted.")
     state["abort_analysis"] = True                     # Signal downstream steps to halt

@@ -11,7 +11,6 @@ to the user without interrupting the computation workflow.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Update execution time
@@ -38,15 +37,6 @@ from app.gui.themes_manager import (
 # 2. Update execution time
 # -----------------------------------------------------------------------------
 def update_execution_time(state: dict[str, Any]) -> None:
-    """
-    Update the execution time every second and display it in the timer window.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     # Compute elapsed time from state['start_time'] and refresh the on-screen value.
     while state["timer_running"]:
@@ -67,19 +57,6 @@ def update_library_preparation_status(
     step_id: bool = False,
     temp: bool = False
 ) -> None:
-    """
-    Update the 'Library Preparation' window with a new message and mirror the same.
-    
-    Args:
-        message (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-        separator (Any): Parameter accepted by this routine. Defaults to the configured value.
-        step_id (Any): Parameter accepted by this routine. Defaults to the configured value.
-        temp (Any): Parameter accepted by this routine. Defaults to the configured value.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     
     STEP_prep = state["STEP_prep"]
     
@@ -120,19 +97,6 @@ def update_scaffold_analysis_status(
     step_id: bool = False,
     temp: bool = False
 ) -> None:
-    """
-    Update the 'Scaffold Analysis' window and mirror into state['scaff_log'].
-    
-    Args:
-        message (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-        separator (Any): Parameter accepted by this routine. Defaults to the configured value.
-        step_id (Any): Parameter accepted by this routine. Defaults to the configured value.
-        temp (Any): Parameter accepted by this routine. Defaults to the configured value.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     STEP_scaff = state["STEP_scaff"]
 
@@ -173,19 +137,6 @@ def update_rga_status(
     step_id: bool = False,
     temp: bool = False
 ) -> None:
-    """
-    Update the R-Groups Decomposition window with a new message.
-    
-    Args:
-        message (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-        separator (Any): Parameter accepted by this routine. Defaults to the configured value.
-        step_id (Any): Parameter accepted by this routine. Defaults to the configured value.
-        temp (Any): Parameter accepted by this routine. Defaults to the configured value.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     STEP_rga = state["STEP_rga"]
 
@@ -220,17 +171,6 @@ def update_rga_status(
 # 6. Show pie chart
 # -----------------------------------------------------------------------------
 def show_pie_chart(sorted_list: Any, sender_name: str, state: dict[str, Any]) -> None:
-    """
-    Display a pie chart of activity types, targets or assays.
-    
-    Args:
-        sorted_list (Any): Parameter accepted by this routine.
-        sender_name (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     # Parse labels/counts, create a plot anchored to the preparation console, and add a normalised pie series.
     labels, values = zip(*sorted_list)

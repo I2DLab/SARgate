@@ -7,7 +7,6 @@ Molecule overview table for subset/activity selection and pagination.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Normalize to list
@@ -61,15 +60,6 @@ from app.gui.themes_manager import (
 # 2. Normalize to list
 # -----------------------------------------------------------------------------
 def _normalize_to_list(cell: Any) -> Any:
-    """
-    Execute the normalize to list routine.
-    
-    Args:
-        cell (Any): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     try:
         if cell != cell:
             return []
@@ -96,32 +86,12 @@ def _normalize_to_list(cell: Any) -> Any:
 # 3. Show overview table window
 # -----------------------------------------------------------------------------
 def show_overview_table_window(state: dict[str, Any]) -> None:
-    """
-    Display the overview table panel with subset, activity, pagination, and search bar.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     # Update activity options when subset changes and (re)build the overview table.
     # -----------------------------------------------------------------------------
     # 3.1. Update overview table options
     # -----------------------------------------------------------------------------
     def update_overview_table_options(sender: Any, app_data: Any, user_data: Any) -> None:
-        """
-        Update the activity type combo and rebuild the overview table when subset changes.
-        
-        Args:
-            sender (Any): Parameter accepted by this routine.
-            app_data (Any): Parameter accepted by this routine.
-            user_data (Any): Parameter accepted by this routine.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
 
         subset = app_data
         bioact_types_dict = user_data["bioact_types_dict"]
@@ -189,15 +159,6 @@ def show_overview_table_window(state: dict[str, Any]) -> None:
 # 4. Manage overview table
 # -----------------------------------------------------------------------------
 def manage_overview_table(state: dict[str, Any]) -> None:
-    """
-    Reset pagination and display the first page of the overview table.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     # Establish page size and start at page 1, then build the table.
     state["overview_table_page"] = 1
@@ -210,15 +171,6 @@ def manage_overview_table(state: dict[str, Any]) -> None:
 # 5. Show overview table
 # -----------------------------------------------------------------------------
 def show_overview_table(state: dict[str, Any]) -> None:
-    """
-    Build and display the overview table based on selected subset and activity.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     # Initialise view state, remove stale widgets, read summary CSV, and aggregate activities.
 
@@ -341,23 +293,6 @@ def build_overview_table(
     height: Any,
     pos: Any
 ) -> Any:
-    """
-    Build and display the molecule table with images, SMILES, names, and activity values.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-        columns (Any): Parameter accepted by this routine.
-        smiles_list (Any): Parameter accepted by this routine.
-        true_indices (Any): Parameter accepted by this routine.
-        df (pd.DataFrame): Parameter accepted by this routine.
-        img_width (Any): Parameter accepted by this routine.
-        width (int): Parameter accepted by this routine.
-        height (int): Parameter accepted by this routine.
-        pos (Any): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
 
     # Compute a 4:3 image height and declare a converter to normalised float32 RGBA arrays.
     tbl_img_width = img_width
@@ -386,17 +321,6 @@ def build_overview_table(
     # 6.2. Show mol in overview tab
     # -----------------------------------------------------------------------------
     def show_mol_in_overview_tab(sender: Any, app_data: Any, user_data: Any) -> None:
-        """
-        Callback to display a molecule in the overview tab when an image button is clicked.
-        
-        Args:
-            sender (Any): Parameter accepted by this routine.
-            app_data (Any): Parameter accepted by this routine.
-            user_data (Any): Parameter accepted by this routine.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         subset, mol = user_data
         dpg.set_value("tab_bar", "overview_tab")
         change_tab(state)
@@ -558,17 +482,6 @@ def build_overview_table(
 # 7. Prev overview page callback
 # -----------------------------------------------------------------------------
 def prev_overview_table_page_callback(sender: Any, app_data: Any, user_data: Any) -> None:
-    """
-    Callback for navigating to the previous page in the overview table.
-    
-    Args:
-        sender (Any): Parameter accepted by this routine.
-        app_data (Any): Parameter accepted by this routine.
-        user_data (Any): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     # Decrement page or wrap around to the last page, then rebuild the table.
     page = user_data["overview_table_page"]
@@ -588,17 +501,6 @@ def prev_overview_table_page_callback(sender: Any, app_data: Any, user_data: Any
 # 8. Next overview page callback
 # -----------------------------------------------------------------------------
 def next_overview_table_page_callback(sender: Any, app_data: Any, user_data: Any) -> None:
-    """
-    Callback for navigating to the next page in the overview table.
-    
-    Args:
-        sender (Any): Parameter accepted by this routine.
-        app_data (Any): Parameter accepted by this routine.
-        user_data (Any): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
             
     # Increment page or wrap back to the first page, then rebuild the table.
     page = user_data["overview_table_page"]
@@ -618,17 +520,6 @@ def next_overview_table_page_callback(sender: Any, app_data: Any, user_data: Any
 # 9. Jump to mol id callback
 # -----------------------------------------------------------------------------
 def jump_to_mol_id_callback(sender: Any, app_data: Any, state: dict[str, Any]) -> None:
-    """
-    Callback to jump directly to the page containing a molecule by its ID or name.
-    
-    Args:
-        sender (Any): Parameter accepted by this routine.
-        app_data (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     # Compute target page and rebuild the table; log if not found.
     query = str(app_data).strip()
@@ -642,8 +533,6 @@ def jump_to_mol_id_callback(sender: Any, app_data: Any, state: dict[str, Any]) -
             page = math.ceil(mol_id / max_per_page)
             state["overview_table_page"] = page
             show_overview_table(state)
-        else:
-            print(f"[Mol ID {mol_id}] not found")
         return
 
     if "MolName" in df.columns:
@@ -654,5 +543,3 @@ def jump_to_mol_id_callback(sender: Any, app_data: Any, state: dict[str, Any]) -
                 state["overview_table_page"] = page
                 show_overview_table(state)
                 return
-
-    print(f"[Mol Name '{query}'] not found")

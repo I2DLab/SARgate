@@ -9,7 +9,6 @@ Displays a Tanimoto similarity matrix with fingerprint maps.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Show tanimoto similarity manager window
@@ -40,15 +39,6 @@ from app.gui.themes_manager import (
 # 2. Show tanimoto similarity manager window
 # -----------------------------------------------------------------------------
 def show_tanimoto_similarity_manager_window(state: dict[str, Any]) -> None:
-    """
-    Display the similarity panel with subset and activity selection, pagination,.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     def _search_tanimoto_molecule(user_state: dict[str, Any]) -> None:
         """
@@ -139,15 +129,6 @@ def show_tanimoto_similarity_manager_window(state: dict[str, Any]) -> None:
 # 3. Show tanimoto similarity matrix
 # -----------------------------------------------------------------------------
 def show_tanimoto_similarity_matrix(state: dict[str, Any]) -> None:
-    """
-    Build and display the similarity matrix based on selected subset and activity.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     log_event("Similarity", "Drawing Tanimoto similarity matrix", indent=1)
     render_scale = 1.8
     render_w = int(round(state["similarity_tan_img_width"] * render_scale))
@@ -554,16 +535,6 @@ def show_tanimoto_similarity_matrix(state: dict[str, Any]) -> None:
     # 3.1. Update similarity images
     # -----------------------------------------------------------------------------
     def _update_similarity_images(row_index: int, col_index: int) -> None:
-        """
-        Update similarity images.
-        
-        Args:
-            row_index (int): Parameter accepted by this routine.
-            col_index (int): Parameter accepted by this routine.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         smi_x = all_smiles[col_index]
         smi_y = all_smiles[row_index]
         mol_x = Chem.MolFromSmiles(smi_x)
@@ -652,17 +623,6 @@ def show_tanimoto_similarity_matrix(state: dict[str, Any]) -> None:
     # 3.2. On heatmap click
     # -----------------------------------------------------------------------------
     def on_heatmap_click(sender: Any, app_data: Any, user_data: Any) -> None:
-        """
-        Execute the on heatmap click routine.
-        
-        Args:
-            sender (Any): Parameter accepted by this routine.
-            app_data (Any): Parameter accepted by this routine.
-            user_data (Any): Parameter accepted by this routine.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         if not dpg.is_item_hovered("tanimoto_matrix"):
             return
         mouse_pos = dpg.get_plot_mouse_pos()

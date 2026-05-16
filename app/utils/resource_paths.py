@@ -13,7 +13,6 @@ addressing common permission issues.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Candidate bases
@@ -38,15 +37,6 @@ from typing import Any
 # 2. Candidate bases
 # -----------------------------------------------------------------------------
 def _candidate_bases() -> Any:
-    """
-    Determine possible base directories where bundled resources may reside.
-    
-    Args:
-        None.
-    
-    Returns:
-        Any: Value returned by the routine.
-    """
 
     bases = []
 

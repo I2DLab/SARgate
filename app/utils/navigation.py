@@ -11,7 +11,6 @@ shortcuts across different windows and interactive panels.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Key handler callback
@@ -308,17 +307,6 @@ def _start_slith_shortcut_listener(state: dict[str, Any]) -> None:
 # 7. Key handler callback
 # -----------------------------------------------------------------------------
 def key_handler_callback(sender: Any, app_data: Any, state: dict[str, Any]) -> None:
-    """
-    Handle the opening/closing of the Slith window via ALT + SHIFT + S.
-    
-    Args:
-        sender (Any): Parameter accepted by this routine.
-        app_data (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     if dpg.is_key_down(dpg.mvKey_F1):
         open_contextual_help(state)
@@ -349,15 +337,6 @@ def _poll_slith_shortcut(state: dict[str, Any]) -> None:
 # 9. Setup key handlers
 # -----------------------------------------------------------------------------
 def setup_key_handlers(state: dict[str, Any]) -> None:
-    """
-    Register key-press handlers for navigation and global shortcuts.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     state["_slith_shortcut_was_down"] = False
     state["_slith_shortcut_requested"] = False
     state["_slith_shortcut_last_toggle"] = 0.0
@@ -388,18 +367,6 @@ def setup_key_handlers(state: dict[str, Any]) -> None:
 # 10. Navigate buttons
 # -----------------------------------------------------------------------------
 def navigate_buttons(sender: Any, app_data: Any, direction: str, state: dict[str, Any]) -> None:
-    """
-    Handle button navigation in the Overview tab using Up/Down arrow keys.
-    
-    Args:
-        sender (Any): Parameter accepted by this routine.
-        app_data (Any): Parameter accepted by this routine.
-        direction (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     selected_tab = dpg.get_item_alias(dpg.get_value("tab_bar"))
     if selected_tab != "overview_tab":

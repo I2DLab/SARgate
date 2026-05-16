@@ -10,7 +10,6 @@ initialises or processes heavy computations.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Draw loading screen
@@ -335,16 +334,6 @@ def draw_loading_screen(
     parent: str | None = None,
     context: str = "global",
 ) -> None:
-    """
-    Draw a full-screen loading overlay with an animated spinner and a 'Loading...' message.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-        bg (Any): Parameter accepted by this routine. Defaults to the configured value.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     # Prevent multiple overlays; if one exists, do nothing and exit.
     tags = _get_loading_tags(context)

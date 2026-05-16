@@ -18,16 +18,11 @@ session, while also reducing the visible gap between the splash shutdown and
 the main window startup.
 """
 
-# --- STEP MAP (Micro-Outline) ---
-# STEP 1: Cross-platform helpers
 #   1.1: _bundle_base_dir() -> robust base directory for bundled assets
 #   1.2: _get_screen_size() -> detect primary screen size across platforms
 #
-# STEP 2: Static configuration (module name, splash geometry, preload steps)
 #
-# STEP 3: Shared UI state for splash
 #
-# STEP 4: build_splash() -> create splash UI and centre on screen
 #   4.1: Enable Windows Per-Monitor DPI awareness
 #   4.2: Resolve bundled image path
 #   4.3: Load splash image (Pillow first, then DearPyGui fallback)
@@ -35,13 +30,9 @@ the main window startup.
 #   4.5: Layout: image, progress bar, centred text
 #   4.6: Centre viewport and draw first frame
 #
-# STEP 5: ui_update() -> update progress bar and centred text with repaint
 #
-# STEP 6: preload_sync() -> synchronous imports with progress updates
 #
-# STEP 7: cleanup_splash() -> close splash window and destroy DPG context
 #
-# STEP 8: __main__ launcher flow
 #   8.1: Ensure base dir on sys.path
 #   8.2: Build splash and preload synchronously
 #   8.3: Launch main module in a fresh child process when possible
@@ -68,7 +59,6 @@ def _bundle_base_dir() -> str:
       - macOS .app: Contents/Resources
       - Development: folder of this file
     """
-    # --- STEP 1.1.1: PyInstaller extraction dir (onefile and onedir with PyInstaller 6.x) ---
     meipass = getattr(sys, "_MEIPASS", None)
     if meipass:
         return meipass
@@ -76,12 +66,10 @@ def _bundle_base_dir() -> str:
     exe = os.path.abspath(sys.executable)
     exe_dir = os.path.dirname(exe)
 
-    # --- STEP 1.1.2: Typical onedir: _internal next to the executable (Linux/Win/macOS) ---
     internal = os.path.join(exe_dir, "_internal")
     if os.path.isdir(internal):
         return internal
 
-    # --- STEP 1.1.3: macOS .app: Contents/Resources ---
     if sys.platform == "darwin":
         # e.g. /path/App.app/Contents/MacOS/SARgate  -> Resources
         parts = exe_dir.split(os.sep)
@@ -94,7 +82,6 @@ def _bundle_base_dir() -> str:
             except Exception:
                 pass
 
-    # --- STEP 1.1.4: Development: current file's directory ---
     return os.path.dirname(os.path.abspath(__file__))
 
 
@@ -108,7 +95,6 @@ def _get_screen_size():
       4) Cross-platform tkinter
       5) Final fallback: 1920x1080
     """
-    # --- STEP 1.2.1: screeninfo (if available) ---
     try:
         from screeninfo import get_monitors
         mons = get_monitors()
@@ -118,7 +104,6 @@ def _get_screen_size():
     except Exception:
         pass
 
-    # --- STEP 1.2.2: Windows via ctypes ---
     if sys.platform == "win32":
         try:
             import ctypes
@@ -128,7 +113,6 @@ def _get_screen_size():
         except Exception:
             pass
 
-    # --- STEP 1.2.3: Linux via xrandr (if DISPLAY present) ---
     if sys.platform.startswith("linux") and os.environ.get("DISPLAY"):
         try:
             out = subprocess.check_output(shlex.split("xrandr --current"), stderr=subprocess.DEVNULL, text=True)
@@ -143,7 +127,6 @@ def _get_screen_size():
         except Exception:
             pass
 
-    # --- STEP 1.2.4: Cross-platform tkinter fallback ---
     try:
         import tkinter as tk
         root = tk.Tk(); root.withdraw()
@@ -151,7 +134,6 @@ def _get_screen_size():
         root.destroy()
         return w, h
     except Exception:
-        # --- STEP 1.2.5: Final fallback ---
         return 1920, 1080
 
 
@@ -447,7 +429,6 @@ def _apply_native_viewport_rounding(radius: float, width: int, height: int) -> N
 
 
 # === CONFIG ===
-# --- STEP 2: Static configuration (module name, splash geometry, preload steps) ---
 APP_MODULE = "app.main"   # application entry module
 WIDTH, HEIGHT = 720, 405
 X_POS, Y_POS = 400, 300  # initial position (overridden in build_splash)
@@ -466,7 +447,6 @@ STEPS = [
 
 
 # === SHARED STATE (only for UI) ===
-# --- STEP 3: Shared UI state for splash ---
 state = {
     "progress": 0.0,
     "message": "Starting...",
@@ -484,7 +464,6 @@ def build_splash():
       - Create DearPyGui float texture [0..1] and draw 1:1
       - On Windows, enable Per-Monitor DPI Awareness
     """
-    # --- STEP 4.1: Enable Windows Per-Monitor DPI awareness ---
     def _enable_windows_per_monitor_dpi_v2():
         if sys.platform != "win32":
             return
@@ -507,11 +486,9 @@ def build_splash():
     _enable_windows_per_monitor_dpi_v2()
     dpg.create_context()
 
-    # --- STEP 4.2: Resolve bundled image path (robust for Linux/macOS/Windows, onedir/.app/dev) ---
     base_dir = _bundle_base_dir()
     img_path = os.path.join(base_dir, "assets", "icons", "splash_img.png")
 
-    # --- STEP 4.3: Load image and create float texture (Pillow first, DearPyGui fallback) ---
     tex_tag, loaded = None, False
     try:
         from PIL import Image
@@ -551,7 +528,6 @@ def build_splash():
                 print(f"[Splash] dpg.load_image failed ({type(ee).__name__}: {ee}). No image.")
                 tex_tag = None
 
-    # --- STEP 4.4: Create viewport and base theme (frameless, no rounding/margins) ---
     WIN_W = TARGET_W
     WIN_H = TARGET_H + GAP_ABOVE_BAR + BAR_H + GAP_BELOW_BAR
     BAR_W = WIN_W - 2 * MARGIN_X
@@ -571,7 +547,6 @@ def build_splash():
             dpg.add_theme_style(dpg.mvStyleVar_WindowBorderSize, 0)
             dpg.add_theme_style(dpg.mvStyleVar_WindowRounding, 0)
 
-    # --- STEP 4.5: Layout: image, progress bar and overlayed centred text ---
     with dpg.window(tag="splash_window",
                     no_title_bar=True, no_move=True, no_resize=True, no_collapse=True,
                     no_background=False, no_scrollbar=True,
@@ -601,7 +576,6 @@ def build_splash():
 
     
 
-    # --- STEP 4.6: Centre splash on screen and render first frame(s) ---
     dpg.setup_dearpygui()
     dpg.show_viewport()
     dpg.render_dearpygui_frame()
@@ -627,15 +601,12 @@ def ui_update(message: str, progress: float):
         message (str): Status message to display.
         progress (float): Progress value in [0.0, 1.0].
     """
-    # --- STEP 5.1: Normalise inputs and store to state ---
     msg = str(message).replace("\n", " ")
     state["message"] = msg
     state["progress"] = max(0.0, min(1.0, progress))
 
-    # --- STEP 5.2: Update progress bar ---
     dpg.set_value("splash_bar", state["progress"])
 
-    # --- STEP 5.3: Compute centred text position (with macOS tweak) ---
     BAR_W = state.get("_BAR_W", WIDTH - 20)
     BAR_H = state.get("_BAR_H", 24)
     DRAW_PAD = state.get("_DRAW_PAD", 8)
@@ -646,7 +617,6 @@ def ui_update(message: str, progress: float):
 
 
 
-    # --- STEP 5.4: Apply text and repaint twice (ensure visibility) ---
     dpg.configure_item("splash_text", text=state["message"], pos=(tx, ty))
 
     dpg.render_dearpygui_frame()
@@ -660,7 +630,6 @@ def preload_sync():
     Returns:
         tuple[bool, Exception|None]: (success, exception if any)
     """
-    # --- STEP 6.1: Prepare counters and per-module percentage ---
     total = sum(len(mods) for _, mods in STEPS)
     done = 0
 
@@ -668,7 +637,6 @@ def preload_sync():
     percent_per_step = 1.0 / max(tot_steps, 1)
     percent = 0.0
 
-    # --- STEP 6.2: Import modules step-by-step with UI updates ---
     try:
         for label, mods in STEPS:
             ui_update(label, done / total if total else 0.0)
@@ -679,13 +647,11 @@ def preload_sync():
                 done += 1
                 ui_update(label, done / total)
 
-        # --- STEP 6.3: Finish ---
         ui_update("Ready", 1.0)
         time.sleep(1)
         return True, None
 
     except Exception as e:
-        # --- STEP 6.4: Report error and return failure ---
         ui_update(f"Error while importing:\n{type(e).__name__}: {e}", done / total if total else 0.0)
         time.sleep(1)
         return False, e
@@ -694,14 +660,12 @@ def preload_sync():
 
 def cleanup_splash():
     """Close and destroy the Dear PyGui context used by the splash."""
-    # --- STEP 7.1: Close splash window if present ---
     try:
         if dpg.does_item_exist("splash_window"):
             dpg.delete_item("splash_window")
     except Exception:
         pass
 
-    # --- STEP 7.2: Destroy DPG context (ignore errors) ---
     try:
         dpg.destroy_context()
     except Exception:
@@ -786,23 +750,19 @@ if __name__ == "__main__":
         runpy.run_module("app.main", run_name="__main__")
         sys.exit(0)
 
-    # --- STEP 8.1: Ensure base directory is on sys.path ---
     base_dir = os.path.dirname(os.path.abspath(__file__))
     if base_dir not in sys.path:
         sys.path.insert(0, base_dir)
 
-    # --- STEP 8.2: Build splash and preload synchronously ---
     build_splash()
     ok, err = preload_sync()
 
-    # --- STEP 8.3: Launch main module in a fresh child process ---
     if ok:
         try:
             ui_update("Launching SARgate...", 1.0)
             child = _launch_main_fresh(base_dir)
             ready_path = getattr(child, "_sargate_ready_path", "")
             if ready_path:
-                # --- STEP 8.4: Wait for the main-process readiness signal ---
                 _wait_for_main_ready(ready_path)
                 try:
                     os.unlink(ready_path)
@@ -814,6 +774,5 @@ if __name__ == "__main__":
             cleanup_splash()
             raise
     else:
-        # --- STEP 8.5: Exit with error if preload failed ---
         cleanup_splash()
         sys.exit(1)

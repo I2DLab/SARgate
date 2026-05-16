@@ -9,7 +9,7 @@
     "theme_name": "SARgate",
     "colormap_continuous": "Aurora",
     "colormap_discrete": "Starfield",
-    "pca_point_size": "small",
+    "pca_point_size": "Small",
     "pca_mcs_timeout": "10s",
     "pca_mcs_features": true,
     "umap_point_size": "Small",

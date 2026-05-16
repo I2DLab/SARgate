@@ -18,7 +18,6 @@ and click handling) is delegated to helpers in `mod.logic.landscape_functions`.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Draw landscape plot
@@ -60,22 +59,6 @@ def draw_landscape_plot(
     lo: Any,
     hi: Any
 ) -> Any:
-    """
-    Draw the full SAR Landscape view.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-        fp_choice (Any): Parameter accepted by this routine.
-        activity (str): Parameter accepted by this routine.
-        xs (Any): Parameter accepted by this routine.
-        ys (Any): Parameter accepted by this routine.
-        sali_raw (Any): Parameter accepted by this routine.
-        lo (Any): Parameter accepted by this routine.
-        hi (Any): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     log_event("Similarity", "Rendering SAL plot", indent=1)
     log_settings("Similarity", indent=2, fingerprint=fp_choice, activity=activity, points=len(xs), sali_min=lo, sali_max=hi, colormap=state.get("colormap_continuous"))
     set_loading_screen_progress(state, 84)
@@ -98,15 +81,6 @@ def draw_landscape_plot(
     # 2.1. Color from raw sali
     # -----------------------------------------------------------------------------
     def _color_from_raw_sali(val: float) -> Any:
-        """
-        Execute the color from raw sali routine.
-        
-        Args:
-            val (float): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         if not np.isfinite(val) or not np.isfinite(lo) or not np.isfinite(hi) or hi <= lo:
             return (128, 128, 128, 200)
         t = float((val - lo) / (hi - lo))

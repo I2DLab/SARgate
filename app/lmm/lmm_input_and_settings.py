@@ -11,7 +11,6 @@ parameters required before starting an analysis.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Build the input selection panel
@@ -1036,7 +1035,6 @@ to keep a molecule in the filtered dataset (0-100%).""")
                         change_font_type(dpg.last_item(), "bold", state)
 
 
-                        # --- STEP 2.6.1: Workflow selection callback and conditional visibility ---
                         def clustering_workflow_callback(_: Any, __: Any, user_data: Any) -> None:
                             """
                             Update the subsets-collection workflow and related widget visibility.
@@ -1163,7 +1161,6 @@ More specific workflows can be selected to retain positional information and str
       user-defined one (generalized), but has a similarity to it above a defined threshold.
 """)
 
-                        # --- STEP 2.6.2: Heavy atoms / Similarity / Filtering thresholds ---
                         # Minimum heavy atoms to consider for MinBMS aggregation.
                         with dpg.group(horizontal=True, tag="Heavy atoms threshold group"):
                             dpg.add_text("Heavy atoms threshold")
@@ -1222,7 +1219,6 @@ More specific workflows can be selected to retain positional information and str
                                 dpg.add_text("Maximum time allowed for each MCS search during MSC clustering.\nChoose 'Unlimited' to let the search run with no time limit\n(the analysis may take very long time).")
 
 
-                        # --- STEP 2.6.3: User-defined scaffold input and validation popup ---
                         # Validate a scaffold SMILES/SMARTS/InChI/MolBlock and show a small status popup.
                         def validate_scaffold_callback() -> None:
                             """
@@ -1298,7 +1294,6 @@ More specific workflows can be selected to retain positional information and str
                                 dpg.add_button(label="OK", callback=lambda: dpg.configure_item("scaffold_validity_popup", show=False))
 
 
-                        # --- STEP 2.6.4: User-defined generalized scaffold input and validation popup ---
                         def validate_generalized_scaffold_callback() -> None:
                             """
                             Validate the generalized scaffold and report the detected format.
@@ -1389,7 +1384,6 @@ More specific workflows can be selected to retain positional information and str
                                 dpg.add_button(label="OK", callback=lambda: dpg.configure_item("gen_scaffold_validity_popup", show=False))
 
 
-                        # --- STEP 2.6.5: Similarity threshold for "generalized scaffold + similarity" ---
                         with dpg.group(horizontal=True, tag="Scaffold Similarity threshold group", show=False):
                             dpg.add_text("Scaffold similarity threshold (%)")
                             dpg.add_input_int(

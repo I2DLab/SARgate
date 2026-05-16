@@ -9,7 +9,6 @@ Displays all molecules loaded into SARgate with their metadata.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Show library summary table
@@ -38,16 +37,6 @@ from PIL import Image as pilImage
 # 2. Show library summary table
 # -----------------------------------------------------------------------------
 def show_library_summary_table(state: dict[str, Any], selected_file_path: str) -> Any:
-    """
-    Load a molecular file (SDF, CSV/TSV, SMI/TXT) and display a modal table with molecule images and properties.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-        selected_file_path (str): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     if dpg.does_item_exist("library_table_window_inner"):
         return
 
@@ -72,15 +61,6 @@ def show_library_summary_table(state: dict[str, Any], selected_file_path: str) -
     elif ext in [".csv", ".tsv", ".xlsx"]:
 
         def _detect_sep_quick(path: str) -> Any:
-            """
-            Detect sep quick.
-            
-            Args:
-                path (str): Input accepted by this routine.
-            
-            Returns:
-                Any: Value returned by the routine.
-            """
             with open(path, "r", encoding="utf-8-sig", errors="replace") as f:
                 line = f.readline()
             counts = {"\t": line.count("\t"), ",": line.count(","), ";": line.count(";")}
@@ -160,17 +140,6 @@ def show_library_summary_table(state: dict[str, Any], selected_file_path: str) -
         It keeps GPU memory bounded and avoids pre-rendering all molecules.
         """
         def __init__(self, capacity: int, img_w: int, img_h: int) -> None:
-            """
-            Execute the init routine.
-            
-            Args:
-                capacity (Any): Parameter accepted by this routine.
-                img_w (Any): Parameter accepted by this routine.
-                img_h (Any): Parameter accepted by this routine.
-            
-            Returns:
-                None: This routine updates state or performs side effects in place.
-            """
             self.capacity = max(10, int(capacity))
             self.img_w = img_w
             self.img_h = img_h
@@ -178,16 +147,6 @@ def show_library_summary_table(state: dict[str, Any], selected_file_path: str) -
 
         def _make_texture(self, idx: int, mol: Any) -> Any:
             # Compute 2D coords (once per mol) and draw to Cairo.
-            """
-            Execute the make texture routine.
-            
-            Args:
-                idx (int): Parameter accepted by this routine.
-                mol (Chem.Mol): Parameter accepted by this routine.
-            
-            Returns:
-                Any: Value produced by the routine.
-            """
             try:
                 rdDepictor.Compute2DCoords(mol, clearConfs=True)
             except Exception:
@@ -218,16 +177,6 @@ def show_library_summary_table(state: dict[str, Any], selected_file_path: str) -
 
         def get(self, idx: int, mol: Any) -> Any:
             # Return existing texture or create a new one; maintain LRU order.
-            """
-            Return the requested value.
-            
-            Args:
-                idx (int): Parameter accepted by this routine.
-                mol (Chem.Mol): Parameter accepted by this routine.
-            
-            Returns:
-                Any: Value produced by the routine.
-            """
             if idx in self._store:
                 tag = self._store.pop(idx)
                 self._store[idx] = tag
@@ -296,15 +245,6 @@ def show_library_summary_table(state: dict[str, Any], selected_file_path: str) -
         # 2.2.1. Filter callback
         # -----------------------------------------------------------------------------
         def _filter_callback() -> None:
-            """
-            Execute the filter callback routine.
-            
-            Args:
-                None.
-            
-            Returns:
-                None: This routine updates state or performs side effects in place.
-            """
             query = dpg.get_value("library_table_filter_input").strip().lower()
             df_all = state["_lib_df"]
 
@@ -397,15 +337,6 @@ def show_library_summary_table(state: dict[str, Any], selected_file_path: str) -
     # 2.5. Go first page
     # -----------------------------------------------------------------------------
     def go_first_page() -> None:
-        """
-        Execute the go first page routine.
-        
-        Args:
-            None.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         state["_lib_page"] = 0
         render_table_rows(); update_pager_labels()
 
@@ -413,15 +344,6 @@ def show_library_summary_table(state: dict[str, Any], selected_file_path: str) -
     # 2.6. Go prev page
     # -----------------------------------------------------------------------------
     def go_prev_page() -> None:
-        """
-        Execute the go prev page routine.
-        
-        Args:
-            None.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         if state["_lib_page"] > 0:
             state["_lib_page"] -= 1
             render_table_rows(); update_pager_labels()
@@ -430,15 +352,6 @@ def show_library_summary_table(state: dict[str, Any], selected_file_path: str) -
     # 2.7. Go next page
     # -----------------------------------------------------------------------------
     def go_next_page() -> None:
-        """
-        Execute the go next page routine.
-        
-        Args:
-            None.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         vis = len(state["_lib_indices"])
         pages = max(1, (vis + state["_lib_page_size"] - 1) // state["_lib_page_size"])
         if state["_lib_page"] < pages - 1:
@@ -449,15 +362,6 @@ def show_library_summary_table(state: dict[str, Any], selected_file_path: str) -
     # 2.8. Go last page
     # -----------------------------------------------------------------------------
     def go_last_page() -> None:
-        """
-        Execute the go last page routine.
-        
-        Args:
-            None.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         vis = len(state["_lib_indices"])
         state["_lib_page"] = max(0, (vis + state["_lib_page_size"] - 1) // state["_lib_page_size"] - 1)
         render_table_rows(); update_pager_labels()
@@ -484,7 +388,6 @@ def show_library_summary_table(state: dict[str, Any], selected_file_path: str) -
     with dpg.child_window(parent="library_table_window", tag="library_table_window_inner",
                           no_scrollbar=False, horizontal_scrollbar=True, no_scroll_with_mouse=False, border=False):
 
-        # --- STEP 8.1: Toolbar (counts, search box, pager) ---
         with dpg.group(horizontal=True):
             dpg.add_text("", tag="library_table_count_text")
             dpg.add_spacer(width=state["win_spacer"]*2)
@@ -503,7 +406,6 @@ def show_library_summary_table(state: dict[str, Any], selected_file_path: str) -
 
         dpg.add_separator()
 
-        # --- STEP 8.2: Scrollable table with image column and data columns ---
         with dpg.child_window(autosize_x=True, autosize_y=True, horizontal_scrollbar=True, border=False,
                               tag="library_table_child_window"):
             with dpg.table(tag="library_table", header_row=True, resizable=True,
@@ -531,7 +433,6 @@ def show_library_summary_table(state: dict[str, Any], selected_file_path: str) -
                 # Initial page render.
                 render_table_rows()
 
-            # --- STEP 8.3: Apply themes to inputs and child container ---
             dpg.bind_item_theme("library_table", apply_input_text_theme())
         dpg.bind_item_theme("library_table_child_window", apply_inner_child_theme())
 

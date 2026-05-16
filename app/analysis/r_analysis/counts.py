@@ -11,7 +11,6 @@ and their contribution to biological activity.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Show counts selection window
@@ -58,15 +57,6 @@ from app.utils.native_dialogs import save_file_dialog
 # 2. Show counts selection window
 # -----------------------------------------------------------------------------
 def show_counts_selection_window(state: dict[str, Any]) -> None:
-    """
-    Opens a window allowing the user to select a subset and an R-group.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     # Default sorting mode
     state.setdefault("counts_sort_mode", "frequency")
@@ -76,17 +66,6 @@ def show_counts_selection_window(state: dict[str, Any]) -> None:
     # 2.1. Update rgroup options
     # -----------------------------------------------------------------------------
     def update_rgroup_options(sender: Any, app_data: Any, user_data: Any) -> None:
-        """
-        Updates the R-group combo box based on the selected subset.
-        
-        Args:
-            sender (Any): Parameter accepted by this routine.
-            app_data (Any): Parameter accepted by this routine.
-            user_data (Any): Parameter accepted by this routine.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
 
         # Pull the selected subset and resolve its available R-groups
         selected_subset = app_data
@@ -136,15 +115,6 @@ def show_counts_selection_window(state: dict[str, Any]) -> None:
 # 3. Change counts sort order
 # -----------------------------------------------------------------------------
 def change_counts_sort_order(state: dict[str, Any]) -> None:
-    """
-    Toggles the R-group sorting mode between 'frequency' and 'activity',.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     mode = state.get("counts_sort_mode", "frequency")
     state["counts_sort_mode"] = "activity" if mode == "frequency" else "frequency"
     # Rebuild the window with the new ordering
@@ -156,15 +126,6 @@ def change_counts_sort_order(state: dict[str, Any]) -> None:
 # 4. Show counts table window
 # -----------------------------------------------------------------------------
 def show_counts_table_window(state: dict[str, Any]) -> Any:
-    """
-    Generates and displays the R-group counts summary including the scaffold image,.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     log_event("R-Analysis", "Drawing counts table", indent=1)
     log_settings("R-Analysis", indent=2, subset=dpg.get_value("counts_subset_choice"), rgroup=dpg.get_value("counts_rgroup_choice"), sort_mode=state.get("counts_sort_mode", "frequency"))
     dpg.configure_item("counts_table", show=True)
@@ -429,17 +390,6 @@ def show_counts_table_window(state: dict[str, Any]) -> Any:
     # 4.5. Update rgroup details
     # -----------------------------------------------------------------------------
     def update_rgroup_details(sender: Any, app_data: Any, user_data: Any) -> None:
-        """
-        Updates the detail panel with molecule IDs containing the hovered R-group,.
-        
-        Args:
-            sender (Any): Parameter accepted by this routine.
-            app_data (Any): Parameter accepted by this routine.
-            user_data (Any): Parameter accepted by this routine.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
 
         hovered_smi, state = user_data
 
@@ -634,16 +584,6 @@ def show_counts_table_window(state: dict[str, Any]) -> Any:
     # 4.6. Mean activity for smi
     # -----------------------------------------------------------------------------
     def _mean_activity_for_smi(smi: Any, activity_col: str) -> Any:
-        """
-        Execute the mean activity for smi routine.
-        
-        Args:
-            smi (Any): Parameter accepted by this routine.
-            activity_col (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         rows = csv_df[csv_df[r_group] == smi]
         vals = pd.to_numeric(rows[activity_col], errors="coerce").dropna()
         if vals.empty:
@@ -662,15 +602,6 @@ def show_counts_table_window(state: dict[str, Any]) -> Any:
     # 4.7. Activity unit
     # -----------------------------------------------------------------------------
     def _activity_unit(activity_col: str) -> Any:
-        """
-        Return unit label for an activity column based on state.
-        
-        Args:
-            activity_col (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         if activity_col in state.get("nM_activity_types", []):
             return "nM"
         if activity_col in state.get("percent_activities", []):
@@ -686,16 +617,6 @@ def show_counts_table_window(state: dict[str, Any]) -> Any:
     # 4.8. Mean metric for smi
     # -----------------------------------------------------------------------------
     def _mean_metric_for_smi(smi: Any, activity_col: str) -> Any:
-        """
-        Returns (metric_value, label, unit, is_p_metric).
-        
-        Args:
-            smi (Any): Parameter accepted by this routine.
-            activity_col (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         if activity_col is None:
             return None, None, None, False
         rows = csv_df[csv_df[r_group] == smi]
@@ -796,15 +717,6 @@ def show_counts_table_window(state: dict[str, Any]) -> Any:
     # 4.9. Prepare counts boxplot
     # -----------------------------------------------------------------------------
     def prepare_counts_boxplot(sender: Any) -> None:
-        """
-        Execute the prepare counts boxplot routine.
-        
-        Args:
-            sender (Any): Parameter accepted by this routine.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         if sender == "activity_type":
             activity = dpg.get_value("counts_boxplot_activity_type")
             state["counts_last_activity"] = activity
@@ -821,13 +733,13 @@ def show_counts_table_window(state: dict[str, Any]) -> Any:
                 if dpg.does_item_exist("sort_counts_label"):
                     dpg.configure_item(
                         "sort_counts_label",
-                        default_value=sort_text,  # <- QUI, non 'label'
+                        default_value=sort_text,
                         show=True,
                     )
                 if dpg.does_item_exist("sort_counts_checkbox"):
                     dpg.configure_item("sort_counts_checkbox", show=True)
 
-                # Se stai già ordinando per attività, ridisegna tabella+boxplot
+                # Redraw the table and boxplot if activity sorting is active.
                 if state.get("counts_sort_mode") == "activity":
                     show_counts_table_window(state)
                     update_responsive_images(state)
@@ -898,9 +810,9 @@ def show_counts_table_window(state: dict[str, Any]) -> Any:
 
             activity_for_sort = dpg.get_value("counts_boxplot_activity_type")
 
-            # Nascondi il controllo se non ci sono attività
+            # Hide the sorting controls when no activity column exists.
             if activity_for_sort == "No activities":
-                # creo gli item ma invisibili (per evitare errori di binding)
+                # Keep hidden items available so theme binding remains stable.
                 dpg.add_text("", tag="sort_counts_label", show=False)
                 dpg.add_checkbox(tag="sort_counts_checkbox", show=False)
             else:
@@ -991,15 +903,6 @@ def show_counts_table_window(state: dict[str, Any]) -> Any:
     # 4.10. Compute stats for smi
     # -----------------------------------------------------------------------------
     def _compute_stats_for_smi(smi: Any) -> Any:
-        """
-        Execute the compute stats for smi routine.
-        
-        Args:
-            smi (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         matching = csv_df[csv_df[r_group] == smi]
         results_min = []
         results_max = []
@@ -1028,15 +931,6 @@ def show_counts_table_window(state: dict[str, Any]) -> Any:
                 )
 
             def fmt(v: Any) -> Any:
-                """
-                Execute the fmt routine.
-                
-                Args:
-                    v (Any): Input accepted by this routine.
-                
-                Returns:
-                    Any: Value returned by the routine.
-                """
                 return f"{v:.1f}" if v is not None else "N/A"
 
             if not vals.empty:
@@ -1052,18 +946,6 @@ def show_counts_table_window(state: dict[str, Any]) -> Any:
     # 4.11. Draw single row
     # -----------------------------------------------------------------------------
     def _draw_single_row(idx: int, smi: Any, count: int, pil_img: Any) -> None:
-        """
-        Draw single row.
-        
-        Args:
-            idx (int): Parameter accepted by this routine.
-            smi (Any): Parameter accepted by this routine.
-            count (int): Parameter accepted by this routine.
-            pil_img (Any): Parameter accepted by this routine.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         row_tag = f"counts_table_row_{idx}"
         with dpg.table_row(tag=row_tag):
 
@@ -1130,15 +1012,6 @@ def show_counts_table_window(state: dict[str, Any]) -> Any:
     # 4.12. Rebuild counts table
     # -----------------------------------------------------------------------------
     def _rebuild_counts_table() -> None:
-        """
-        Execute the rebuild counts table routine.
-        
-        Args:
-            None.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         if dpg.does_item_exist("counts_table_table"):
             dpg.delete_item("counts_table_table")
 
@@ -1184,15 +1057,6 @@ def show_counts_table_window(state: dict[str, Any]) -> Any:
     # 4.13. Prev page
     # -----------------------------------------------------------------------------
     def _prev_page() -> None:
-        """
-        Execute the prev page routine.
-        
-        Args:
-            None.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         if state["counts_current_page"] > 0:
             state["counts_current_page"] -= 1
             draw_loading_screen(state, bg=False)
@@ -1207,15 +1071,6 @@ def show_counts_table_window(state: dict[str, Any]) -> Any:
     # 4.14. Next page
     # -----------------------------------------------------------------------------
     def _next_page() -> None:
-        """
-        Execute the next page routine.
-        
-        Args:
-            None.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         if state["counts_current_page"] < state["counts_total_pages"] - 1:
             state["counts_current_page"] += 1
             draw_loading_screen(state, bg=False)

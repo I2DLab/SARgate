@@ -11,7 +11,6 @@ export of key transformations for SAR interpretation.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Draw mmpa table
@@ -39,17 +38,6 @@ from app.gui.themes_manager import apply_bordered_input_text_theme
 # 2. Draw mmpa table
 # -----------------------------------------------------------------------------
 def draw_mmpa_table(activity: str, table_data: Any, state: dict[str, Any]) -> Any:
-    """
-    Build and display the MMPA results table, plus the dynamic image panel for.
-    
-    Args:
-        activity (str): Parameter accepted by this routine.
-        table_data (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     log_event("MMPA", f"Rendering MMPA table for activity '{activity}'", indent=1)
     log_settings("MMPA", indent=2, activity=activity, transformations=len(table_data) if hasattr(table_data, "__len__") else None)
     dpg.configure_item("mmpa_table_cont", show=True)
@@ -99,17 +87,6 @@ def draw_mmpa_table(activity: str, table_data: Any, state: dict[str, Any]) -> An
     # 2.1. Update mmpa images
     # -----------------------------------------------------------------------------
     def update_mmpa_images(sender: Any, app_data: Any, user_data: Any) -> Any:
-        """
-        Updates the molecular and R-group images for a given transformation based on current MMPA selection.
-        
-        Args:
-            sender (Any): Parameter accepted by this routine.
-            app_data (Any): Parameter accepted by this routine.
-            user_data (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         # Parse the current transformation, pick the active pair, and draw four panels (R1, R2, MolA, MolB).
         try:
             df = state["mmpa_dataframe"]
@@ -163,7 +140,6 @@ def draw_mmpa_table(activity: str, table_data: Any, state: dict[str, Any]) -> An
             id2 = extract_index(name2)
 
             if id1 is None or id2 is None:
-                print("[MMPA] Could not extract molecule index.")
                 return
 
             # Resolve SMILES from Mol_IDs
@@ -171,14 +147,12 @@ def draw_mmpa_table(activity: str, table_data: Any, state: dict[str, Any]) -> An
             if len(mol1_smi) > 0:
                 mol1_smi = mol1_smi[0]
             else:
-                print(f"[MMPA] Warning: Mol_ID {id1} not found in DataFrame")
                 return
             
             mol2_smi = df.loc[df["Mol_ID"] == id2, "Mol"].values
             if len(mol2_smi) > 0:
                 mol2_smi = mol2_smi[0]
             else:
-                print(f"[MMPA] Warning: Mol_ID {id2} not found in DataFrame")
                 return
 
             mol1 = Chem.MolFromSmiles(mol1_smi, sanitize=False)
@@ -186,17 +160,6 @@ def draw_mmpa_table(activity: str, table_data: Any, state: dict[str, Any]) -> An
 
             # Helper to read activity by Mol_ID, returning "N/A" if missing
             def get_activity_by_id(df: Any, mol_id: Any, col: Any) -> Any:
-                """
-                Return activity by id.
-                
-                Args:
-                    df (pd.DataFrame): Input accepted by this routine.
-                    mol_id (Any): Input accepted by this routine.
-                    col (Any): Input accepted by this routine.
-                
-                Returns:
-                    Any: Value returned by the routine.
-                """
                 row = df.loc[df["Mol_ID"] == mol_id]
                 if not row.empty and col in row:
                     return row[col].values[0]
@@ -229,17 +192,6 @@ def draw_mmpa_table(activity: str, table_data: Any, state: dict[str, Any]) -> An
 
 
             def render_and_set_texture(mol: Any, texture_tag: str, label_text: str) -> None:
-                """
-                Render a molecule with RDKit MolDraw2D (Cairo backend) and set it as a DearPyGui dynamic texture.
-                
-                Args:
-                    mol (Chem.Mol): Input accepted by this routine.
-                    texture_tag (Any): Input accepted by this routine.
-                    label_text (Any): Input accepted by this routine.
-                
-                Returns:
-                    None: This routine performs in-place updates or side effects only.
-                """
                 if not dpg.does_item_exist(texture_tag):
                     return
 
@@ -285,17 +237,6 @@ def draw_mmpa_table(activity: str, table_data: Any, state: dict[str, Any]) -> An
     # 2.2. Mmpa prev pair callback
     # -----------------------------------------------------------------------------
     def mmpa_prev_pair_callback(sender: Any, app_data: Any, user_data: Any) -> None:
-        """
-        Callback to display the previous molecular pair for the currently selected transformation.
-        
-        Args:
-            sender (Any): Parameter accepted by this routine.
-            app_data (Any): Parameter accepted by this routine.
-            user_data (Any): Parameter accepted by this routine.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         vals = state.get("mmpa_current_vals", [])
         if not vals:
             return
@@ -307,17 +248,6 @@ def draw_mmpa_table(activity: str, table_data: Any, state: dict[str, Any]) -> An
     # 2.3. Mmpa next pair callback
     # -----------------------------------------------------------------------------
     def mmpa_next_pair_callback(sender: Any, app_data: Any, user_data: Any) -> None:
-        """
-        Callback to display the next molecular pair for the currently selected transformation.
-        
-        Args:
-            sender (Any): Parameter accepted by this routine.
-            app_data (Any): Parameter accepted by this routine.
-            user_data (Any): Parameter accepted by this routine.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         vals = state.get("mmpa_current_vals", [])
         if not vals:
             return
@@ -329,16 +259,6 @@ def draw_mmpa_table(activity: str, table_data: Any, state: dict[str, Any]) -> An
     # 2.4. Sort callback
     # -----------------------------------------------------------------------------
     def sort_callback(sender: Any, sort_specs: Any) -> None:
-        """
-        Sorts the MMPA table based on the selected column.
-        
-        Args:
-            sender (Any): Parameter accepted by this routine.
-            sort_specs (Any): Parameter accepted by this routine.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         if not sort_specs:
             return
 
@@ -586,7 +506,6 @@ def draw_mmpa_table(activity: str, table_data: Any, state: dict[str, Any]) -> An
                        borders_innerV=True, borders_outerV=True, freeze_rows=1, scrollY=True,
                        row_background=True, resizable=True, sortable=True, sort_tristate=True, callback=sort_callback):
 
-            # STEP 1.6.1: Create table columns with tooltips
             dpg.add_table_column(label="ID", tag="mmpa_col_0", init_width_or_weight=3)
             dpg.add_table_column(label="R", tag="mmpa_col_1", init_width_or_weight=2)
             dpg.add_table_column(label="Transformation", tag="mmpa_col_2", init_width_or_weight=15)
@@ -596,23 +515,11 @@ def draw_mmpa_table(activity: str, table_data: Any, state: dict[str, Any]) -> An
             dpg.add_table_column(label="Freq.", tag="mmpa_col_6", init_width_or_weight=3)   
             
 
-            # STEP 1.6.2: Row selection callbacks and helper themes
             def on_row_click(
                 transformation_value: Any,
                 row_selectable_tags: Any,
                 selected_ref: Any
             ) -> None:
-                """
-                Execute the on row click routine.
-                
-                Args:
-                    transformation_value (Any): Input accepted by this routine.
-                    row_selectable_tags (Any): Input accepted by this routine.
-                    selected_ref (Any): Input accepted by this routine.
-                
-                Returns:
-                    None: This routine performs in-place updates or side effects only.
-                """
                 update_mmpa_images(None, None, transformation_value)
                 state["mmpa_selected_transform"] = transformation_value
                 previous_tags = selected_ref.get("current") or []
@@ -625,29 +532,9 @@ def draw_mmpa_table(activity: str, table_data: Any, state: dict[str, Any]) -> An
                 selected_ref["current"] = list(row_selectable_tags)
 
             def make_callback(transf: Any, row_tags: Any, ref: Any) -> Any:
-                """
-                Execute the make callback routine.
-                
-                Args:
-                    transf (Any): Input accepted by this routine.
-                    row_tags (Any): Input accepted by this routine.
-                    ref (Any): Input accepted by this routine.
-                
-                Returns:
-                    Any: Value returned by the routine.
-                """
                 return lambda s, a: on_row_click(transf, row_tags, ref)
 
             def make_text_color_theme(color: Any) -> Any:
-                """
-                Execute the make text color theme routine.
-                
-                Args:
-                    color (Any): Input accepted by this routine.
-                
-                Returns:
-                    Any: Value returned by the routine.
-                """
                 tag = f"theme_{color}"
                 if not dpg.does_item_exist(tag):
                     with dpg.theme(tag=tag):
@@ -670,7 +557,6 @@ def draw_mmpa_table(activity: str, table_data: Any, state: dict[str, Any]) -> An
             dpg.bind_item_theme("mmpa_table", table_theme)
 
 
-        # STEP 1.6.4: Initial sort on Mean Δp{activity} (desc)
         try:
             # Get internal column id for the Mean Δ column
             col_ids = dpg.get_item_children("mmpa_table", 0)  # slot 0 = columns
@@ -764,7 +650,6 @@ def draw_mmpa_table(activity: str, table_data: Any, state: dict[str, Any]) -> An
         dpg.set_frame_callback(dpg.get_frame_count() + 1, lambda: _position_mmpa_pair_buttons())
         
 
-        # STEP 1.6.5: Auto-select first row
         try:
             rows = dpg.get_item_children("mmpa_table", 1) or []
             if rows:

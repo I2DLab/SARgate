@@ -22,7 +22,6 @@ This module displays the full decomposition results:
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Ensure dendro cache
@@ -102,15 +101,6 @@ from app.analysis.overview.overview_enrichment_plot import build_enrichment_layo
 # 2. Ensure dendro cache
 # -----------------------------------------------------------------------------
 def _ensure_dendro_cache(state: dict[str, Any]) -> Any:
-    """
-    Create/return a cache containing:.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     return state.setdefault("_dpg_dendro_cache", {})
 
 
@@ -118,15 +108,6 @@ def _ensure_dendro_cache(state: dict[str, Any]) -> Any:
 # 3. Get rgba from colorname
 # -----------------------------------------------------------------------------
 def _get_rgba_from_colorname(color_str: Any) -> Any:
-    """
-    Return rgba from colorname.
-    
-    Args:
-        color_str (Any): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     try:
         if color_str in ("C0", "b", "blue"):
             return (80, 80, 80, 255)
@@ -193,16 +174,6 @@ def _add_overview_label_on_pil(
 # 4. Recolor dendrogram segments
 # -----------------------------------------------------------------------------
 def _recolor_dendrogram_segments(state: dict[str, Any], threshold: Any) -> None:
-    """
-    Use the cached linkage to obtain ONLY the new colours (via scipy.dendrogram no_plot).
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-        threshold (float | str | Any): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     cache = state.get("_dpg_dendro_cache") or {}
     linkage_matrix   = cache.get("linkage")
     labels_input     = cache.get("labels_input")     # the same 'subset_names' passed to scipy
@@ -227,16 +198,6 @@ def _recolor_dendrogram_segments(state: dict[str, Any], threshold: Any) -> None:
 # 5. Fast update clusters from linkage
 # -----------------------------------------------------------------------------
 def _fast_update_clusters_from_linkage(state: dict[str, Any], threshold: Any) -> Any:
-    """
-    Replicate your 1..K cluster remapping and dendrogram order,.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-        threshold (float | str | Any): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     cache = state.get("_dpg_dendro_cache") or {}
     linkage_matrix   = cache.get("linkage")
     labels_input     = cache.get("labels_input")     # these were the numeric IDs (strings) passed to scipy
@@ -295,15 +256,6 @@ def _clear_clustering_ui() -> None:
 # 7. Normalize scaffold
 # -----------------------------------------------------------------------------
 def _normalize_scaffold(mol: Chem.Mol) -> Chem.Mol:
-    """
-    Standardise the scaffold to reduce false positives:.
-    
-    Args:
-        mol (Chem.Mol): Parameter accepted by this routine.
-    
-    Returns:
-        Chem.Mol: Value produced by the routine.
-    """
     if mol is None:
         return None
     m = rdMolStandardize.Cleanup(mol)
@@ -434,15 +386,6 @@ def sort_by_scaffold_similarity(
 # 9. Ensure dendro frame theme
 # -----------------------------------------------------------------------------
 def _ensure_dendro_frame_theme(state: dict[str, Any]) -> Any:
-    """
-    Ensure dendro frame theme.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     th = state.get("_dendro_frame_theme")
     if th and dpg.does_item_exist(th):
         return th
@@ -460,15 +403,6 @@ def _ensure_dendro_frame_theme(state: dict[str, Any]) -> Any:
 # 10. Refresh subset buttons
 # -----------------------------------------------------------------------------
 def refresh_subset_buttons(state: dict[str, Any]) -> None:
-    """
-    Rebuilds the subset selection buttons in the GUI based on the current clustering and state.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     if dpg.does_item_exist("subset_choice_group"):
         dpg.delete_item("subset_choice_group", children_only=True)
@@ -502,17 +436,6 @@ def refresh_subset_buttons(state: dict[str, Any]) -> None:
 # 11. On slider threshold change
 # -----------------------------------------------------------------------------
 def on_slider_threshold_change(sender: Any, app_data: Any, state: dict[str, Any]) -> None:
-    """
-    Move ONLY the drag line, recolour existing segments, update clusters using cached linkage.
-    
-    Args:
-        sender (Any): Parameter accepted by this routine.
-        app_data (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     # For drag_line, the value is NOT in app_data → read it from the item itself
     new_distance = dpg.get_value(sender)
 
@@ -565,15 +488,6 @@ def on_slider_threshold_change(sender: Any, app_data: Any, state: dict[str, Any]
 # 12. Draw scaffold dendrogram
 # -----------------------------------------------------------------------------
 def draw_scaffold_dendrogram(state: dict[str, Any]) -> Any:
-    """
-    Draws a hierarchical clustering dendrogram of scaffold similarity using DearPyGui.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     
     draw_loading_screen(state)
 
@@ -581,15 +495,6 @@ def draw_scaffold_dendrogram(state: dict[str, Any]) -> Any:
     # 12.1. Get color
     # -----------------------------------------------------------------------------
     def get_color(color_str: Any) -> Any:
-        """
-        Converts a plot colour name or code to an RGBA tuple for DearPyGui rendering.
-        
-        Args:
-            color_str (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         try:
             if color_str in ("C0", "b", "blue"):
                 return (80, 80, 80, 255)
@@ -761,15 +666,6 @@ def draw_scaffold_dendrogram(state: dict[str, Any]) -> Any:
 # 13. Show subset choice window
 # -----------------------------------------------------------------------------
 def show_subset_choice_window(state: dict[str, Any]) -> Any:
-    """
-    Displays the GUI window for selecting and sorting molecular subsets.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     
     # -----------------------------------------------------------------------------
     # 13.1. Calculate scaffold similarities
@@ -779,17 +675,6 @@ def show_subset_choice_window(state: dict[str, Any]) -> Any:
         smiles_rgd_dict: str,
         subset_dir: str
     ) -> Any:
-        """
-        (Unchanged) Multi-method: compute similarity between query and scaffolds.
-        
-        Args:
-            query_smiles (Any): Parameter accepted by this routine.
-            smiles_rgd_dict (Any): Parameter accepted by this routine.
-            subset_dir (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         fp_generators = {
             "Morgan": GetMorganGenerator(radius=2, fpSize=2048),
             "RDKit": GetRDKitFPGenerator(),
@@ -846,17 +731,6 @@ def show_subset_choice_window(state: dict[str, Any]) -> Any:
     # 13.2. On subset sort choice
     # -----------------------------------------------------------------------------
     def on_subset_sort_choice(sender: Any, app_data: Any, user_data: Any) -> None:
-        """
-        Callback triggered when the user selects a sorting method for subsets.
-        
-        Args:
-            sender (Any): Parameter accepted by this routine.
-            app_data (Any): Parameter accepted by this routine.
-            user_data (Any): Parameter accepted by this routine.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
 
         show_query_input = app_data == "Query similarity"
         dpg.configure_item("overview_subset_query_input", show=show_query_input)
@@ -970,15 +844,6 @@ def show_subset_choice_window(state: dict[str, Any]) -> Any:
 # 14. Show molecule choice window
 # -----------------------------------------------------------------------------
 def show_molecule_choice_window(state: dict[str, Any]) -> None:
-    """
-    Creates and displays the GUI window for selecting a molecule from the current subset.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     console_group_3 = dpg.add_group(parent="molecule_choice", height=-1)
     state["console_group_3"] = console_group_3   
@@ -989,16 +854,6 @@ def show_molecule_choice_window(state: dict[str, Any]) -> None:
 # 15. Update molecule choice status
 # -----------------------------------------------------------------------------
 def update_molecule_choice_status(parent_subset: str, state: dict[str, Any]) -> None:
-    """
-    Populates the molecule selection window with buttons for each molecule in the given subset.
-    
-    Args:
-        parent_subset (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     # 5.2.1: Reset molecule and R-group panes
     dpg.delete_item("molecule_choice", children_only=True)
@@ -1037,15 +892,6 @@ def update_molecule_choice_status(parent_subset: str, state: dict[str, Any]) -> 
 # 16. Show r groups choice window
 # -----------------------------------------------------------------------------
 def show_r_groups_choice_window(state: dict[str, Any]) -> None:
-    """
-    Creates and displays the GUI window for selecting R-groups of a molecule.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     
     console_group_4 = dpg.add_group(parent="r_group_choice", height=-1)
     state["console_group_4"] = console_group_4   
@@ -1057,16 +903,6 @@ def show_r_groups_choice_window(state: dict[str, Any]) -> None:
 # 17. Update r groups choice status
 # -----------------------------------------------------------------------------
 def update_r_groups_choice_status(subset_molecule: str, state: dict[str, Any]) -> None:
-    """
-    Populates the R-group selection window with buttons for each R-group of the selected molecule.
-    
-    Args:
-        subset_molecule (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     # 6.2.1: Reset and parse identifiers
     dpg.delete_item("r_group_choice", children_only=True)
@@ -1104,15 +940,6 @@ def update_r_groups_choice_status(subset_molecule: str, state: dict[str, Any]) -
 # 18. Show properties windows
 # -----------------------------------------------------------------------------
 def show_properties_windows(state: dict[str, Any]) -> None:
-    """
-    Creates and displays the properties window, used to show R-group counts or related information.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     console_group = dpg.add_group(parent="properties_window", height=-1)
     state["console_group_5"] = console_group   
 
@@ -1121,16 +948,6 @@ def show_properties_windows(state: dict[str, Any]) -> None:
 # 19. Update properties windows
 # -----------------------------------------------------------------------------
 def update_properties_windows(id: Any, state: dict[str, Any]) -> None:
-    """
-    Updates and displays the properties panel based on the selected item:.
-    
-    Args:
-        id (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     # 7.2.0: Guarded refresh with loading overlay
     draw_loading_screen(state, bg=False)
@@ -1575,15 +1392,6 @@ def update_properties_windows(id: Any, state: dict[str, Any]) -> None:
 # 20. Show activities windows
 # -----------------------------------------------------------------------------
 def show_activities_windows(state: dict[str, Any]) -> None:
-    """
-    Creates and displays the properties window, used to show R-group counts or related information.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     console_group = dpg.add_group(parent="activities_window", height=-1)
     state["console_group_8"] = console_group   
 
@@ -1592,16 +1400,6 @@ def show_activities_windows(state: dict[str, Any]) -> None:
 # 21. Update activities windows
 # -----------------------------------------------------------------------------
 def update_activities_windows(id: Any, state: dict[str, Any]) -> Any:
-    """
-    Updates and displays the activities panel based on the selected item:.
-    
-    Args:
-        id (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
 
     # 7.2.0: Guarded refresh with loading overlay
     draw_loading_screen(state, bg=False)
@@ -1911,17 +1709,6 @@ def update_activities_windows(id: Any, state: dict[str, Any]) -> Any:
 # 22. Autoscroll to button
 # -----------------------------------------------------------------------------
 def autoscroll_to_button(sender: Any, app_data: Any, user_data: Any) -> None:
-    """
-    Scrolls the appropriate container to the vertical position of the clicked button.
-    
-    Args:
-        sender (Any): Parameter accepted by this routine.
-        app_data (Any): Parameter accepted by this routine.
-        user_data (Any): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     button_id = user_data
 
     if "scaff_img" in sender:
@@ -1940,17 +1727,6 @@ def autoscroll_to_button(sender: Any, app_data: Any, user_data: Any) -> None:
 # 23. Image click callback
 # -----------------------------------------------------------------------------
 def image_click_callback(sender: Any, app_data: Any, user_data: Any) -> None:
-    """
-    Calls both autoscroll_to_button and export_svg_callback.
-    
-    Args:
-        sender (Any): Parameter accepted by this routine.
-        app_data (Any): Parameter accepted by this routine.
-        user_data (Any): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     smiles_str, state, label_tag, subset = user_data
 
     # call autoscroll
@@ -1984,15 +1760,6 @@ def _bind_compact_image_group_theme(group_tag: str) -> None:
 # 24. Build align checkbox
 # -----------------------------------------------------------------------------
 def build_align_checkbox(state: dict[str, Any]) -> None:
-    """
-    Builds the checkboxes in the molecular image window.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     if not dpg.does_item_exist("overview_align_checkbox"):
         with dpg.group(parent="image_checkboxes_window", before="subset_sorting_mode_combo_group", horizontal=True):
@@ -2017,17 +1784,6 @@ def build_align_checkbox(state: dict[str, Any]) -> None:
 # 25. Toggle overview alignment
 # -----------------------------------------------------------------------------
 def toggle_overview_alignment(sender: Any, app_data: Any, user_data: Any) -> None:
-    """
-    Toggle aligned/non-aligned drawing and redraw last overview item.
-    
-    Args:
-        sender (Any): Parameter accepted by this routine.
-        app_data (Any): Parameter accepted by this routine.
-        user_data (Any): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     state = user_data
     state["overview_align"] = bool(app_data)
     last_id = state.get("overview_last_id")
@@ -2039,17 +1795,6 @@ def toggle_overview_alignment(sender: Any, app_data: Any, user_data: Any) -> Non
 # 26. Toggle overview counts
 # -----------------------------------------------------------------------------
 def toggle_overview_counts(sender: Any, app_data: Any, user_data: Any) -> None:
-    """
-    Toggle R-group frequency labels on/off and redraw.
-    
-    Args:
-        sender (Any): Parameter accepted by this routine.
-        app_data (Any): Parameter accepted by this routine.
-        user_data (Any): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     state = user_data
     state["overview_show_counts"] = bool(app_data)
 
@@ -2062,16 +1807,6 @@ def toggle_overview_counts(sender: Any, app_data: Any, user_data: Any) -> None:
 # 27. Show results window
 # -----------------------------------------------------------------------------
 def show_results_window(id: Any, state: dict[str, Any]) -> None:
-    """
-    Displays the molecular image window based on the selected identifier:.
-    
-    Args:
-        id (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     img_width = state["overview_img_width"]
     img_height = int(img_width * 0.75)
@@ -2252,10 +1987,10 @@ def show_results_window(id: Any, state: dict[str, Any]) -> None:
                     idx = atom.GetProp("molAtomMapNumber")
                     r_name = f"R{idx}"
 
-                    # SMILES effettivo dell’R-group in questa molecola
+                    # R-group SMILES for this molecule.
                     r_smiles = smiles_dict[molecule].get(r_name, "")
 
-                    # frequenza nel subset
+                    # Frequency in the active subset.
                     count = r_counts[r_name].get(r_smiles, 0)
 
                     if state.get("overview_show_counts", False):
@@ -2681,16 +2416,6 @@ def show_results_window(id: Any, state: dict[str, Any]) -> None:
 # 28. Show log p atomic contribution map
 # -----------------------------------------------------------------------------
 def show_logP_atomic_contribution_map(smiles: str, state: dict[str, Any]) -> None:
-    """
-    Generate and display the atomic contribution map of Crippen's logP,.
-    
-    Args:
-        smiles (str): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     
     # 10.1.1: Replace existing molecule image in 'mol_image' window
     for tag in ["gasteiger_legend_text", "logp_legend_text"]:
@@ -2734,16 +2459,6 @@ def show_logP_atomic_contribution_map(smiles: str, state: dict[str, Any]) -> Non
 # 29. Show gasteiger atomic contribution map
 # -----------------------------------------------------------------------------
 def show_gasteiger_atomic_contribution_map(smiles: str, state: dict[str, Any]) -> None:
-    """
-    Generate and display an atomic contribution map of Gasteiger partial charges,.
-    
-    Args:
-        smiles (str): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     # 11.1.1: Replace existing molecule image in 'mol_image' window
     for tag in ["gasteiger_legend_text", "logp_legend_text"]:
         if dpg.does_item_exist(tag):
@@ -2790,16 +2505,6 @@ def show_gasteiger_atomic_contribution_map(smiles: str, state: dict[str, Any]) -
 # 30. Show hba hbd
 # -----------------------------------------------------------------------------
 def show_hba_hbd(smiles: str, state: dict[str, Any]) -> None:
-    """
-    Generate and display a molecule image with H-bond donors and acceptors highlighted.
-    
-    Args:
-        smiles (str): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     # 12.1.1: Clean previous image and legend
     for tag in ["gasteiger_legend_text", "logp_legend_text"]:

@@ -11,7 +11,6 @@ and rehydrates analysis windows when loading an existing job.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Directory selector
@@ -38,17 +37,6 @@ from app.gui.themes_manager import change_font_type
 # 2. Directory selector
 # -----------------------------------------------------------------------------
 def directory_selector(sender: Any, app_data: Any, state: dict[str, Any]) -> None:
-    """
-    Handle directory selection from a file dialog and update application state.
-    
-    Args:
-        sender (Any): Parameter accepted by this routine.
-        app_data (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     selected_dir = app_data["file_path_name"]
     handle_selected_directory(selected_dir, state)
@@ -74,20 +62,16 @@ def handle_selected_directory(selected_dir: str, state: dict[str, Any]) -> None:
     if role == "input":
         state["input_dir"] = selected_dir
         state["settings"]["input_directory"] = selected_dir
-        print(f"Input directory selected: {selected_dir}")
 
     elif role == "output":
         state["output_dir"] = selected_dir
         state["settings"]["results_directory"] = selected_dir
-        print(f"Output directory selected: {selected_dir}")
 
     elif role == "predictions":
         state["predictions_dir"] = selected_dir
         state["settings"]["predictions_directory"] = selected_dir
-        print(f"Predictions directory selected: {selected_dir}")
 
     elif role == "load_results":
-        print(f"Results directory selected: {selected_dir}")
         load_results(selected_dir, state)
 
     with open(state["settings_file"], "w", encoding="utf-8") as f:
@@ -98,16 +82,6 @@ def handle_selected_directory(selected_dir: str, state: dict[str, Any]) -> None:
 # 3. Load results
 # -----------------------------------------------------------------------------
 def load_results(selected_dir: str, state: dict[str, Any]) -> None:
-    """
-    Load an existing analysis job from disk and update application state.
-    
-    Args:
-        selected_dir (str): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     try:
         
@@ -209,17 +183,6 @@ def load_analysis_windows_text(state: dict[str, Any]) -> Any:
     # 4.1. Rebuild window
     # -----------------------------------------------------------------------------
     def _rebuild_window(window_tag: str, entries: Any, add_spacer_before_sep: bool = False) -> Any:
-        """
-        Execute the rebuild window routine.
-        
-        Args:
-            window_tag (Any): Parameter accepted by this routine.
-            entries (Any): Parameter accepted by this routine.
-            add_spacer_before_sep (Any): Parameter accepted by this routine. Defaults to the configured value.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         if not dpg.does_item_exist(window_tag):
             return 0
         try:

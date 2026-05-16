@@ -10,7 +10,6 @@ activity differences, needed to build the MMPA distribution plots.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Run mmpa delta precompute
@@ -49,19 +48,6 @@ def run_mmpa_delta_precompute(
     min_delta: float = 0.0,
     bins: int = 50
 ) -> None:
-    """
-    Pre-compute the distribution of ΔpValue MMPA for ALL activities in the dataset.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-        include_undefined (Any): Parameter accepted by this routine. Defaults to the configured value.
-        include_inactive (Any): Parameter accepted by this routine. Defaults to the configured value.
-        min_delta (Any): Parameter accepted by this routine. Defaults to the configured value.
-        bins (Any): Parameter accepted by this routine. Defaults to the configured value.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     log_event("LMM", "Precomputing MMPA delta-activity distributions", indent=1)
     log_settings("LMM", indent=2, include_undefined=include_undefined, include_inactive=include_inactive, min_delta=min_delta, bins=bins)
     update_rga_status(f"MMPA Δactivity precomputation started ...", state, step_id=True)
@@ -121,20 +107,6 @@ def run_mmpa_delta_precompute_single_activity(
     min_delta: float = 0.0,
     bins: int = 50
 ) -> None:
-    """
-    Execute ΔpValue pre-computation for ONE activity across all subsets.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-        activity (str): Parameter accepted by this routine.
-        include_undefined (Any): Parameter accepted by this routine. Defaults to the configured value.
-        include_inactive (Any): Parameter accepted by this routine. Defaults to the configured value.
-        min_delta (Any): Parameter accepted by this routine. Defaults to the configured value.
-        bins (Any): Parameter accepted by this routine. Defaults to the configured value.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     log_event("LMM", f"Processing activity '{activity}' for MMPA precomputation", indent=2)
     log_settings("LMM", indent=3, activity=activity, include_undefined=include_undefined, include_inactive=include_inactive, min_delta=min_delta, bins=bins)
     summary_dir = state["summary_dir"]
@@ -233,14 +205,12 @@ def _load_bioactivity_types_from_json(work_dir: str) -> Any:
     if not os.path.isfile(json_path):
         json_path = os.path.join(work_dir, "results.srf")
     if not os.path.isfile(json_path):
-        print(f"[MMPA-Δ] JSON not found: {json_path}")
         return []
 
     try:
         with open(json_path, "r", encoding="utf-8") as f:
             data = json.load(f)
-    except Exception as e:
-        print(f"[MMPA-Δ] Error reading JSON: {e}")
+    except Exception:
         return []
 
     bio = data.get("bioact_types_dict", {})
@@ -408,15 +378,6 @@ def _compute_all_pair_deltas(df_agg: Any, r_cols: Any, min_delta: float = 0.0) -
     # 8.1. Count two dummies
     # -----------------------------------------------------------------------------
     def _count_two_dummies(smi: Any) -> Any:
-        """
-        Execute the count two dummies routine.
-        
-        Args:
-            smi (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         return smi.count("[*:") >= 2
 
     n = len(df_agg)

@@ -11,7 +11,6 @@ calculate Bemis-Murcko scaffold's minimal substructures, performs substructure c
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Scaffold analysis
@@ -62,15 +61,6 @@ def _murcko_scaffold_cached(mol: Any, cache: dict[int, Any]) -> Any:
 # 2. Scaffold analysis
 # -----------------------------------------------------------------------------
 def scaffold_analysis(state: dict[str, Any]) -> Any:
-    """
-    Perform scaffold-based analysis and clustering of the molecular dataset.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
 
     checkbox_states = state["checkbox_states"]               
     selected_file = state["selected_file_name"]            
@@ -200,15 +190,6 @@ def scaffold_analysis(state: dict[str, Any]) -> Any:
                 return
 
         def generalize_connectivity_from_core(core: Any) -> Any:
-            """
-            Execute the generalize connectivity from core routine.
-            
-            Args:
-                core (Any): Input accepted by this routine.
-            
-            Returns:
-                Any: Value returned by the routine.
-            """
             try:
                 if core is None:
                     return None
@@ -221,15 +202,6 @@ def scaffold_analysis(state: dict[str, Any]) -> Any:
 
 
         def topo_key(gen_mol: Any) -> Any:
-            """
-            Build a canonical topology-only key from a 'generalized' mol:.
-            
-            Args:
-                gen_mol (Any): Input accepted by this routine.
-            
-            Returns:
-                Any: Value returned by the routine.
-            """
 
             if gen_mol is None:
                 return None
@@ -376,7 +348,6 @@ def scaffold_analysis(state: dict[str, Any]) -> Any:
         append_to_log(state, f"{len(murcko_smiles)} unique scaffolds extracted from {len(suppl)} molecules")
         update_scaffold_analysis_status(f"   {len(murcko_smiles)} unique scaffolds\n   extracted from {len(suppl)} molecules", state)
 
-        # --- STEP 1.1: COMPUTE SCAFFOLD DOMINANCE INDEX (DI) ---
         # Combine richness and dominance signals to quantify scaffold concentration and diversity.
         def compute_scaffold_dominance_index(
             scaffold_freqs: Any,
@@ -892,16 +863,6 @@ def scaffold_analysis(state: dict[str, Any]) -> Any:
 # 3. Calculate minimal substructures
 # -----------------------------------------------------------------------------
 def calculate_minimal_substructures(murcko_smiles: str, state: dict[str, Any]) -> Any:
-    """
-    Execute the calculate minimal substructures routine.
-    
-    Args:
-        murcko_smiles (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     append_to_log(state, "Identifying minimal substructures...")
     update_scaffold_analysis_status("IDENTIFYING MINIMAL SUBSTRUCTURES", state, step_id=True)
 

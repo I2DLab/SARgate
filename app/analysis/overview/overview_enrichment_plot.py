@@ -7,7 +7,6 @@ Overview Enrichment Plot Functions
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Update enrich colorbar labels
@@ -36,15 +35,6 @@ from app.analysis.overview.overview_global_ranges import show_all_subsets_activi
 # 2. Update enrich colorbar labels
 # -----------------------------------------------------------------------------
 def _update_enrich_colorbar_labels(state: dict[str, Any]) -> None:
-    """
-    Update colorbar labels using BOTH global and R-group counts.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     gmax = state.get("global_activity_max_count")
     gmin = state.get("global_activity_min_count")
     rmax = state.get("rgroup_max_count")
@@ -69,16 +59,6 @@ def _update_enrich_colorbar_labels(state: dict[str, Any]) -> None:
 # 3. Draw global activity bar
 # -----------------------------------------------------------------------------
 def draw_global_activity_bar(id: Any, state: dict[str, Any]) -> None:
-    """
-    Draws the global activity vertical bars using the SAME logic.
-    
-    Args:
-        id (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     q = id.split("_")
     subset = f"{q[0]}_{q[1]}"
 
@@ -144,16 +124,6 @@ def draw_global_activity_bar(id: Any, state: dict[str, Any]) -> None:
 # 4. Build enrichment layout
 # -----------------------------------------------------------------------------
 def build_enrichment_layout(id: Any, state: dict[str, Any]) -> Any:
-    """
-    Builds both plots (global upper bar + empty lower bar).
-    
-    Args:
-        id (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     state["current_enrichment_id"] = id
 
     q = id.split("_")
@@ -237,15 +207,6 @@ def build_enrichment_layout(id: Any, state: dict[str, Any]) -> Any:
         tick_values = [10**p for p in range(pmin, pmax+1)]
 
         def fmt(v: Any) -> Any:
-            """
-            Execute the fmt routine.
-            
-            Args:
-                v (Any): Input accepted by this routine.
-            
-            Returns:
-                Any: Value returned by the routine.
-            """
             if v < 1:
                 return f"{v*1000:g} pM"
             elif v < 1000:
@@ -471,16 +432,6 @@ def build_enrichment_layout(id: Any, state: dict[str, Any]) -> Any:
 # 5. Update enrichment rgroup
 # -----------------------------------------------------------------------------
 def update_enrichment_Rgroup(id: Any, state: dict[str, Any]) -> None:
-    """
-    Updates ONLY the lower enrichment plot when an R-group is selected.
-    
-    Args:
-        id (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     query = id.split("_")
     subset = f"{query[0]}_{query[1]}"

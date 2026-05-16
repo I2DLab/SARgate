@@ -12,7 +12,6 @@ to keep layout calculations consistent across the application.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Capture screen metrics
@@ -54,11 +53,9 @@ def get_screen_size(state: dict[str, Any]) -> None:
     except Exception:
         sw, sh = 1920, 1080
 
-    # --- STEP 2.1: Store screen dimensions ---
     state["screen_width"] = sw
     state["screen_height"] = sh
 
-    # --- STEP 2.2: Compute the base window spacer ---
     state["win_spacer"] = int(sw / 288)
 
 
@@ -120,26 +117,22 @@ def setup_viewport(state: dict[str, Any], home_dir: str, title: str = "SARgate")
             vw = dpg.get_viewport_client_width() or dpg.get_viewport_width()
             vh = dpg.get_viewport_client_height() or dpg.get_viewport_height()
 
-            # --- STEP 3.1.1: Compare with the previous frame ---
             if state["_last_vw"] is None:
                 state["_last_vw"], state["_last_vh"] = vw, vh
                 dpg.set_frame_callback(dpg.get_frame_count() + 1, _probe)
                 return
 
             if vw == state["_last_vw"] and vh == state["_last_vh"]:
-                # --- STEP 3.1.2: Count consecutive identical frames ---
                 state["_stable_counter"] += 1
             else:
                 state["_stable_counter"] = 0
                 state["_last_vw"], state["_last_vh"] = vw, vh
 
-            # --- STEP 3.1.3: Freeze design reference dimensions when stable ---
             if state["_stable_counter"] >= n_same_frames:
                 state["design_ref_width"] = int(vw)
                 state["design_ref_height"] = int(vh)
                 state["_viewport_ready"] = True
 
-                # --- STEP 3.1.4: Align the main window if it already exists ---
                 if dpg.does_item_exist("main_window"):
                     dpg.configure_item("main_window", width=int(vw), height=int(vh))
                 return
@@ -163,24 +156,19 @@ def setup_viewport(state: dict[str, Any], home_dir: str, title: str = "SARgate")
         viewport_kwargs["small_icon"] = icon_path
         viewport_kwargs["large_icon"] = icon_path
 
-    # --- STEP 3.1: Create the viewport ---
     dpg.create_viewport(**viewport_kwargs)
 
-    # --- STEP 3.2: Set up and show the viewport ---
     dpg.setup_dearpygui()
     dpg.configure_app()
     dpg.show_viewport()
 
-    # --- STEP 3.3: Maximize the viewport ---
     dpg.maximize_viewport()
 
-    # --- STEP 3.4: Initialize viewport stability flags ---
     state["_viewport_ready"] = False
     state["_stable_counter"] = 0
     state["_last_vw"] = None
     state["_last_vh"] = None
 
-    # --- STEP 3.5: Start the viewport stability watcher ---
     _start_viewport_stable_watch(state, n_same_frames=10)
 
 
@@ -204,18 +192,15 @@ def setup_main_window(state: dict[str, Any]) -> None:
     dpg.set_viewport_min_width(int(live_vw / 2))
     dpg.set_viewport_min_height(int(live_vh / 2))
 
-    # --- STEP 4.1: Use a provisional design reference when needed ---
     if not state.get("_viewport_ready"):
         state["design_ref_width"] = int(live_vw)
         state["design_ref_height"] = int(live_vh)
 
-    # --- STEP 4.2: Compute the main window geometry ---
     vw = int(state["design_ref_width"])
     vh = int(state["design_ref_height"])
     win_w = max(1, vw)
     win_h = max(1, vh)
 
-    # --- STEP 4.3: Create the main window ---
     dpg.add_window(
         label="Main Window",
         width=vw,
@@ -254,7 +239,6 @@ def setup_main_window(state: dict[str, Any]) -> None:
         vw = dpg.get_viewport_client_width() or dpg.get_viewport_width()
         vh = dpg.get_viewport_client_height() or dpg.get_viewport_height()
 
-        # --- STEP 4.4.1: Update the main window geometry ---
         dpg.configure_item("main_window", width=int(vw), height=int(vh))
         try:
             if callable(state.get("redraw_main_frame_overlay")):
@@ -285,7 +269,6 @@ def setup_main_window(state: dict[str, Any]) -> None:
             Returns:
                 None: This callback updates responsive UI assets in place.
             """
-            # --- STEP 4.4.2: Refresh responsive images ---
             update_responsive_images(user_data)
 
         dpg.set_frame_callback(dpg.get_frame_count() + 1, _resize_cb, user_data=state)
@@ -294,7 +277,6 @@ def setup_main_window(state: dict[str, Any]) -> None:
     dpg.set_frame_callback(dpg.get_frame_count() + 2, _on_viewport_resize)
     dpg.set_viewport_resize_callback(_on_viewport_resize)
 
-    # --- STEP 4.5: Persist the initial main window geometry ---
     state["main_win_width"] = win_w
     state["main_win_height"] = win_h
     state["main_win_y"] = 0

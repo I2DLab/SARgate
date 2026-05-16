@@ -11,7 +11,6 @@ and starts GUI tabs for further analysis.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Save analysis tab windows text
@@ -72,15 +71,6 @@ from app.utils.app_logger import log_event, log_settings, log_exception, log_tra
 # 2. Save analysis tab windows text
 # -----------------------------------------------------------------------------
 def save_analysis_tab_windows_text(state: dict[str, Any]) -> Any:
-    """
-    Save the texts shown in the three consoles into <work_dir>/results.sof.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     json_path = os.path.join(state["work_dir"], "results.sof")
     if not os.path.exists(json_path):
         json_path = os.path.join(state["work_dir"], "results.srf")
@@ -119,15 +109,6 @@ def save_analysis_tab_windows_text(state: dict[str, Any]) -> Any:
 # 3. Save properties dictionaries
 # -----------------------------------------------------------------------------
 def save_properties_dictionaries(state: dict[str, Any]) -> None:
-    """
-    Extract and persist molecular properties and activity metadata for downstream analysis.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     state["file_name"] = state["selected_file_name"][:-4]                
     checkbox_states = state["checkbox_states"]                            
@@ -315,15 +296,6 @@ def save_properties_dictionaries(state: dict[str, Any]) -> None:
 # 4. Open overview tab
 # -----------------------------------------------------------------------------
 def open_overview_tab(state: dict[str, Any]) -> None:
-    """
-    Build and initialise all GUI tabs related to overview outputs and auxiliary analyses.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     for tab in ["analysis_tab", "overview_tab", "r_analysis_tab", "similarity_tab",
                 "stereo_tab", "mmpa_tab", "chemspace_tab", "prediction_tab"]:

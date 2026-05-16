@@ -16,7 +16,6 @@ This module:
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Run landscape analysis
@@ -41,15 +40,6 @@ from app.analysis.similarity.sal_plot import draw_landscape_plot
 # 2. Run landscape analysis
 # -----------------------------------------------------------------------------
 def run_landscape_analysis(state: dict[str, Any]) -> Any:
-    """
-    Execute the SAR Landscape analysis and update the plot.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     log_event("Similarity", "Computing Structure-Activity Landscape data", indent=1)
 
     subset = dpg.get_value("landscape_subset_choice")
@@ -94,18 +84,6 @@ def run_landscape_analysis(state: dict[str, Any]) -> Any:
         read_undefined: bool,
         read_inactives: bool
     ) -> Any:
-        """
-        Parse activity series.
-        
-        Args:
-            df (pd.DataFrame): Parameter accepted by this routine.
-            activity_col (Any): Parameter accepted by this routine.
-            read_undefined (Any): Parameter accepted by this routine.
-            read_inactives (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         s = df[activity_col].copy()
         if read_undefined:
             s = s.astype(str)
@@ -148,15 +126,6 @@ def run_landscape_analysis(state: dict[str, Any]) -> Any:
     # 2.2. Mol from smiles
     # -----------------------------------------------------------------------------
     def _mol_from_smiles(smi: Any) -> Any:
-        """
-        Execute the mol from smiles routine.
-        
-        Args:
-            smi (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         try:
             return Chem.MolFromSmiles(smi)
         except Exception:
@@ -166,16 +135,6 @@ def run_landscape_analysis(state: dict[str, Any]) -> Any:
     # 2.3. Fingerprint
     # -----------------------------------------------------------------------------
     def _fingerprint(mol: Any, choice: str) -> Any:
-        """
-        Execute the fingerprint routine.
-        
-        Args:
-            mol (Chem.Mol): Parameter accepted by this routine.
-            choice (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         if mol is None:
             return None
         morgan_fp_gen = GetMorganGenerator(radius=2, fpSize=2048, includeChirality=True)
@@ -229,16 +188,6 @@ def run_landscape_analysis(state: dict[str, Any]) -> Any:
     # 2.4. Delta p
     # -----------------------------------------------------------------------------
     def _delta_p(a: Any, b: Any) -> Any:
-        """
-        Execute the delta p routine.
-        
-        Args:
-            a (Any): Parameter accepted by this routine.
-            b (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         return float(abs(math.log10(b) - math.log10(a)))
 
     fps = list(work["FP"])

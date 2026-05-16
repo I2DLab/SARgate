@@ -12,7 +12,6 @@ detection for CSV/TXT e gestione robusta dei file Excel (XLSX).
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Detect separator
@@ -39,15 +38,6 @@ from app.lmm.lmm_file_reader import _read_excel_robust
 # 2. Detect separator
 # -----------------------------------------------------------------------------
 def detect_separator(file_path: str) -> Any:
-    """
-    Detect separator for CSV/TSV/TXT. For Excel returns None.
-    
-    Args:
-        file_path (str): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     ext = os.path.splitext(file_path)[1].lower()
     if ext == ".xlsx":
         return None
@@ -66,16 +56,6 @@ def detect_separator(file_path: str) -> Any:
 # 4. Toggle log flag
 # -----------------------------------------------------------------------------
 def toggle_log_flag(col: Any, state: dict[str, Any]) -> None:
-    """
-    Show/hide the 'log' checkbox and sync state['activity_columns'].
-    
-    Args:
-        col (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     col_tag = f"chk_{col}"
     log_tag = f"log_flag_{col}"
     is_selected = dpg.get_value(col_tag)
@@ -94,16 +74,6 @@ def toggle_log_flag(col: Any, state: dict[str, Any]) -> None:
 # 5. Update log flag
 # -----------------------------------------------------------------------------
 def update_log_flag(col: Any, state: dict[str, Any]) -> None:
-    """
-    Update stored 'log'/'lin' for a given activity column.
-    
-    Args:
-        col (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     for idx, (c, _) in enumerate(state["activity_columns"]):
         if c == col:
             state["activity_columns"][idx] = (col, "log" if dpg.get_value(f"log_flag_{col}") else "lin")
@@ -118,31 +88,12 @@ def update_log_flag(col: Any, state: dict[str, Any]) -> None:
 # 6. Show csv column selector
 # -----------------------------------------------------------------------------
 def show_csv_column_selector(state: dict[str, Any], file_path: str) -> Any:
-    """
-    Display a popup window to select columns from a CSV/TSV/TXT/XLSX file.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-        file_path (str): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
 
     # --- Helpers -------------------------------------------------------------
     # -----------------------------------------------------------------------------
     # 6.1. Is likely logarithmic
     # -----------------------------------------------------------------------------
     def is_likely_logarithmic(values: Any) -> Any:
-        """
-        Heuristically determine if a column of values appears to be on a log scale.
-        
-        Args:
-            values (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         try:
             numeric_vals = pd.to_numeric(values.dropna())
             if numeric_vals.empty:
@@ -202,16 +153,6 @@ def show_csv_column_selector(state: dict[str, Any], file_path: str) -> Any:
     # 6.3. Set activity mode
     # -----------------------------------------------------------------------------
     def set_activity_mode(mode: str, state: dict[str, Any]) -> None:
-        """
-        Set the selected activity format mode and update the checkbox layout.
-        
-        Args:
-            mode (Any): Parameter accepted by this routine.
-            state (dict[str, Any]): Parameter accepted by this routine.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         if mode == "":
             dpg.set_value("no_activity_checkbox", True)
             dpg.set_value("chembl_checkbox", False)
@@ -251,15 +192,6 @@ def show_csv_column_selector(state: dict[str, Any], file_path: str) -> Any:
     # 6.4. Show excel fix popup
     # -----------------------------------------------------------------------------
     def _show_excel_fix_popup(msg: str) -> None:
-        """
-        Display excel fix popup.
-        
-        Args:
-            msg (str): Parameter accepted by this routine.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         if dpg.does_item_exist("excel_fix_popup"):
             dpg.delete_item("excel_fix_popup")
         with dpg.window(
@@ -516,15 +448,6 @@ def show_csv_column_selector(state: dict[str, Any], file_path: str) -> Any:
 # 7. Confirm csv column selection
 # -----------------------------------------------------------------------------
 def confirm_csv_column_selection(state: dict[str, Any]) -> None:
-    """
-    Persist selected combos and activity choices into state, then close the popup.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     for combo in [
         "smiles_combo", "molname_combo", "chembl_id_combo", "pubchem_cid_combo",
         "chembl_assay_id_combo", "pubchem_aid_combo", "assay_desc_combo", "assay_type_combo",
@@ -535,11 +458,10 @@ def confirm_csv_column_selection(state: dict[str, Any]) -> None:
         state[combo.replace("_combo", "_column")] = dpg.get_value(combo)
 
     if state["smiles_column"] == "":
-        print("❌ No SMILES column selected.")
         return
     
     if state["activity_mode"] == "chembl":
-        # Descerne which source is used:
+        # Determine which source is used:
         # - ChEMBL true: columns Standard Type/Relation/Value/Units
         # - PubChem: Activity_Type / Activity_Qualifier / Activity_Value (+ fixed unit uM)
         src = state.get("activity_source", "chembl")
@@ -579,7 +501,6 @@ def confirm_csv_column_selection(state: dict[str, Any]) -> None:
                 is_log = dpg.get_value(log_tag) if dpg.does_item_exist(log_tag) else False
                 results.append((col, "log" if is_log else "lin"))
         if not results:
-            print("❌ No activity columns selected.")
             return
         state["activity_columns"] = results
 
@@ -592,15 +513,6 @@ def confirm_csv_column_selection(state: dict[str, Any]) -> None:
     # 7.1. Show confirm
     # -----------------------------------------------------------------------------
     def _show_confirm(_: Any = None) -> None:
-        """
-        Display confirm.
-        
-        Args:
-            _ (Any): Parameter accepted by this routine. Defaults to the configured value.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         show_library_table_confirm_popup(state)
 
     dpg.set_frame_callback(dpg.get_frame_count() + 1, _show_confirm)
@@ -610,15 +522,6 @@ def confirm_csv_column_selection(state: dict[str, Any]) -> None:
 # 8. Click cancel button
 # -----------------------------------------------------------------------------
 def click_cancel_button(state: dict[str, Any]) -> None:
-    """
-    Reset selection and close popup.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     dpg.set_value("file_name_text", "No selected file")
     if dpg.does_item_exist("library_table_window_inner"):
         dpg.delete_item("library_table_window_inner")

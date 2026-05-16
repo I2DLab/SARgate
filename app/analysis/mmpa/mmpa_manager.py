@@ -11,7 +11,6 @@ thresholds, transformation filtering, and summary statistics.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Show mmpa window
@@ -33,15 +32,6 @@ from app.analysis.mmpa.mmpa_network import clear_mmpa_network_memory
 # 2. Show mmpa window
 # -----------------------------------------------------------------------------
 def show_mmpa_window(state: dict[str, Any]) -> None:
-    """
-    Displays the GUI panel for R-based Matched Molecular Pairs Analysis (MMPA).
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     def _refresh_mmpa_delta_thresh_slider(selected_activity: Any, selected_subset: Any, state: dict[str, Any], reset_value: bool) -> None:
         tag = "mmpa_delta_thresh"
@@ -88,17 +78,6 @@ def show_mmpa_window(state: dict[str, Any]) -> None:
     # 2.1. Update mmpa options
     # -----------------------------------------------------------------------------
     def update_mmpa_options(sender: Any, app_data: Any, user_data: Any) -> None:
-        """
-        Updates the available activity types and shows/hides the MMPA button based on the selected subset.
-        
-        Args:
-            sender (Any): Parameter accepted by this routine.
-            app_data (Any): Parameter accepted by this routine.
-            user_data (Any): Parameter accepted by this routine.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         
         subset = app_data
         bioact_types_dict = user_data["bioact_types_dict"]
@@ -132,17 +111,6 @@ def show_mmpa_window(state: dict[str, Any]) -> None:
     # 2.2. Update mmpa delta thresh
     # -----------------------------------------------------------------------------
     def update_mmpa_delta_thresh(sender: Any, app_data: Any, user_data: Any) -> None:
-        """
-        Adjusts the delta threshold input (label, format, limits, default) based on the selected activity type.
-        
-        Args:
-            sender (Any): Parameter accepted by this routine.
-            app_data (Any): Parameter accepted by this routine.
-            user_data (Any): Parameter accepted by this routine.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
 
         selected_activity = app_data
         state = user_data
@@ -228,15 +196,6 @@ def show_mmpa_window(state: dict[str, Any]) -> None:
 # 3. Try run mmpa analysis
 # -----------------------------------------------------------------------------
 def try_run_mmpa_analysis(state: dict[str, Any]) -> None:
-    """
-    Wrapper to run the MMPA analysis with error handling.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     log_event("MMPA", "Submitting MMPA analysis request", indent=1)
     clear_mmpa_network_memory(state, clear_plot=True)
     for tag in ["mmpa_table", "r1_label", "r2_label", "rmolA_label", "molB_label", 

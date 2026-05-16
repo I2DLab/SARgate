@@ -19,7 +19,6 @@ over the shared mutable application state (`state`).
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. On plot click
@@ -54,17 +53,6 @@ from rdkit.Chem.Draw import rdMolDraw2D, SimilarityMaps
 # 2. On plot click
 # -----------------------------------------------------------------------------
 def _on_plot_click(sender: Any, app_data: Any, user_data: Any) -> None:
-    """
-    Execute the on plot click routine.
-    
-    Args:
-        sender (Any): Parameter accepted by this routine.
-        app_data (Any): Parameter accepted by this routine.
-        user_data (Any): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     landscape_x_axis = "landscape_x_axis"
     landscape_y_axis = "landscape_y_axis"
     state = user_data
@@ -147,15 +135,6 @@ def _on_plot_click(sender: Any, app_data: Any, user_data: Any) -> None:
 # 3. Get sali thresh linear
 # -----------------------------------------------------------------------------
 def _get_sali_thresh_linear(state: dict[str, Any]) -> float:
-    """
-    Return sali thresh linear.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        float: Value produced by the routine.
-    """
     try:
         t = float(dpg.get_value("landscape_sali_index_thresh"))
     except Exception:
@@ -186,17 +165,6 @@ def _get_sali_thresh_linear(state: dict[str, Any]) -> float:
 # 4. Update landscape scatter
 # -----------------------------------------------------------------------------
 def _update_landscape_scatter(bin_edges: Any, N_COL: Any, state: dict[str, Any]) -> None:
-    """
-    Update landscape scatter.
-    
-    Args:
-        bin_edges (Any): Parameter accepted by this routine.
-        N_COL (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     # if dpg.is_mouse_button_dragging(dpg.mvMouseButton_Left, 1.0):
     #     return
     
@@ -268,18 +236,6 @@ def _update_landscape_scatter(bin_edges: Any, N_COL: Any, state: dict[str, Any])
 # 5. Render mol with legend
 # -----------------------------------------------------------------------------
 def _render_mol_with_legend(mol: Any, w: Any, h: Any, legend_text: str) -> Any:
-    """
-    Execute the render mol with legend routine.
-    
-    Args:
-        mol (Chem.Mol): Parameter accepted by this routine.
-        w (int): Parameter accepted by this routine.
-        h (int): Parameter accepted by this routine.
-        legend_text (str): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     # Empty image fallback if `mol` is None
     if mol is None:
         arr = np.zeros((h, w, 4), dtype=np.float32)
@@ -309,15 +265,6 @@ def _render_mol_with_legend(mol: Any, w: Any, h: Any, legend_text: str) -> Any:
 # 6. Simmap fp lambda from choice
 # -----------------------------------------------------------------------------
 def _simmap_fp_lambda_from_choice(choice: str) -> Any:
-    """
-    Execute the simmap fp lambda from choice routine.
-    
-    Args:
-        choice (str): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     if choice == "Morgan Fingerprint":
         return GetMorganGenerator(radius=2, fpSize=2048, includeChirality=True)
     elif choice == "RDKit Fingerprint":
@@ -341,20 +288,6 @@ def _render_similarity_map_for_fp(
     fp_func: Any,
     legend_text: str
 ) -> Any:
-    """
-    Execute the render similarity map for fp routine.
-    
-    Args:
-        ref_mol (Chem.Mol): Parameter accepted by this routine.
-        probe_mol (Any): Parameter accepted by this routine.
-        w (int): Parameter accepted by this routine.
-        h (int): Parameter accepted by this routine.
-        fp_func (Any): Parameter accepted by this routine.
-        legend_text (str): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     if ref_mol is None or probe_mol is None or fp_func is None:
         arr = np.zeros((h, w, 4), dtype=np.float32)
         return arr.ravel().tolist()
@@ -399,17 +332,6 @@ def _render_similarity_map_for_fp(
 # 8. Fmt activity display
 # -----------------------------------------------------------------------------
 def _fmt_activity_display(val: Any, label: str, state: dict[str, Any]) -> Any:
-    """
-    Execute the fmt activity display routine.
-    
-    Args:
-        val (Any): Parameter accepted by this routine.
-        label (str): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     # p-type (use your configured key: "nM_activity_types")
     if label in state.get("nM_activity_types", set()):
         try:
@@ -439,16 +361,6 @@ def _fmt_activity_display(val: Any, label: str, state: dict[str, Any]) -> Any:
 # 9. Update molecule panel
 # -----------------------------------------------------------------------------
 def _update_molecule_panel(idx_pair: Any, state: dict[str, Any]) -> None:
-    """
-    Update molecule panel.
-    
-    Args:
-        idx_pair (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     landscape_img_width = state["landscape_img_width"]
     landscape_img_height = round(landscape_img_width / 4 * 3)
     landscape_render_scale = 1.8
@@ -503,17 +415,6 @@ def _update_molecule_panel(idx_pair: Any, state: dict[str, Any]) -> None:
 # 10. Draw similarity maps
 # -----------------------------------------------------------------------------
 def _draw_similarity_maps(sender: Any, app_data: Any, user_data: Any) -> None:
-    """
-    Draw similarity maps.
-    
-    Args:
-        sender (Any): Parameter accepted by this routine.
-        app_data (Any): Parameter accepted by this routine.
-        user_data (Any): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     state = user_data
     last = state.get("landscape_last_pair")
     work = state.get("landscape_work_df")
@@ -580,17 +481,6 @@ def _draw_similarity_maps(sender: Any, app_data: Any, user_data: Any) -> None:
 # 11. Hide similarity maps
 # -----------------------------------------------------------------------------
 def _hide_similarity_maps(sender: Any, app_data: Any, user_data: Any) -> None:
-    """
-    Execute the hide similarity maps routine.
-    
-    Args:
-        sender (Any): Parameter accepted by this routine.
-        app_data (Any): Parameter accepted by this routine.
-        user_data (Any): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     state = user_data
     last_idx = state.get("landscape_last_pair_idx", None)
     if last_idx is not None:

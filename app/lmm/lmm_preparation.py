@@ -12,7 +12,6 @@ analyses within SARgate.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Library preparation
@@ -36,15 +35,6 @@ from app.lmm.lmm_activity_curation import calculate_pvalue
 # 2. Library preparation
 # -----------------------------------------------------------------------------
 def library_preparation(state: dict[str, Any]) -> Any:
-    """
-    Prepare the molecular library for downstream analysis.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
 
     checkbox_states = state["checkbox_states"]
     input_name = state["selected_file_name"]
@@ -203,7 +193,7 @@ def library_preparation(state: dict[str, Any]) -> Any:
         return parts[0].strip() if parts else None
 
 
-    ## === STEP 1a: REMOVE DUPLICATES AND AGGREGATE PROPERTIES ===
+    # Merge duplicate structures while preserving all activity entries.
     if duplicates_mode == "Keep one entry with multiple activities":
         update_library_preparation_status("REMOVING DUPLICATES", state, step_id=True)
         merged = defaultdict(list)
@@ -250,7 +240,7 @@ def library_preparation(state: dict[str, Any]) -> Any:
             append_to_log(state, f"The cleaned dataset {input_name} contains {len(suppl)} compounds.")
 
 
-    ## === STEP 1b: REMOVE DUPLICATES AND KEEP BEST ACTIVITY PER TYPE (WITH MATCHED pValue) ===
+    # Merge duplicate structures and keep the best activity for each type.
     elif duplicates_mode == "Keep one entry with the best activity":
         update_library_preparation_status("REMOVING DUPLICATES (BEST ACTIVITY)", state, step_id=True)
         append_to_log(state, f"{len(unprep_suppl)} molecules before merging identical structures")
@@ -263,15 +253,6 @@ def library_preparation(state: dict[str, Any]) -> Any:
         pval_val_re = re.compile(r'^\s*([^\s]+)\s*=\s*([0-9]+(?:\.[0-9]+)?)\s*$')                     # "pEC50 = 6.8239"
 
         def parse_activity(s: Any) -> Any:
-            """
-            Parse activity.
-            
-            Args:
-                s (Any): Input accepted by this routine.
-            
-            Returns:
-                Any: Value returned by the routine.
-            """
             m = act_val_re.match(str(s))
             if not m:
                 return None
@@ -279,15 +260,6 @@ def library_preparation(state: dict[str, Any]) -> Any:
             return typ, rel, val, unit
 
         def parse_pvalue(s: Any) -> Any:
-            """
-            Parse pvalue.
-            
-            Args:
-                s (Any): Input accepted by this routine.
-            
-            Returns:
-                Any: Value returned by the routine.
-            """
             m = pval_val_re.match(str(s))
             if not m:
                 return None
@@ -396,7 +368,7 @@ def library_preparation(state: dict[str, Any]) -> Any:
             append_to_log(state, f"The cleaned dataset {input_name} contains {len(suppl)} compounds.")
                                     
 
-    ## === STEP 1c: REMOVE DUPLICATES AND KEEP AVERAGE ACTIVITY PER TYPE (RECOMPUTE pValue) ===
+    # Merge duplicate structures and average activities by type.
     elif duplicates_mode == "Keep one entry with average activities":
         update_library_preparation_status("REMOVING DUPLICATES (AVERAGE ACTIVITIES)", state, step_id=True)
         append_to_log(state, f"{len(unprep_suppl)} molecules before merging identical structures")
@@ -406,15 +378,6 @@ def library_preparation(state: dict[str, Any]) -> Any:
         pval_key_re = re.compile(r'^(pValue|p_Value)(?:_(\d+))?$')
         act_val_re = re.compile(r'^\s*(.+?)\s*([<>]=?|=)\s*([0-9]+(?:\.[0-9]+)?)\s*([^\s]+)\s*$')
         def parse_activity(s: Any) -> Any:
-            """
-            Parse activity.
-            
-            Args:
-                s (Any): Input accepted by this routine.
-            
-            Returns:
-                Any: Value returned by the routine.
-            """
             m = act_val_re.match(str(s))
             if not m:
                 return None
@@ -514,7 +477,7 @@ def library_preparation(state: dict[str, Any]) -> Any:
             append_to_log(state, f"The cleaned dataset {input_name} contains {len(suppl)} compounds.")
                                     
                         
-    ## === STEP 1d: KEEP DUPLICATES SEPARATED (NO MERGE) ===
+    # Keep duplicate structures as separate entries.
     elif duplicates_mode == "Keep duplicates separated":
         update_library_preparation_status("KEEPING DUPLICATES SEPARATED", state, step_id=True)
         # No aggregation: shallow-copy valid molecules
@@ -633,15 +596,6 @@ def library_preparation(state: dict[str, Any]) -> Any:
             print(f"[StructSim] Warning: SanitizeMol failed but MolBlock may still be usable: {e}")
 
         def murcko_generalized(m: Any) -> Any:
-            """
-            Execute the murcko generalized routine.
-            
-            Args:
-                m (Any): Input accepted by this routine.
-            
-            Returns:
-                Any: Value returned by the routine.
-            """
             try:
                 core = MurckoScaffold.GetScaffoldForMol(m)
                 if core is None:

@@ -12,7 +12,6 @@ Notes directly on the scaffold at R-group anchor positions:
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Define module configuration and shared state
@@ -69,16 +68,6 @@ NOTES_DEFAULT_PAD_FRAC = 0.25
 # 3. Hex to rgba
 # -----------------------------------------------------------------------------
 def _hex_to_rgba(hex_str: Any, a: float = 1.0) -> Any:
-    """
-    Execute the hex to rgba routine.
-    
-    Args:
-        hex_str (Any): Parameter accepted by this routine.
-        a (Any): Parameter accepted by this routine. Defaults to the configured value.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     hex_str = hex_str.lstrip("#")
     r = int(hex_str[0:2], 16) / 255.0
     g = int(hex_str[2:4], 16) / 255.0
@@ -97,18 +86,6 @@ PALETTE_RN = [
 # 4. Rgba f to u8
 # -----------------------------------------------------------------------------
 def _rgba_f_to_u8(r: Any, g: Any, b: Any, a: float = 1.0) -> Any:
-    """
-    Execute the rgba f to u8 routine.
-    
-    Args:
-        r (Any): Parameter accepted by this routine.
-        g (Any): Parameter accepted by this routine.
-        b (Any): Parameter accepted by this routine.
-        a (Any): Parameter accepted by this routine. Defaults to the configured value.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     return (int(r*255), int(g*255), int(b*255), int(a*255))
 
 
@@ -116,15 +93,6 @@ def _rgba_f_to_u8(r: Any, g: Any, b: Any, a: float = 1.0) -> Any:
 # 5. Build subset cores index
 # -----------------------------------------------------------------------------
 def build_subset_cores_index(state: dict[str, Any]) -> Any:
-    """
-    Build index of core SMARTS per subset with occurrence counts.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     srgd = state.get("smiles_rgd_dict", {}) or {}
     index = {}
     for subset, mols in srgd.items():
@@ -149,15 +117,6 @@ def build_subset_cores_index(state: dict[str, Any]) -> Any:
 # 6. Refresh notes after data change
 # -----------------------------------------------------------------------------
 def refresh_notes_after_data_change(state: dict[str, Any]) -> None:
-    """
-    Rebuild core index, reload notes, refresh UI preserving current subset.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     build_subset_cores_index(state)
     load_notes_from_disk(state)
     if dpg.does_item_exist("notes_popup"):
@@ -171,15 +130,6 @@ def refresh_notes_after_data_change(state: dict[str, Any]) -> None:
 # 7. Ensure notes store
 # -----------------------------------------------------------------------------
 def _ensure_notes_store(state: dict[str, Any]) -> Any:
-    """
-    Ensure in-memory store and JSON path exist.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     if "notes_store" not in state:
         state["notes_store"] = {}  # { subset: { "R1": "...", "R2": "...", "__general__": "..." } }
     report_dir = state.get("report_dir") or ""
@@ -195,15 +145,6 @@ def _ensure_notes_store(state: dict[str, Any]) -> Any:
 # 8. Load notes from disk
 # -----------------------------------------------------------------------------
 def load_notes_from_disk(state: dict[str, Any]) -> None:
-    """
-    Load notes store into state['notes_store'] if present.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     store, path = _ensure_notes_store(state)
     candidate_paths = [path]
     if path.lower().endswith(".snf"):
@@ -226,15 +167,6 @@ def load_notes_from_disk(state: dict[str, Any]) -> None:
 # 9. Save notes to disk
 # -----------------------------------------------------------------------------
 def save_notes_to_disk(state: dict[str, Any]) -> None:
-    """
-    Save state['notes_store'] to JSON.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     store, path = _ensure_notes_store(state)
     try:
         os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -253,18 +185,6 @@ def _smiles_to_texture_arr(
     h: Any,
     pad_frac: Any = NOTES_DEFAULT_PAD_FRAC
 ) -> Any:
-    """
-    Draw SMILES/SMARTS to an RGBA float32 array (flattened).
-    
-    Args:
-        smi_or_smarts (Any): Parameter accepted by this routine.
-        w (int): Parameter accepted by this routine.
-        h (int): Parameter accepted by this routine.
-        pad_frac (Any): Parameter accepted by this routine. Defaults to the configured value.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     # --- parse mol ---
     mol = None
     if isinstance(smi_or_smarts, str) and smi_or_smarts:
@@ -345,15 +265,6 @@ def _smiles_to_texture_arr(
 # 11. Get subsets
 # -----------------------------------------------------------------------------
 def _get_subsets(state: dict[str, Any]) -> Any:
-    """
-    Return available subset keys as strings.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     srgd = state.get("smiles_rgd_dict", {}) or {}
     return [str(k) for k in srgd.keys()]
 
@@ -362,15 +273,6 @@ def _get_subsets(state: dict[str, Any]) -> Any:
 # 12. Notes popup window
 # -----------------------------------------------------------------------------
 def notes_popup_window(state: dict[str, Any]) -> None:
-    """
-    Create the top-level Notes window (idempotent).
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     build_subset_cores_index(state)
     load_notes_from_disk(state)
     _ensure_notes_global_handlers(state)
@@ -422,15 +324,6 @@ def notes_popup_window(state: dict[str, Any]) -> None:
 # 13. Refresh notes subsets list
 # -----------------------------------------------------------------------------
 def _refresh_notes_subsets_list(state: dict[str, Any]) -> None:
-    """
-    Populate the left panel with subset buttons.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     if dpg.does_item_exist("notes_subsets_list"):
         dpg.delete_item("notes_subsets_list", children_only=True)
 
@@ -449,16 +342,6 @@ def _refresh_notes_subsets_list(state: dict[str, Any]) -> None:
 # 14. Load notes for subset
 # -----------------------------------------------------------------------------
 def _load_notes_for_subset(subset: str, state: dict[str, Any]) -> None:
-    """
-    Load a subset: draw scaffold (without R labels), restore general notes (autosave),.
-    
-    Args:
-        subset (str): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     subset = str(subset)
     state["notes_current_subset"] = subset
     store, _ = _ensure_notes_store(state)
@@ -499,16 +382,6 @@ def _load_notes_for_subset(subset: str, state: dict[str, Any]) -> None:
 # 15. Extract rgroup mapnums
 # -----------------------------------------------------------------------------
 def _extract_rgroup_mapnums(subset: str, state: dict[str, Any]) -> Any:
-    """
-    Map R-labels to map numbers using the key name ('R3' -> 3).
-    
-    Args:
-        subset (str): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     srgd = state.get("smiles_rgd_dict", {}) or {}
     rec = srgd.get(subset) or {}
     mol_block = rec.get("mol_1") or rec.get("mol_2") or {}
@@ -540,15 +413,6 @@ def _extract_rgroup_mapnums(subset: str, state: dict[str, Any]) -> Any:
 # 16. Core anchor norms
 # -----------------------------------------------------------------------------
 def _core_anchor_norms(core_smarts: str) -> Any:
-    """
-    Compute normalised anchor positions for each atom map number found in the core.
-    
-    Args:
-        core_smarts (Any): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     out = {}
     if not core_smarts:
         return out
@@ -591,35 +455,12 @@ def _core_anchor_norms(core_smarts: str) -> Any:
 # 17. Place r triggers
 # -----------------------------------------------------------------------------
 def _place_r_triggers(subset: str, core_smarts: str, state: dict[str, Any]) -> Any:
-    """
-    Create, for each R anchor, a child_window overlaying the structure.
-    
-    Args:
-        subset (str): Parameter accepted by this routine.
-        core_smarts (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
 
     # Local helper: convert float RGBA [0..1] to uint8 [0..255]
     # -----------------------------------------------------------------------------
     # 17.1. Rgba f to u8
     # -----------------------------------------------------------------------------
     def _rgba_f_to_u8(r: Any, g: Any, b: Any, a: float = 1.0) -> Any:
-        """
-        Execute the rgba f to u8 routine.
-        
-        Args:
-            r (Any): Parameter accepted by this routine.
-            g (Any): Parameter accepted by this routine.
-            b (Any): Parameter accepted by this routine.
-            a (Any): Parameter accepted by this routine. Defaults to the configured value.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         return (int(r * 255), int(g * 255), int(b * 255), int(a * 255))
 
     subset = str(subset)
@@ -770,17 +611,6 @@ def _place_r_triggers(subset: str, core_smarts: str, state: dict[str, Any]) -> A
 # 18. Cb general notes changed
 # -----------------------------------------------------------------------------
 def _cb_general_notes_changed(sender: Any, app_data: Any, user_data: Any) -> None:
-    """
-    Execute the cb general notes changed routine.
-    
-    Args:
-        sender (Any): Parameter accepted by this routine.
-        app_data (Any): Parameter accepted by this routine.
-        user_data (Any): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     subset = user_data.get("subset")
     state  = user_data.get("state")
     _on_notes_edit(subset, "__general__", app_data, state)
@@ -790,17 +620,6 @@ def _cb_general_notes_changed(sender: Any, app_data: Any, user_data: Any) -> Non
 # 19. Cb r input changed
 # -----------------------------------------------------------------------------
 def _cb_r_input_changed(sender: Any, app_data: Any, user_data: Any) -> None:
-    """
-    Execute the cb r input changed routine.
-    
-    Args:
-        sender (Any): Parameter accepted by this routine.
-        app_data (Any): Parameter accepted by this routine.
-        user_data (Any): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     _on_notes_edit(user_data["subset"], user_data["r_label"], app_data, user_data["state"])
 
 
@@ -808,18 +627,6 @@ def _cb_r_input_changed(sender: Any, app_data: Any, user_data: Any) -> None:
 # 20. On notes edit
 # -----------------------------------------------------------------------------
 def _on_notes_edit(subset: str, field: Any, value: Any, state: dict[str, Any]) -> None:
-    """
-    Execute the on notes edit routine.
-    
-    Args:
-        subset (str): Parameter accepted by this routine.
-        field (Any): Parameter accepted by this routine.
-        value (float | str | Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     store, _ = _ensure_notes_store(state)
     subset_notes = store.setdefault(subset, {})
     subset_notes[field] = value
@@ -833,15 +640,6 @@ def _on_notes_edit(subset: str, field: Any, value: Any, state: dict[str, Any]) -
 # 21. Ensure notes global handlers
 # -----------------------------------------------------------------------------
 def _ensure_notes_global_handlers(state: dict[str, Any]) -> None:
-    """
-    Create global mouse-move and mouse-up handlers for dragging note children.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     dpg.add_mouse_move_handler(parent="handler_registry", callback=_cb_notes_global_mouse_move, user_data=state)
     dpg.add_mouse_release_handler(parent="handler_registry", callback=_cb_notes_global_mouse_up, user_data=state)
 
@@ -850,17 +648,6 @@ def _ensure_notes_global_handlers(state: dict[str, Any]) -> None:
 # 22. Cb notes drag start
 # -----------------------------------------------------------------------------
 def _cb_notes_drag_start(sender: Any, app_data: Any, user_data: Any) -> None:
-    """
-    Started with mouse down on the child's 'grip'. Registers mouse->window offset.
-    
-    Args:
-        sender (Any): Parameter accepted by this routine.
-        app_data (Any): Parameter accepted by this routine.
-        user_data (Any): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     state = user_data["state"]
     win_tag = user_data["win_tag"]
     mx, my = dpg.get_mouse_pos(local=False)
@@ -872,17 +659,6 @@ def _cb_notes_drag_start(sender: Any, app_data: Any, user_data: Any) -> None:
 # 23. Cb notes global mouse move
 # -----------------------------------------------------------------------------
 def _cb_notes_global_mouse_move(sender: Any, app_data: Any, user_data: Any) -> None:
-    """
-    If dragging is active, reposition the child based on the mouse position.
-    
-    Args:
-        sender (Any): Parameter accepted by this routine.
-        app_data (Any): Parameter accepted by this routine.
-        user_data (Any): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     state = user_data
     drag = state.get("notes_drag") or {}
     if not drag.get("active"):
@@ -900,17 +676,6 @@ def _cb_notes_global_mouse_move(sender: Any, app_data: Any, user_data: Any) -> N
 # 24. Cb notes global mouse up
 # -----------------------------------------------------------------------------
 def _cb_notes_global_mouse_up(sender: Any, app_data: Any, user_data: Any) -> None:
-    """
-    Terminate dragging on mouse release.
-    
-    Args:
-        sender (Any): Parameter accepted by this routine.
-        app_data (Any): Parameter accepted by this routine.
-        user_data (Any): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     state = user_data
     drag = state.get("notes_drag")
     if drag:

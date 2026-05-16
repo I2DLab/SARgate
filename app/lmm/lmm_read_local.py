@@ -10,7 +10,6 @@ local files in SDF, CSV, TSV, XLSX, SMI or TXT format.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Read sdf
@@ -46,15 +45,6 @@ from app.lmm.lmm_file_reader import (
 # 2. Read sdf
 # -----------------------------------------------------------------------------
 def read_sdf(state: dict[str, Any]) -> None:
-    """
-    Read and preprocess an input SDF file, ensuring UTF-8 encoding and curating.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     input_path = state["selected_file_path"]                        # Path to the original input file
     input_name = state["selected_file_name"]                        # Filename of the original input file
@@ -150,15 +140,6 @@ def read_sdf(state: dict[str, Any]) -> None:
 # 3. Create from csv
 # -----------------------------------------------------------------------------
 def create_from_csv(state: dict[str, Any]) -> Any:
-    """
-    Convert a CSV/TSV/XLSX file into an SDF, extracting SMILES and activity data and.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
 
     update_library_preparation_status("CONVERTING FILE TO SDF", state, separator=True, step_id=True)
 
@@ -215,17 +196,6 @@ def create_from_csv(state: dict[str, Any]) -> Any:
     # 3.1. Add common properties
     # -----------------------------------------------------------------------------
     def add_common_properties(mol: Any, row: Any, smiles: str) -> None:
-        """
-        Set IDs, assay, target and misc metadata onto the molecule.
-        
-        Args:
-            mol (Chem.Mol): Parameter accepted by this routine.
-            row (Any): Parameter accepted by this routine.
-            smiles (str): Parameter accepted by this routine.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         mol.SetProp("SMILES", str(smiles))
         if name_col and pd.notna(row.get(name_col)):
             mol.SetProp("_Name", str(row[name_col]))
@@ -331,17 +301,6 @@ def create_from_csv(state: dict[str, Any]) -> Any:
                     valid_acts.append((col, row[col], mode))
 
             def bioactivity_string(col: Any, val: Any, mode: str) -> Any:
-                """
-                Execute the bioactivity string routine.
-                
-                Args:
-                    col (Any): Input accepted by this routine.
-                    val (Any): Input accepted by this routine.
-                    mode (Any): Input accepted by this routine.
-                
-                Returns:
-                    Any: Value returned by the routine.
-                """
                 try:
                     activity_type = str(col).strip()
                     numeric_value = float(val)
@@ -395,15 +354,6 @@ def create_from_csv(state: dict[str, Any]) -> Any:
         # --- ChEMBL-like / PubChem activity mode ---
         elif activity_mode == "chembl":
             def clean_field(v: Any) -> Any:
-                """
-                Execute the clean field routine.
-                
-                Args:
-                    v (Any): Input accepted by this routine.
-                
-                Returns:
-                    Any: Value returned by the routine.
-                """
                 s = str(v) if not isinstance(v, str) else v
                 return re.sub(r"\s+", "", s.strip())
 
@@ -503,15 +453,6 @@ def create_from_csv(state: dict[str, Any]) -> Any:
 # 4. Create from smi or txt
 # -----------------------------------------------------------------------------
 def create_from_smi_or_txt(state: dict[str, Any]) -> None:
-    """
-    Create an SDF dataset from a .smi or .txt file containing SMILES strings.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     subset_dir = state["subset_dir"]
     input_name = state["selected_file_name"]

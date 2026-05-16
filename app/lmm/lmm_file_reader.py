@@ -11,7 +11,6 @@ Robust readers for CSV/TSV/TXT and XLSX files.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Read text robust
@@ -32,15 +31,6 @@ from xml.etree import ElementTree as ET
 # 2. Read text robust
 # -----------------------------------------------------------------------------
 def _read_text_robust(path: str) -> Any:
-    """
-    Robust text reader for CSV/TSV/TXT:.
-    
-    Args:
-        path (str): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     encodings = ("utf-8-sig", "cp1252", "latin-1")
     last_exc = None
     for enc in encodings:
@@ -56,15 +46,6 @@ def _read_text_robust(path: str) -> Any:
 # 3. Read excel robust
 # -----------------------------------------------------------------------------
 def _read_excel_robust(path: str) -> Any:
-    """
-    Robust XLSX reader that trims empty margins and infers the header row.
-    
-    Args:
-        path (str): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
 
     ext = os.path.splitext(path)[1].lower()
     if ext != ".xlsx":
@@ -83,15 +64,6 @@ def _read_excel_robust(path: str) -> Any:
         return value
 
     def _largest_bbox(ws: Any) -> Any:
-        """
-        Find the smallest bounding box containing non-empty cells.
-        
-        Args:
-            ws (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         min_r = min_c = 10**9
         max_r = max_c = 0
         any_data = False
@@ -202,16 +174,6 @@ def _read_excel_robust(path: str) -> Any:
         return df_local if not df_local.empty else None
 
     def _bbox_to_df(ws: Any, bbox: Any) -> Any:
-        """
-        Convert a worksheet bounding box into a dataframe.
-        
-        Args:
-            ws (Any): Parameter accepted by this routine.
-            bbox (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         (min_r, min_c, max_r, max_c) = bbox
         block = []
         for r in ws.iter_rows(min_row=min_r, max_row=max_r, min_col=min_c, max_col=max_c, values_only=True):

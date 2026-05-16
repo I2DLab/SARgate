@@ -11,7 +11,6 @@ themes and expose an internal style editor for live appearance adjustment.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Apply colormap
@@ -940,17 +939,6 @@ def refresh_overrides(state: dict[str, Any]) -> None:
 # 2. Apply colormap
 # -----------------------------------------------------------------------------
 def apply_colormap(sender: Any, app_data: Any, state: dict[str, Any]) -> None:
-    """
-    Applies the selected colormap to the entire application GUI.
-    
-    Args:
-        sender (Any): Parameter accepted by this routine.
-        app_data (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     # Extract and store colormap name
     colormap_name = app_data
     state["colormap_continuous"] = colormap_name
@@ -1035,17 +1023,6 @@ def apply_colormap(sender: Any, app_data: Any, state: dict[str, Any]) -> None:
 
 
 def apply_plot_colormap(sender: Any, app_data: Any, state: dict[str, Any]) -> None:
-    """
-    Apply the selected plot colormap and persist it in settings.
-
-    Args:
-        sender (Any): Parameter accepted by this routine.
-        app_data (Any): Selected plot colormap name.
-        state (dict[str, Any]): Shared application state.
-
-    Returns:
-        None: This routine updates state and refreshes visible plot bindings.
-    """
     plot_colormap_name = app_data
     if plot_colormap_name not in state["plot_colormaps"]:
         return
@@ -1258,17 +1235,6 @@ def get_continuous_colormap_color(norm_val: Any, state: dict[str, Any]) -> Any:
 # 4. Apply theme callback
 # -----------------------------------------------------------------------------
 def apply_theme_callback(sender: Any, app_data: Any, state: dict[str, Any]) -> Any:
-    """
-    Applies the selected theme to the entire application GUI.
-    
-    Args:
-        sender (Any): Parameter accepted by this routine.
-        app_data (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
 
     # Extract and store theme name
     theme_name = app_data
@@ -1587,17 +1553,6 @@ def apply_theme_callback(sender: Any, app_data: Any, state: dict[str, Any]) -> A
 # 5. Change font type
 # -----------------------------------------------------------------------------
 def change_font_type(item_tag: str, font_type: Any, state: dict[str, Any]) -> None:
-    """
-    Applies a regular or bold font to a specific widget based on the sender's tag.
-    
-    Args:
-        item_tag (Any): Parameter accepted by this routine.
-        font_type (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     applied_font = state["applied_font"]
 
@@ -1614,15 +1569,6 @@ def change_font_type(item_tag: str, font_type: Any, state: dict[str, Any]) -> No
 # 6. Custom style editor
 # -----------------------------------------------------------------------------
 def custom_style_editor(state: dict[str, Any]) -> None:
-    """
-    Build the custom style editor window.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     with dpg.window(label="Custom Style Editor", tag="custom_style_editor", autosize=True,
                     no_scrollbar=True, no_resize=True, no_collapse=True,
                     pos=((state["main_win_width"] / 2) - 175, state["main_win_y"]),
@@ -1638,17 +1584,6 @@ def custom_style_editor(state: dict[str, Any]) -> None:
 
 
             def change_font(sender: Any, app_data: Any, state: dict[str, Any]) -> None:
-                """
-                Apply a different font immediately and persist the choice.
-                
-                Args:
-                    sender (Any): Input accepted by this routine.
-                    app_data (Any): Input accepted by this routine.
-                    state (dict[str, Any]): Input accepted by this routine.
-                
-                Returns:
-                    None: This routine performs in-place updates or side effects only.
-                """
                 dpg.bind_font(None)
                 time.sleep(0.01)  # short delay to avoid flicker
                 dpg.bind_font(app_data)
@@ -1666,17 +1601,6 @@ def custom_style_editor(state: dict[str, Any]) -> None:
                     
 
             def change_font_scale(sender: Any, app_data: Any, state: dict[str, Any]) -> None:
-                """
-                Adjust the global font scale (zoom) and persist it.
-                
-                Args:
-                    sender (Any): Input accepted by this routine.
-                    app_data (Any): Input accepted by this routine.
-                    state (dict[str, Any]): Input accepted by this routine.
-                
-                Returns:
-                    None: This routine performs in-place updates or side effects only.
-                """
                 font_scale = app_data
                 dpg.set_global_font_scale(font_scale)
 
@@ -1769,17 +1693,6 @@ def custom_style_editor(state: dict[str, Any]) -> None:
             change_font_type(dpg.last_item(), "bold", state)
 
             def _color_picker_configs(sender: Any, value: Any, user_data: Any) -> None:
-                """
-                Update colour picker configuration (wheel/bar mode) dynamically.
-                
-                Args:
-                    sender (Any): Input accepted by this routine.
-                    value (Any): Input accepted by this routine.
-                    user_data (Any): Input accepted by this routine.
-                
-                Returns:
-                    None: This routine performs in-place updates or side effects only.
-                """
                 _old_config = dpg.get_item_configuration(user_data)
 
                 picker_mode = _old_config["picker_mode"]
@@ -2369,15 +2282,6 @@ def custom_style_editor(state: dict[str, Any]) -> None:
 # 7. Apply outer child theme
 # -----------------------------------------------------------------------------
 def apply_outer_child_theme() -> Any:
-    """
-    Creates a theme with a solid background for outer child windows.
-    
-    Args:
-        None.
-    
-    Returns:
-        Any: Value returned by the routine.
-    """
 
     with dpg.theme() as outer_child_theme:
         with dpg.theme_component(dpg.mvChildWindow):
@@ -2389,15 +2293,6 @@ def apply_outer_child_theme() -> Any:
 # 8. Apply inner child theme
 # -----------------------------------------------------------------------------
 def apply_inner_child_theme() -> Any:
-    """
-    Creates a theme with a transparent background for inner child windows.
-    
-    Args:
-        None.
-    
-    Returns:
-        Any: Value returned by the routine.
-    """
 
     with dpg.theme() as inner_child_theme:
         with dpg.theme_component(dpg.mvChildWindow):
@@ -2409,15 +2304,6 @@ def apply_inner_child_theme() -> Any:
 # 9. Apply input text theme
 # -----------------------------------------------------------------------------
 def apply_input_text_theme() -> Any:
-    """
-    Creates a theme for input text widgets with transparent background and borders.
-    
-    Args:
-        None.
-    
-    Returns:
-        Any: Value returned by the routine.
-    """
 
     with dpg.theme() as input_text_theme:
         with dpg.theme_component(dpg.mvInputText):
@@ -2434,15 +2320,6 @@ def apply_input_text_theme() -> Any:
 # 10. Apply bordered input text theme
 # -----------------------------------------------------------------------------
 def apply_bordered_input_text_theme(state: dict[str, Any]) -> Any:
-    """
-    Creates a theme for input text widgets with borders.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     theme_dict = state["themes"][state["theme_name"]]
     with dpg.theme() as input_bordered_text_theme:
         with dpg.theme_component(dpg.mvInputText):
@@ -2462,15 +2339,6 @@ def apply_bordered_input_text_theme(state: dict[str, Any]) -> Any:
 # 11. Apply image button theme
 # -----------------------------------------------------------------------------
 def apply_image_button_theme(state: dict[str, Any]) -> Any:
-    """
-    Theme for image buttons (hover/active colours, borders and rounding).
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     return _ensure_image_button_theme(state)
 
 
@@ -2478,15 +2346,6 @@ def apply_image_button_theme(state: dict[str, Any]) -> Any:
 # 12. Apply image theme
 # -----------------------------------------------------------------------------
 def apply_image_theme(state: dict[str, Any]) -> Any:
-    """
-    Theme for generic images (border and rounding).
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     with dpg.theme() as image_theme:
         with dpg.theme_component(dpg.mvImage):
             dpg.add_theme_color(dpg.mvThemeCol_Border, state["themes"][state["theme_name"]]["Border Color"], category=dpg.mvThemeCat_Core)
@@ -2499,15 +2358,6 @@ def apply_image_theme(state: dict[str, Any]) -> Any:
 # 13. Apply colormap theme
 # -----------------------------------------------------------------------------
 def apply_colormap_theme(state: dict[str, Any]) -> Any:
-    """
-    Theme for colourmap scales with transparent frame and no border.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     with dpg.theme() as colorscale_no_background_theme:
         with dpg.theme_component(dpg.mvColorMapScale):
             dpg.add_theme_color(dpg.mvThemeCol_FrameBg, (0, 0, 0, 0), category=dpg.mvThemeCat_Core)
@@ -2519,15 +2369,6 @@ def apply_colormap_theme(state: dict[str, Any]) -> Any:
 # 14. Apply pie chart theme
 # -----------------------------------------------------------------------------
 def apply_pie_chart_theme(state: dict[str, Any]) -> Any:
-    """
-    Plot theme suited for pie charts (transparent plot bg/border, themed legend).
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     theme_dict = state["themes"][state["theme_name"]]
     with dpg.theme() as pie_chart_theme:
         with dpg.theme_component(dpg.mvPlot):
@@ -2545,15 +2386,6 @@ def apply_pie_chart_theme(state: dict[str, Any]) -> Any:
 # 15. Apply dendrogram theme
 # -----------------------------------------------------------------------------
 def apply_dendrogram_theme(state: dict[str, Any]) -> Any:
-    """
-    Plot theme tailored for dendrogram visualisations.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     theme_dict = state["themes"][state["theme_name"]]
     with dpg.theme() as dendrogram_theme:
         with dpg.theme_component(dpg.mvPlot):
@@ -2572,15 +2404,6 @@ def apply_dendrogram_theme(state: dict[str, Any]) -> Any:
 # 16. Apply enrich plot theme
 # -----------------------------------------------------------------------------
 def apply_enrich_plot_theme(state: dict[str, Any]) -> Any:
-    """
-    Execute the apply enrich plot theme routine.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     theme_dict = state["themes"][state["theme_name"]]
     with dpg.theme() as enrich_plot_theme:
         with dpg.theme_component(dpg.mvPlot):
@@ -2601,15 +2424,6 @@ def apply_enrich_plot_theme(state: dict[str, Any]) -> Any:
 # 17. Apply line chart theme
 # -----------------------------------------------------------------------------
 def apply_line_chart_theme(state: dict[str, Any]) -> Any:
-    """
-    General theme for line charts.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     theme_dict = state["themes"][state["theme_name"]]
 
     bg = theme_dict["Plot Background"]
@@ -2661,15 +2475,6 @@ def apply_mmpa_network_theme() -> Any:
 # 19. Apply plot theme
 # -----------------------------------------------------------------------------
 def apply_plot_theme(state: dict[str, Any]) -> Any:
-    """
-    General theme for plots.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     theme_dict = state["themes"][state["theme_name"]]
 
     with dpg.theme() as plot_theme:
@@ -2690,15 +2495,6 @@ def apply_plot_theme(state: dict[str, Any]) -> Any:
 # 20. Apply boxplot theme
 # -----------------------------------------------------------------------------
 def apply_boxplot_theme(state: dict[str, Any]) -> Any:
-    """
-    General theme for boxplot and Rgroup table.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     theme_dict = state["themes"][state["theme_name"]]
 
     with dpg.theme() as boxplot_theme:
@@ -2740,15 +2536,6 @@ def apply_infinite_line_theme() -> Any:
 # 22. Apply progress bar theme
 # -----------------------------------------------------------------------------
 def apply_progress_bar_theme(state: dict[str, Any]) -> Any:
-    """
-    Theme for the loading bar.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     theme_dict = state["themes"][state["theme_name"]]
     with dpg.theme() as progress_bar_theme:
         with dpg.theme_component(dpg.mvProgressBar):

@@ -9,7 +9,6 @@ each cell is coloured by the difference in activity between molecule j and i
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Show clustered similarity manager window
@@ -44,15 +43,6 @@ from app.gui.themes_manager import (
 # 2. Show clustered similarity manager window
 # -----------------------------------------------------------------------------
 def show_clustered_similarity_manager_window(state: dict[str, Any]) -> None:
-    """
-    Build the controls for the clustered similarity matrix inside.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     def _search_clustered_molecule(user_state: dict[str, Any]) -> None:
         """
@@ -181,17 +171,6 @@ def _update_clustered_similarity_activity_choices(
     app_data: Any,
     state: dict[str, Any]
 ) -> None:
-    """
-    Update the 'similarity_cluster_activity_choice' combo items based on.
-    
-    Args:
-        sender (Any): Parameter accepted by this routine.
-        app_data (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     subset = dpg.get_value("similarity_cluster_subset_choice") \
         if dpg.does_item_exist("similarity_cluster_subset_choice") else None
     bioact_dict = state.get("bioact_types_dict", {})
@@ -216,15 +195,6 @@ def _update_clustered_similarity_activity_choices(
 # 4. Build clustered similarity matrix
 # -----------------------------------------------------------------------------
 def build_clustered_similarity_matrix(state: dict[str, Any]) -> Any:
-    """
-    Build the clustered activity-difference matrix based on:.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     log_event("Similarity", "Drawing clustered similarity matrix", indent=1)
     if not dpg.does_item_exist("clustered_similarity_matrix_window"):
         return
@@ -299,16 +269,6 @@ def build_clustered_similarity_matrix(state: dict[str, Any]) -> Any:
     # 4.1. Parse activity string
     # -----------------------------------------------------------------------------
     def parse_activity_string(act_str: Any, read_inequalities: bool = False) -> Any:
-        """
-        Parse an activity value from the CSV.
-        
-        Args:
-            act_str (Any): Parameter accepted by this routine.
-            read_inequalities (Any): Parameter accepted by this routine. Defaults to the configured value.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         if not isinstance(act_str, str):
             return np.nan
 
@@ -344,15 +304,6 @@ def build_clustered_similarity_matrix(state: dict[str, Any]) -> Any:
     # 4.2. Is float
     # -----------------------------------------------------------------------------
     def _is_float(x: Any) -> Any:
-        """
-        Execute the is float routine.
-        
-        Args:
-            x (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         try:
             float(x)
             return True
@@ -923,16 +874,6 @@ def build_clustered_similarity_matrix(state: dict[str, Any]) -> Any:
     # 4.3. Update clustered images
     # -----------------------------------------------------------------------------
     def _update_clustered_images(row_idx: int, col_idx: int) -> None:
-        """
-        Update clustered images.
-        
-        Args:
-            row_idx (int): Parameter accepted by this routine.
-            col_idx (int): Parameter accepted by this routine.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         smi_x = smiles_list[order[col_idx]]
         smi_y = smiles_list[order[row_idx]]
         mol_x = Chem.MolFromSmiles(smi_x)
@@ -986,17 +927,6 @@ def build_clustered_similarity_matrix(state: dict[str, Any]) -> Any:
     # 4.4. On clustered heatmap click
     # -----------------------------------------------------------------------------
     def on_clustered_heatmap_click(sender: Any, app_data: Any, user_data: Any) -> None:
-        """
-        Execute the on clustered heatmap click routine.
-        
-        Args:
-            sender (Any): Parameter accepted by this routine.
-            app_data (Any): Parameter accepted by this routine.
-            user_data (Any): Parameter accepted by this routine.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         if not dpg.is_item_hovered("clustered_matrix"):
             return
         pos = dpg.get_plot_mouse_pos()

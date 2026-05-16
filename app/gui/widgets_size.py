@@ -11,7 +11,6 @@ the main window geometry previously computed in win_size.get_win_size(state).
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Setup widgets size
@@ -23,34 +22,19 @@ from typing import Any
 # 2. Setup widgets size
 # -----------------------------------------------------------------------------
 def setup_widgets_size(state: dict[str, Any]) -> None:
-    """
-    Populate `state` with all secondary/UI element dimensions.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
-    # --- STEP 2.1.1: Alias design_ref_* values ---
     vw = int(state["design_ref_width"])
     vh = int(state["design_ref_height"])
 
-    # --- STEP 2.1.2: Alias main window geometry ---
     main_win_width  = state["main_win_width"]
     main_win_height = state["main_win_height"]
 
-    # --- STEP 2.1.3: Alias spacing parameters ---
     win_spacer = int(state["win_spacer"])
     main_win_y = int(state["design_ref_height"] * 0.05)
 
-    # --- STEP 2.2: Compute vertical offset ---
     state["main_win_y"] = 80
 
-    # --- STEP 2.3: Compute element dimensions (legacy ratios) ---
 
-    # --- STEP 2.3.1: Icon tab buttons & font scale---
     state["tab_button_size"] = int(state["settings"].get("tab_button_size", 30))
     state["max_tab_button_size"] = 50
     state["tab_button_spacing"] = 3
@@ -58,11 +42,9 @@ def setup_widgets_size(state: dict[str, Any]) -> None:
     state["min_font_scale"] = 0.5
     state["max_font_scale"] = 1.5
 
-    # --- STEP 2.3.2: File dialog ---
     state["file_dialog_width"] = round(vw / 2)
     state["file_dialog_height"] = round(vh / 2)
 
-    # --- STEP 2.3.3: Analysis tab ---
     state["analysis_win_width"] = round((main_win_width - (win_spacer * 3)) / 4)
 
     state["analysis_tab_fileselect_height"] = round(main_win_height / 5.57333333)
@@ -108,7 +90,6 @@ def setup_widgets_size(state: dict[str, Any]) -> None:
     state["library_table_img_width"] = round(main_win_width / 5)
     state["library_table_img_height"] = round(main_win_height / 8.35)
 
-    # --- STEP 2.3.4: Overview tab ---
     state["overview_img_width"] = round((main_win_width + (win_spacer * 4)) / 3)
     state["overview_img_height"] = round(state["overview_img_width"] * 0.75)
     state["overview_img_win_width"] = main_win_width
@@ -151,7 +132,6 @@ def setup_widgets_size(state: dict[str, Any]) -> None:
     state["overview_prop_child_small_button_width"] = round(main_win_width / 57.6)
     state["overview_prop_right_input_width"] = round(main_win_width / 2.25)
 
-    # --- STEP 2.3.5: Similarity tab ---
     state["similarity_tan_img_width"] = round(main_win_width / 3)
     state["similarity_tan_img_height"] = round(state["similarity_tan_img_width"] * 0.75)
     state["similarity_clustered_img_width"] = round(main_win_width / 4.5)
@@ -178,7 +158,6 @@ def setup_widgets_size(state: dict[str, Any]) -> None:
     state["similarity_tbl_win_y"] = state["similarity_tan_win_y"]
     state["similarity_tbl_img_width"] = round(state["similarity_tbl_win_width"] / 4)
 
-    # --- STEP 2.3.6: Counts tab ---
     state["counts_selection_win_width"] = round(main_win_width / 3)
     state["counts_selection_win_height"] = round(main_win_height / 9)
     state["counts_selection_combo_width"] = round(main_win_width / 6.5158371)
@@ -203,7 +182,6 @@ def setup_widgets_size(state: dict[str, Any]) -> None:
     )
     state["counts_table_img_size"] = round(main_win_width / 6.2)
 
-    # --- STEP 2.3.7: Isomers tab ---
     state["isomers_manager_win_width"] = (main_win_width - win_spacer) * 0.2
     state["isomers_manager_win_height"] = round(main_win_height / 22.48648649)
     state["isomers_manager_combo_width"] = round(main_win_width / 10)
@@ -226,7 +204,6 @@ def setup_widgets_size(state: dict[str, Any]) -> None:
         state["isomers_table_img_width"] * 0.75
     )
 
-    # --- STEP 2.3.8: MMPA tab ---
     state["mmpa_img_width"] = round((main_win_width - state["win_spacer"] * 8) / 4)
     state["mmpa_img_height"] = round(state["mmpa_img_width"] * 0.75)
     state["mmpa_img_win_width"] = main_win_width
@@ -264,7 +241,6 @@ def setup_widgets_size(state: dict[str, Any]) -> None:
         ref_w - state["mmpa_network_map_width"]
     ) / 2
 
-    # --- STEP 2.3.9: Landscape tab ---
     state["landscape_manager_win_width"] = main_win_width
     state["landscape_manager_win_height"] = round(main_win_height / 12)
     state["landscape_manager_combo_width"] = round(main_win_width / 7.5)
@@ -284,7 +260,6 @@ def setup_widgets_size(state: dict[str, Any]) -> None:
     state["landscape_img_width"] = round(main_win_width / 3.42857143)
     state["landscape_img_win_width"] = round(main_win_width / 3.27272727)
 
-    # --- STEP 2.3.10: Plots tab ---
     state["plots_manager_win_width"] = main_win_width
     state["plots_manager_win_height"] = round(main_win_height / 22.48648649)
     state["plots_manager_combo_width"] = round(main_win_width / 14.4)
@@ -312,7 +287,6 @@ def setup_widgets_size(state: dict[str, Any]) -> None:
     state["plots_descriptors_height"] = round(main_win_height / 1.08051948)
     state["plots_descriptors_img_width"] = round(main_win_width / 3.6)
 
-    # --- STEP 2.3.11: PCA (legacy) ---
     state["plots_pca_bar_steps"] = vh * 2
     state["plots_pca_bar_height"] = round(main_win_height / 1.24179104)
     state["plots_pca_bar_win_width"] = round(main_win_width / 18)
@@ -329,7 +303,6 @@ def setup_widgets_size(state: dict[str, Any]) -> None:
     state["plots_pca_clst_win_height"] = round(main_win_height / 2.13333333)
     state["plots_pca_img_width"] = round(main_win_width / 3.42857143)
 
-    # --- STEP 2.3.12: Features tab ---
     state["phph_manager_win_width"] = main_win_width
     state["phph_manager_win_height"] = round(main_win_height / 12.60606061)
     state["phph_manager_combo_width"] = round(main_win_width / 9)
@@ -347,7 +320,6 @@ def setup_widgets_size(state: dict[str, Any]) -> None:
         state["phph_tbl_width"] + (win_spacer * 2)
     )
 
-    # --- STEP 2.3.13: Prediction tab ---
     state["prediction_manager_win_width"] = main_win_width
     state["prediction_manager_win_height"] = round(main_win_height / 12.60606061)
     state["prediction_manager_combo_width"] = round(main_win_width / 6.79245283)
@@ -367,15 +339,12 @@ def setup_widgets_size(state: dict[str, Any]) -> None:
     state["prediction_plot_width"] = round(main_win_width / 2.90909091)
     state["prediction_plot_height"] = round(main_win_height / 2.27945205)
 
-    # --- STEP 2.3.14: Utilities tab ---
     state["utils_win_width"] = main_win_width
     state["utils_win_height"] = main_win_height
 
-    # --- STEP 2.3.15: Notes tab ---
     state["notes_img_width"] = int(round(main_win_width / 1.6))
     state["notes_img_height"] = int(round(state["notes_img_width"] * 0.75))
 
-    # --- STEP 2.3.16: Slith tab ---
     state["slith_main_win_width"] = main_win_width
     state["slith_main_win_height"] = main_win_height
 

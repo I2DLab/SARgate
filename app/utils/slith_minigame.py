@@ -7,7 +7,6 @@ Alkane Snake mini-game on a hex edge grid.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Open slith window
@@ -26,15 +25,6 @@ from app.gui.themes_manager import apply_inner_child_theme
 # 2. Open slith window
 # -----------------------------------------------------------------------------
 def open_slith_window(state: dict[str, Any]) -> Any:
-    """
-    Create the Slith mini-game UI and start the loop.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
 
     global text_color, canvas_width, canvas_height, HEX_SIZE, ROWS, COLS
     global start_q, start_r, start_dir, floating_messages, is_game_over
@@ -59,16 +49,6 @@ def open_slith_window(state: dict[str, Any]) -> Any:
     # 2.1. Compute sizes
     # -----------------------------------------------------------------------------
     def _compute_sizes(parent_w: Any, parent_h: Any) -> Any:
-        """
-        Given parent size, return HEX_SIZE, field_w, field_h, inner_x, inner_y, controls_w, controls_h, controls_x, controls_y.
-        
-        Args:
-            parent_w (Any): Parameter accepted by this routine.
-            parent_h (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         controls_h = 72
         gap = 8
         avail_h = max(1, parent_h - controls_h - gap)
@@ -88,16 +68,6 @@ def open_slith_window(state: dict[str, Any]) -> Any:
     # 2.2. Apply sizes
     # -----------------------------------------------------------------------------
     def _apply_sizes(parent_w: Any, parent_h: Any) -> None:
-        """
-        Apply computed sizes to items and state; recompute centring and redraw.
-        
-        Args:
-            parent_w (Any): Parameter accepted by this routine.
-            parent_h (Any): Parameter accepted by this routine.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         global HEX_SIZE, canvas_width, canvas_height, _slith_static_dirty
         hs, field_w, field_h, inner_x, inner_y, ctrl_w, ctrl_h, ctrl_x, ctrl_y = _compute_sizes(parent_w, parent_h)
         HEX_SIZE, canvas_width, canvas_height = hs, field_w, field_h
@@ -161,15 +131,6 @@ def open_slith_window(state: dict[str, Any]) -> Any:
     # -----------------------------------------------------------------------------
     def read_slith_record() -> Any:
         # default = 4 carbons (butyric acid) instead of 3
-        """
-        Execute the read slith record routine.
-        
-        Args:
-            None.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         if os.path.exists(settings_path):
             try:
                 with open(settings_path, "r", encoding="utf-8") as f:
@@ -183,15 +144,6 @@ def open_slith_window(state: dict[str, Any]) -> Any:
     # 2.4. Save slith record
     # -----------------------------------------------------------------------------
     def save_slith_record(new_record: Any) -> None:
-        """
-        Save slith record.
-        
-        Args:
-            new_record (Any): Parameter accepted by this routine.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         settings = {}
         if os.path.exists(settings_path):
             try:
@@ -254,15 +206,6 @@ def open_slith_window(state: dict[str, Any]) -> Any:
     # 2.5. Fatty acid name
     # -----------------------------------------------------------------------------
     def fatty_acid_name(n: int) -> Any:
-        """
-        Execute the fatty acid name routine.
-        
-        Args:
-            n (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         if n < len(prefixes):
             base = prefixes[n] + "anoic acid"
         else:
@@ -277,16 +220,6 @@ def open_slith_window(state: dict[str, Any]) -> Any:
     # 2.6. Hex to pixel raw
     # -----------------------------------------------------------------------------
     def _hex_to_pixel_raw(q: Any, r: Any) -> Any:
-        """
-        Execute the hex to pixel raw routine.
-        
-        Args:
-            q (Any): Parameter accepted by this routine.
-            r (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         x = HEX_SIZE * math.sqrt(3) * (q + 0.5 * (r % 2))
         y = HEX_SIZE * 1.5 * r
         return x, y
@@ -295,17 +228,6 @@ def open_slith_window(state: dict[str, Any]) -> Any:
     # 2.7. Hex corner raw
     # -----------------------------------------------------------------------------
     def hex_corner_raw(center_pt: Any, size: Any, i: int) -> Any:
-        """
-        Execute the hex corner raw routine.
-        
-        Args:
-            center_pt (Any): Parameter accepted by this routine.
-            size (Any): Parameter accepted by this routine.
-            i (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         a = math.radians(60 * i - 30)
         return center_pt[0] + size * math.cos(a), center_pt[1] + size * math.sin(a)
 
@@ -348,16 +270,6 @@ def open_slith_window(state: dict[str, Any]) -> Any:
     # 2.9. Hex to pixel
     # -----------------------------------------------------------------------------
     def hex_to_pixel(q: Any, r: Any) -> Any:
-        """
-        Execute the hex to pixel routine.
-        
-        Args:
-            q (Any): Parameter accepted by this routine.
-            r (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         x, y = _hex_to_pixel_raw(q, r)
         return x + ORIGIN_X, y + ORIGIN_Y
 
@@ -365,17 +277,6 @@ def open_slith_window(state: dict[str, Any]) -> Any:
     # 2.10. Hex corner
     # -----------------------------------------------------------------------------
     def hex_corner(center_pt: Any, size: Any, i: int) -> Any:
-        """
-        Execute the hex corner routine.
-        
-        Args:
-            center_pt (Any): Parameter accepted by this routine.
-            size (Any): Parameter accepted by this routine.
-            i (Any): Parameter accepted by this routine.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         a = math.radians(60 * i - 30)
         return center_pt[0] + size * math.cos(a), center_pt[1] + size * math.sin(a)
 
@@ -385,16 +286,6 @@ def open_slith_window(state: dict[str, Any]) -> Any:
     # 2.11. On key
     # -----------------------------------------------------------------------------
     def on_key(sender: Any, app_data: Any) -> None:
-        """
-        Execute the on key routine.
-        
-        Args:
-            sender (Any): Parameter accepted by this routine.
-            app_data (Any): Parameter accepted by this routine.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         global turn_flag
         if app_data == dpg.mvKey_Left:
             turn_flag = "left"
@@ -405,15 +296,6 @@ def open_slith_window(state: dict[str, Any]) -> Any:
     # 2.12. Schedule next frames
     # -----------------------------------------------------------------------------
     def _schedule_next_frames() -> None:
-        """
-        Execute the schedule next frames routine.
-        
-        Args:
-            None.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         if not dpg.does_item_exist("canvas"):
             return
         base = dpg.get_frame_count()
@@ -428,20 +310,6 @@ def open_slith_window(state: dict[str, Any]) -> Any:
         app_data: Any = None,
         user_data: Any = None,
     ) -> None:
-        """
-        Execute the on frame routine.
-        
-        Args:
-            sender (Any, optional): Dear PyGui callback sender. Included for
-                callback compatibility.
-            app_data (Any, optional): Dear PyGui callback payload. Included for
-                callback compatibility.
-            user_data (Any, optional): Dear PyGui callback user data. Included
-                for callback compatibility.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         global last_update_time, effects_time, last_effects_tick, _last_processed_frame, _last_render_time
         if not dpg.does_item_exist("canvas"):
             return
@@ -471,15 +339,6 @@ def open_slith_window(state: dict[str, Any]) -> Any:
     # 2.14. Move snake
     # -----------------------------------------------------------------------------
     def move_snake() -> Any:
-        """
-        Execute the move snake routine.
-        
-        Args:
-            None.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         global direction, turn_flag, food, speed, auto_turn, food_eaten, pending_growth, _last_render_time
         head_seg = snake_segments[0]
         _, p2_head = head_seg
@@ -507,15 +366,6 @@ def open_slith_window(state: dict[str, Any]) -> Any:
         # 2.14.1. Try step
         # -----------------------------------------------------------------------------
         def try_step(dir_idx: str) -> Any:
-            """
-            Execute the try step routine.
-            
-            Args:
-                dir_idx (Any): Parameter accepted by this routine.
-            
-            Returns:
-                Any: Value produced by the routine.
-            """
             a = math.radians(60 * dir_idx - 30)
             dx, dy = HEX_SIZE * math.cos(a), HEX_SIZE * math.sin(a)
             next_p = (cx + dx, cy + dy)
@@ -755,16 +605,6 @@ def open_slith_window(state: dict[str, Any]) -> Any:
             cy = (GRID_MINY + GRID_MAXY) / 2.0
 
             def _txt_sz(t: Any, s: Any) -> Any:
-                """
-                Execute the txt sz routine.
-                
-                Args:
-                    t (Any): Input accepted by this routine.
-                    s (Any): Input accepted by this routine.
-                
-                Returns:
-                    Any: Value returned by the routine.
-                """
                 try:
                     return dpg.get_text_size(t, size=s)
                 except Exception:
@@ -787,15 +627,6 @@ def open_slith_window(state: dict[str, Any]) -> Any:
     # 2.17. Spawn food
     # -----------------------------------------------------------------------------
     def spawn_food() -> Any:
-        """
-        Execute the spawn food routine.
-        
-        Args:
-            None.
-        
-        Returns:
-            Any: Value produced by the routine.
-        """
         while True:
             r = random.randint(0, ROWS - 1)
             max_q = COLS if r % 2 == 0 else COLS - 1
@@ -811,15 +642,6 @@ def open_slith_window(state: dict[str, Any]) -> Any:
     # 2.18. Pause game
     # -----------------------------------------------------------------------------
     def pause_game() -> None:
-        """
-        Execute the pause game routine.
-        
-        Args:
-            None.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         global pause_start_time, paused_duration
         if is_game_over:
             return
@@ -836,15 +658,6 @@ def open_slith_window(state: dict[str, Any]) -> Any:
     # 2.19. Start game
     # -----------------------------------------------------------------------------
     def start_game() -> None:
-        """
-        Execute the start game routine.
-        
-        Args:
-            None.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         global snake_segments, direction, turn_flag, auto_turn, forced_vertical, speed, start_time
         global is_game_over, food, has_shown_new_record, slith_record, last_update_time, _last_render_time
         global food_eaten, pending_growth
@@ -890,15 +703,6 @@ def open_slith_window(state: dict[str, Any]) -> Any:
     # 2.20. Game over
     # -----------------------------------------------------------------------------
     def game_over() -> None:
-        """
-        Execute the game over routine.
-        
-        Args:
-            None.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         global is_game_over
         state["slith_is_paused"] = True
         is_game_over = True
@@ -964,7 +768,7 @@ def open_slith_window(state: dict[str, Any]) -> Any:
     center_pt = hex_to_pixel(start_q, start_r)
     start_dir = 0
 
-    # 3 segmenti anche alla prima apertura (coerente con start_game)
+    # Match the three-segment initial shape used by start_game.
     i0 = (start_dir - 1) % 6
     i1 = start_dir
     i2 = (start_dir + 1) % 6
@@ -993,15 +797,6 @@ def open_slith_window(state: dict[str, Any]) -> Any:
     # 2.21. Post layout init
     # -----------------------------------------------------------------------------
     def _post_layout_init() -> None:
-        """
-        Execute the post layout init routine.
-        
-        Args:
-            None.
-        
-        Returns:
-            None: This routine updates state or performs side effects in place.
-        """
         try:
             pw, ph = dpg.get_item_rect_size("slith_main_window")
         except Exception:

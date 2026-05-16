@@ -9,7 +9,6 @@ Acts as the entry point for constructing every GUI section.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Initialize gui
@@ -50,15 +49,6 @@ from app.utils.slith_minigame import open_slith_window
 # -----------------------------------------------------------------------------
 def initialize_gui(state: dict[str, Any]) -> None:
 
-    """
-    Execute the initialize gui routine.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     viewport_w, viewport_h = state["design_ref_width"], state["design_ref_height"]
     main_win_y = state["main_win_y"]
     contents_w = viewport_w - 40
@@ -533,16 +523,6 @@ def initialize_gui(state: dict[str, Any]) -> None:
 
         # Helper: select correct dialog based on role
         def show_dialog(role: Any, state: dict[str, Any]) -> None:
-            """
-            Open the corresponding native directory dialog based on the role.
-            
-            Args:
-                role (Any): Input accepted by this routine.
-                state (dict[str, Any]): Input accepted by this routine.
-            
-            Returns:
-                None: This routine performs in-place updates or side effects only.
-            """
             state["dialog_role"] = role
             title_map = {
                 "input": "Select Input Directory",
@@ -650,7 +630,7 @@ Version: 1.0
 Python: 3.13
 Platform: macOS / Windows / Linux
 
-© 2026 I2D Lab, Università degli Studi di Perugia
+© 2026 I2D Lab, University of Perugia
 Open-source project (MIT License)
 
             """

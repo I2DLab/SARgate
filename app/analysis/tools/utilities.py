@@ -11,7 +11,6 @@ main menu for power users and developers.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Show utilities window
@@ -39,15 +38,6 @@ from app.gui.themes_manager import apply_bordered_input_text_theme
 # 2. Show utilities window
 # -----------------------------------------------------------------------------
 def show_utilities_window(state: dict[str, Any], log_on_open: bool = True) -> Any:
-    """
-    Displays the Utilities GUI panel and all its tools.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        Any: Value produced by the routine.
-    """
     if log_on_open:
         log_event("Utilities", "Opening utilities window", indent=1)
         log_settings("Utilities", indent=2, input_dir=state.get("input_dir"), output_dir=state.get("output_dir"))
@@ -64,17 +54,6 @@ def show_utilities_window(state: dict[str, Any], log_on_open: bool = True) -> An
             dpg.add_text("Convert a molecule string (SMILES, SMARTS, InChI or MolBlock) to another format and draw the molecule image")
             
             def convert_molstring(sender: Any, app_data: Any, user_data: Any) -> None:
-                """
-                Live converter callback:.
-                
-                Args:
-                    sender (Any): Input accepted by this routine.
-                    app_data (Any): Input accepted by this routine.
-                    user_data (Any): Input accepted by this routine.
-                
-                Returns:
-                    None: This routine performs in-place updates or side effects only.
-                """
                 molstring_input = dpg.get_value("converter_molstring_input")
                 mol = None
 
@@ -126,7 +105,6 @@ def show_utilities_window(state: dict[str, Any], log_on_open: bool = True) -> An
                 texture_tag = dpg.add_static_texture(img_width, img_height, data, parent="texture_registry")
                 dpg.configure_item("mol_from_string_image", texture_tag=texture_tag)
 
-            # --- STEP 2.1: INITIALISE IMAGE TEXTURE PLACEHOLDERS ---
             # Prepare canvas size, a blank texture, and register it.
             img_width = 400
             img_height = int(img_width * 0.75)
@@ -136,7 +114,6 @@ def show_utilities_window(state: dict[str, Any], log_on_open: bool = True) -> An
             dpg.add_static_texture(img_width, img_height, blank_image.flatten(), 
                                    tag=texture_tag, parent="texture_registry")
 
-            # --- STEP 2.2: LAYOUT: INPUT, IMAGE, OUTPUT FORMAT AND OUTPUT TEXT ---
             # Three side-by-side groups: (A) input text, (B) rendered image, (C) output settings and converted string.
             with dpg.group(horizontal=True):
                 with dpg.group():
@@ -225,36 +202,13 @@ def show_utilities_window(state: dict[str, Any], log_on_open: bool = True) -> An
                     select_merge_folder_callback(selected_folder)
                                     
             def toggle_sdf_selection(sender: Any, app_data: Any, user_data: Any) -> None:
-                """
-                Toggle the inclusion of a given SDF filename in the merge set and print selection summary to stdout.
-                
-                Args:
-                    sender (Any): Input accepted by this routine.
-                    app_data (Any): Input accepted by this routine.
-                    user_data (Any): Input accepted by this routine.
-                
-                Returns:
-                    None: This routine performs in-place updates or side effects only.
-                """
                 filename = user_data
                 if filename in state["merge_sdf_selected"]:
                     state["merge_sdf_selected"].remove(filename)
                 else:
                     state["merge_sdf_selected"].add(filename)
-                print(f"Selected SDFs: {len(state['merge_sdf_selected'])}")
-                for sdf in state["merge_sdf_selected"]:
-                    print(f"    {sdf}")
 
             def merge_selected_sdfs_callback() -> None:
-                """
-                Execute the merge:.
-                
-                Args:
-                    None.
-                
-                Returns:
-                    None: This routine performs in-place updates or side effects only.
-                """
                 folder = state.get("merge_sdf_folder", state["input_dir"])
                 selected = state.get("merge_sdf_selected", set())
                 output_name = dpg.get_value("merge_sdf_output_name").strip()
@@ -308,25 +262,14 @@ def show_utilities_window(state: dict[str, Any], log_on_open: bool = True) -> An
                 dpg.configure_item("merge_exists_popup", show=False)
 
             def sort_keys(filename: str) -> Any:
-                """
-                Natural-sort helper: split strings on digits to ensure numeric order for embedded numbers.
-                
-                Args:
-                    filename (str): Input accepted by this routine.
-                
-                Returns:
-                    Any: Value returned by the routine.
-                """
                 return [int(text) if text.isdigit() else text.lower() for text in re.split(r'(\d+)', filename)]
 
-            # --- STEP 3.1: MERGE SDFs TOOLBAR (SELECT FOLDER, NAME, RUN) ---
             with dpg.group(horizontal=True):
                 dpg.add_button(label="Select Folder", callback=prompt_merge_folder_selection)
                 dpg.add_input_text(tag="merge_sdf_output_name", hint="Output SDF name...", width=200)
                 dpg.add_button(label="Merge Selected", callback=merge_selected_sdfs_callback)
                 dpg.bind_item_theme("merge_sdf_output_name", apply_bordered_input_text_theme(state))
 
-            # --- STEP 3.2: INITIAL TABLE POPULATION (DEFAULT: INPUT DIR) ---
             state["merge_sdf_folder"] = state["input_dir"]
             dpg.add_text(f"Selected Folder:\n{state['input_dir']}", tag="merge_sdf_label", wrap=600)
 
@@ -356,7 +299,6 @@ def show_utilities_window(state: dict[str, Any], log_on_open: bool = True) -> An
                                 else:
                                     dpg.add_text("")
 
-            # --- STEP 3.3: POP-UPS ---
             # Conflicting name pop-up.
             with dpg.window(label="File Exists", modal=True, show=False, tag="merge_exists_popup",
                             no_title_bar=False, no_move=True, no_resize=True, no_close=True):
@@ -383,19 +325,9 @@ def show_utilities_window(state: dict[str, Any], log_on_open: bool = True) -> An
         with dpg.tree_node(label="Compare SDFs", tag="compare_SDFs_tree_node", default_open=False):
             dpg.add_text("Compare two or more SDF files to count common molecules")
 
-            # --- STEP 4.1: INITIALISE STATE FOR COMPARISON ---
             state["compare_sdf_files"] = []
 
             def sdf_to_smiles_set(sdf_path: str) -> Any:
-                """
-                Load an SDF file and produce:.
-                
-                Args:
-                    sdf_path (str): Input accepted by this routine.
-                
-                Returns:
-                    Any: Value returned by the routine.
-                """
                 suppl = Chem.SDMolSupplier(sdf_path)
                 smiles_set = set()
                 smiles_list = []
@@ -469,17 +401,6 @@ def show_utilities_window(state: dict[str, Any], log_on_open: bool = True) -> An
                     dpg.bind_item_theme(dpg.last_item(), apply_bordered_input_text_theme(state)) 
 
             def show_dialog_callback(sender: Any, app_data: Any, user_data: Any) -> None:
-                """
-                Open the native file dialog for the SDF corresponding to the row index.
-                
-                Args:
-                    sender (Any): Input accepted by this routine.
-                    app_data (Any): Input accepted by this routine.
-                    user_data (Any): Input accepted by this routine.
-                
-                Returns:
-                    None: This routine performs in-place updates or side effects only.
-                """
                 selected_path = open_file_dialog(
                     title="Select an SDF File to Compare",
                     default_path=state["input_dir"],
@@ -489,16 +410,6 @@ def show_utilities_window(state: dict[str, Any], log_on_open: bool = True) -> An
                     select_sdf_callback(selected_path, user_data)
 
             def select_sdf_callback(path: str, user_data: Any) -> None:
-                """
-                Update the comparison table after selecting one SDF file.
-                
-                Args:
-                    path (str): Absolute path of the selected SDF file.
-                    user_data (Any): Input accepted by this routine.
-                
-                Returns:
-                    None: This routine performs in-place updates or side effects only.
-                """
                 idx = user_data["index"]
                 filename = os.path.basename(path) 
 
@@ -601,7 +512,6 @@ def show_utilities_window(state: dict[str, Any], log_on_open: bool = True) -> An
                         dpg.add_text("", tag="common_total")
                         dpg.add_text("", tag="common_unique")
 
-            # --- STEP 4.2: BUILD INITIAL COMPARISON TABLE (TWO ROWS + COMMON SUMMARY) ---
             with dpg.table(tag="compare_sdf_table", borders_innerH=True, borders_innerV=True,
                            borders_outerH=True, borders_outerV=True, policy=dpg.mvTable_SizingStretchProp):
 
@@ -642,7 +552,6 @@ def show_utilities_window(state: dict[str, Any], log_on_open: bool = True) -> An
         with dpg.tree_node(label="SDF <-> CSV", tag="utilities_tree_node", default_open=False):
             dpg.add_text("Convert SDF files to CSV format, or vice versa")
 
-            # --- STEP 5.1: INITIALISE CONVERTER STATE ---
             state["converter_format"] = "SDF to CSV"
             state["converter_input_path"] = ""
 
@@ -684,40 +593,18 @@ def show_utilities_window(state: dict[str, Any], log_on_open: bool = True) -> An
                     select_input_file_callback(selected_path)
 
             def converter_format_changed(sender: Any, app_data: Any, user_data: Any) -> None:
-                """
-                Handle format mode change:.
-                
-                Args:
-                    sender (Any): Input accepted by this routine.
-                    app_data (Any): Input accepted by this routine.
-                    user_data (Any): Input accepted by this routine.
-                
-                Returns:
-                    None: This routine performs in-place updates or side effects only.
-                """
                 state["converter_format"] = app_data
                 state["converter_input_path"] = ""
                 dpg.set_value("converter_input_name", "")
 
             def run_conversion_callback() -> Any:
-                """
-                Run the conversion based on the current mode:.
-                
-                Args:
-                    None.
-                
-                Returns:
-                    Any: Value returned by the routine.
-                """
                 input_path = state["converter_input_path"]
                 if not input_path:
-                    print("No input file selected.")
                     dpg.configure_item("converter_no_input_popup", show=True)
                     return
 
                 output_name = dpg.get_value("converter_output_name")
                 if not output_name:
-                    print("No output name provided.")
                     dpg.configure_item("converter_no_filename_popup", show=True)
                     return
 
@@ -820,15 +707,6 @@ def show_utilities_window(state: dict[str, Any], log_on_open: bool = True) -> An
                     if activity_cols_found:
                         def merge_activity(row: Any) -> Any:
                             # Remove any quotes or stray whitespace around the relation
-                            """
-                            Execute the merge activity routine.
-                            
-                            Args:
-                                row (Any): Input accepted by this routine.
-                            
-                            Returns:
-                                Any: Value returned by the routine.
-                            """
                             relation_clean = str(row["Standard Relation"]).strip().strip('"').strip("'")
                             return f"{row['Standard Type']} {relation_clean} {row['Standard Value']} {row['Standard Units']}"
                         df["Activity"] = df.apply(merge_activity, axis=1)
@@ -862,7 +740,6 @@ def show_utilities_window(state: dict[str, Any], log_on_open: bool = True) -> An
                     if dpg.does_item_exist("cover_layer"):
                         dpg.delete_item("cover_layer")
 
-            # --- STEP 5.2: POP-UPS FOR CONVERTER (ERRORS/VALIDATION) ---
             with dpg.window(label="Output File Name Not Valid", tag="converter_file_exists_popup", modal=True, show=False,
                             no_close=True, no_resize=True, no_move=True, autosize=True):
                 dpg.add_text("A file with that name already exists")
@@ -887,7 +764,6 @@ def show_utilities_window(state: dict[str, Any], log_on_open: bool = True) -> An
                 dpg.add_spacer(height=state["win_spacer"])
                 dpg.add_button(label="OK", callback=lambda: dpg.configure_item("converter_no_smiles_column_popup", show=False))
 
-            # --- STEP 5.3: CONVERTER CONTROL BAR (MODE, INPUT, OUTPUT, RUN) ---
             with dpg.group(horizontal=True):
                 with dpg.group():
                     dpg.add_text("Conversion:")
@@ -993,13 +869,11 @@ def show_utilities_window(state: dict[str, Any], log_on_open: bool = True) -> An
 
                 dpg.set_value("chembl_entries_status", f"Found {sum(year_counts.values())} entries for {chembl_id}.")
                 
-            # --- STEP 6.1: INPUTS AND ACTION BUTTON ---
             with dpg.group(horizontal=True):
                 dpg.add_input_text(tag="chembl_target_id_input", width=400, hint="Insert ChEMBL Target ID (e.g. CHEMBL1234)")
                 dpg.add_button(label="Fetch", callback=fetch_chembl_entries_by_year_callback)
                 dpg.bind_item_theme("chembl_target_id_input", apply_bordered_input_text_theme(state))
 
-            # --- STEP 6.2: STATUS + RESULTS TABLE CONTAINER ---
             dpg.add_spacer(height=state["win_spacer"])
             dpg.add_text("", tag="chembl_entries_status")
             dpg.add_spacer(height=state["win_spacer"])

@@ -10,7 +10,6 @@ Generates visual plots to display the distribution of
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Build fixed bins
@@ -174,17 +173,6 @@ def _load_distribution_csv(state: dict[str, Any], activity: str) -> Any:
 # 6. On mmpa thresh slider change
 # -----------------------------------------------------------------------------
 def on_mmpa_thresh_slider_change(sender: Any, app_data: Any, state: dict[str, Any]) -> None:
-    """
-    Move-only update for the threshold lines (no plot rebuild).
-    
-    Args:
-        sender (Any): Parameter accepted by this routine.
-        app_data (Any): Parameter accepted by this routine.
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     try:
         new_x = float(app_data)
     except Exception:
@@ -217,15 +205,6 @@ def on_mmpa_thresh_slider_change(sender: Any, app_data: Any, state: dict[str, An
 # 7. Ensure mmpa plots created
 # -----------------------------------------------------------------------------
 def _ensure_mmpa_plots_created(state: dict[str, Any]) -> None:
-    """
-    Create, if missing, the two plots (GLOBAL and SUBSET) with their series.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     
     # Clear everything inside the target window to rebuild cleanly
     for tag in ["mmpa_global_plot_window", "mmpa_subset_plot_window"]:
@@ -307,15 +286,6 @@ def _ensure_mmpa_plots_created(state: dict[str, Any]) -> None:
 # 8. Refresh global plot
 # -----------------------------------------------------------------------------
 def _refresh_global_plot(state: dict[str, Any]) -> None:
-    """
-    Update the global plot series and labels without recreating the plot.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     if not dpg.does_item_exist("mmpa_global_curve"):
         _ensure_mmpa_plots_created(state)
 
@@ -342,15 +312,6 @@ def _refresh_global_plot(state: dict[str, Any]) -> None:
 # 9. Refresh subset plot
 # -----------------------------------------------------------------------------
 def _refresh_subset_plot(state: dict[str, Any]) -> None:
-    """
-    Update the subset plot series and labels without recreating the plot.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
     if not dpg.does_item_exist("mmpa_subset_curve"):
         _ensure_mmpa_plots_created(state)
 
@@ -380,15 +341,6 @@ def _refresh_subset_plot(state: dict[str, Any]) -> None:
 # 10. Mount mmpa plots
 # -----------------------------------------------------------------------------
 def mount_mmpa_plots(state: dict[str, Any]) -> None:
-    """
-    Ensure the plot window exists, then create and populate both plots.
-    
-    Args:
-        state (dict[str, Any]): Parameter accepted by this routine.
-    
-    Returns:
-        None: This routine updates state or performs side effects in place.
-    """
 
     # Create empty plots then fill them via refresh functions
     _ensure_mmpa_plots_created(state)

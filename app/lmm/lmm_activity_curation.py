@@ -11,7 +11,6 @@ numerical representation across all activity columns before analysis.
 """
 
 # =============================================================================
-# STEP MAP
 # =============================================================================
 # 1. Import module dependencies
 # 2. Activity curation
