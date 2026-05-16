@@ -84,7 +84,7 @@ from app.gui.themes_manager import (
 )
 from app.gui.initialize_gui import initialize_gui
 from app.utils.navigation import setup_key_handlers
-from app.utils.callbacks import update_responsive_images
+from app.utils.callbacks import poll_responsive_image_layout_changes, request_responsive_image_update
 from app.utils.resource_paths import resource_path, user_data_path
 
 
@@ -498,11 +498,20 @@ if __name__ == "__main__":
         pass
 
     with dpg.handler_registry(tag="handler_registry"):
-        dpg.add_mouse_move_handler(callback=lambda s, a, u: update_responsive_images(state))
-        dpg.add_mouse_drag_handler(callback=lambda s, a, u: update_responsive_images(state))
-        dpg.add_mouse_release_handler(callback=lambda s, a, u: update_responsive_images(state))
-        dpg.add_mouse_click_handler(callback=lambda s, a, u: update_responsive_images(state))
-        dpg.add_mouse_wheel_handler(callback=lambda s, a, u: update_responsive_images(state))
+        def _refresh_responsive_images_after_layout_input(*_: Any) -> None:
+            """
+            Refresh responsive images after user actions that can resize layouts.
+
+            Returns:
+                None: This routine updates the shared responsive-image state.
+            """
+            request_responsive_image_update(state, frames=4)
+            poll_responsive_image_layout_changes(state)
+
+        dpg.add_mouse_drag_handler(callback=_refresh_responsive_images_after_layout_input)
+        dpg.add_mouse_release_handler(callback=_refresh_responsive_images_after_layout_input)
+        dpg.add_mouse_click_handler(callback=_refresh_responsive_images_after_layout_input)
+        dpg.add_mouse_wheel_handler(callback=_refresh_responsive_images_after_layout_input)
 
 
     # --- STEP 4.4: Register fonts and apply the default typography ---
@@ -559,10 +568,10 @@ if __name__ == "__main__":
     ensure_event_log_window(state)
 
 
-    # --- STEP 4.10: Start the responsive image refresh poller ---
+    # --- STEP 4.10: Start the responsive image layout watcher ---
     def start_responsive_image_poller(state: dict[str, Any]) -> None:
         """
-        Schedule a lightweight polling loop for responsive image updates.
+        Schedule a lightweight polling loop for responsive image layout changes.
 
         Args:
             state (dict[str, Any]): Shared application state used by responsive
@@ -574,7 +583,7 @@ if __name__ == "__main__":
         """
         def _tick(*_: Any) -> None:
             """
-            Refresh responsive images and queue the next polling frame.
+            Refresh responsive images when their measured containers change.
 
             Args:
                 *_ (Any): Dear PyGui frame-callback payloads. Included for
@@ -583,9 +592,10 @@ if __name__ == "__main__":
             Returns:
                 None: This callback performs UI updates in place.
             """
-            update_responsive_images(state)
-            dpg.set_frame_callback(dpg.get_frame_count() + 5, _tick)
-        dpg.set_frame_callback(dpg.get_frame_count() + 5, _tick)
+            poll_responsive_image_layout_changes(state)
+            dpg.set_frame_callback(dpg.get_frame_count() + 2, _tick)
+        request_responsive_image_update(state, frames=6)
+        dpg.set_frame_callback(dpg.get_frame_count() + 1, _tick)
 
     start_responsive_image_poller(state)
 

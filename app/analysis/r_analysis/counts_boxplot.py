@@ -647,6 +647,22 @@ def draw_counts_boxplot(
 
             # Width = 2*box_width (box border). Height = width * 3/4 in Y units of the plot.
 
+            def _current_plot_pixel_size() -> tuple[float, float]:
+                """
+                Return the current rendered plot size in pixels.
+
+                Returns:
+                    tuple[float, float]: Current plot width and height, with
+                    creation-time values as a fallback.
+                """
+                try:
+                    current_w, current_h = dpg.get_item_rect_size("counts_boxplot")
+                    if current_w and current_h:
+                        return float(current_w), float(current_h)
+                except Exception:
+                    pass
+                return float(plot_width), float(plot_height)
+
             def _aspect_height_4_3(width_x_data: Any, x0: Any, x1: Any, y0: Any, y1: Any) -> Any:
                 """
                 Execute the aspect height 4 3 routine.
@@ -663,8 +679,14 @@ def draw_counts_boxplot(
                 """
                 x_span = max(1e-12, (x1 - x0))
                 y_span = max(1e-12, (y1 - y0))
+                current_plot_width, current_plot_height = _current_plot_pixel_size()
                 # convert width in X-units to height in Y-units maintaining 4:3 on screen
-                return width_x_data * (plot_width / float(plot_height)) * (y_span / float(x_span)) * (4/3)
+                return (
+                    width_x_data
+                    * (current_plot_width / max(1.0, current_plot_height))
+                    * (y_span / float(x_span))
+                    * (4/3)
+                )
 
             def _width_x_to_pixels(width_x_data: float, x0: float, x1: float) -> int:
                 """
@@ -679,7 +701,8 @@ def draw_counts_boxplot(
                     int: Value returned by the routine.
                 """
                 x_span = max(1e-12, (x1 - x0))
-                return int(round((width_x_data / x_span) * plot_width))
+                current_plot_width, _ = _current_plot_pixel_size()
+                return int(round((width_x_data / x_span) * current_plot_width))
 
             state.setdefault("counts_box_img_tex_size", {})
 
@@ -844,6 +867,7 @@ def draw_counts_boxplot(
                         bounds_max=(x_max, max(y_bottom, y_top))
                     )
 
+            state["counts_boxplot_reflow_thumbnails"] = _reflow_thumbnails
 
             if dpg.does_item_exist("counts_boxplot_wheel_handler"):
                 dpg.delete_item("counts_boxplot_wheel_handler")

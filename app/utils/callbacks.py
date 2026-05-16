@@ -274,6 +274,7 @@ def activate_main_tab(selected_tab: str, state: dict[str, Any]) -> None:
                 dpg.set_item_label("pause_game_button", "Resume")
 
     state["current_tab"] = selected_tab
+    request_responsive_image_update(state, frames=4)
     if callable(state.get("refresh_top_nav_selection")):
         try:
             state["refresh_top_nav_selection"]()
@@ -322,6 +323,7 @@ def change_chemspace_subtab(state: dict[str, Any]) -> None:
     """
     selected_chemspace_subtab = dpg.get_item_alias(dpg.get_value("chemspace_tab_bar"))
     state["current_chemspace_subtab"] = selected_chemspace_subtab
+    request_responsive_image_update(state, frames=4)
 
 
 # -----------------------------------------------------------------------------
@@ -339,6 +341,7 @@ def change_overview_subtab(state: dict[str, Any]) -> None:
     """
     selected_overview_subtab = dpg.get_item_alias(dpg.get_value("overview_tab_bar"))
     state["current_overview_subtab"] = selected_overview_subtab
+    request_responsive_image_update(state, frames=4)
 
 
 # -----------------------------------------------------------------------------
@@ -356,6 +359,7 @@ def change_similarity_subtab(state: dict[str, Any]) -> None:
     """
     selected_similarity_subtab = dpg.get_item_alias(dpg.get_value("similarity_tab_bar"))
     state["current_similarity_subtab"] = selected_similarity_subtab
+    request_responsive_image_update(state, frames=4)
 
 
 # -----------------------------------------------------------------------------
@@ -373,6 +377,7 @@ def change_r_analysis_subtab(state: dict[str, Any]) -> None:
     """
     selected_r_analysis_subtab = dpg.get_item_alias(dpg.get_value("r_analysis_tab_bar"))
     state["current_r_analysis_subtab"] = selected_r_analysis_subtab
+    request_responsive_image_update(state, frames=4)
 
 
 # -----------------------------------------------------------------------------
@@ -1302,6 +1307,7 @@ def toggle_fullscreen_with_check(state: dict[str, Any]) -> None:
     state["is_fullscreen"] = not current
 
     dpg.toggle_viewport_fullscreen()
+    request_responsive_image_update(state, frames=10)
 
     if dpg.does_item_exist("fullscreen_menu_item"):
         dpg.configure_item("fullscreen_menu_item", check=state["is_fullscreen"])
@@ -1342,11 +1348,254 @@ def register_responsive_image(
         "aspect": float(aspect_ratio),
         "tab": tab,
     }
+    state.setdefault("responsive_image_layout_signatures", {}).pop(image_tag, None)
+    state.setdefault("responsive_image_applied_sizes", {}).pop(image_tag, None)
+    _bind_responsive_image_resize_handlers(state, image_tag)
+    request_responsive_image_update(state, frames=4)
 
 
 # -----------------------------------------------------------------------------
 # 23. Update responsive images
 # -----------------------------------------------------------------------------
+def request_responsive_image_update(state: dict[str, Any], frames: int = 2) -> None:
+    """
+    Request responsive image refreshes for the next few polling ticks.
+
+    Args:
+        state (dict[str, Any]): Shared application state.
+        frames (int, optional): Number of upcoming polling ticks that should
+            force a refresh. Defaults to `2`.
+
+    Returns:
+        None: This routine updates state in place.
+    """
+    state["_responsive_image_force_ticks"] = max(
+        int(state.get("_responsive_image_force_ticks", 0) or 0),
+        int(frames),
+    )
+
+
+def _tag_to_safe_suffix(item_tag: Any) -> str:
+    """
+    Convert an arbitrary Dear PyGui tag to a stable handler suffix.
+
+    Args:
+        item_tag (Any): Dear PyGui item tag.
+
+    Returns:
+        str: Safe tag suffix.
+    """
+    return "".join(ch if ch.isalnum() or ch == "_" else "_" for ch in str(item_tag))
+
+
+def _bind_responsive_image_resize_handlers(state: dict[str, Any], image_tag: str) -> None:
+    """
+    Bind resize handlers to the container chain used by one responsive image.
+
+    Args:
+        state (dict[str, Any]): Shared application state.
+        image_tag (str): Registered responsive image tag.
+
+    Returns:
+        None: This routine creates Dear PyGui item handlers when possible.
+    """
+    info = state.get("responsive_images", {}).get(image_tag)
+    if not info:
+        return
+
+    watched_items = _responsive_image_watched_items(image_tag, info, include_image=False)
+
+    def _on_responsive_item_resize(sender: Any, app_data: Any, user_data: Any) -> None:
+        request_responsive_image_update(user_data, frames=4)
+        poll_responsive_image_layout_changes(user_data)
+
+    for item_tag in watched_items:
+        handler_tag = f"responsive_image_resize_handler_{_tag_to_safe_suffix(item_tag)}"
+        try:
+            if not dpg.does_item_exist(handler_tag):
+                with dpg.item_handler_registry(tag=handler_tag):
+                    dpg.add_item_resize_handler(
+                        callback=_on_responsive_item_resize,
+                        user_data=state,
+                    )
+            dpg.bind_item_handler_registry(item_tag, handler_tag)
+        except Exception:
+            pass
+
+
+def _responsive_image_watched_items(
+    image_tag: Any,
+    info: dict[str, Any],
+    include_image: bool = True,
+) -> list[Any]:
+    """
+    Build the set of layout items that can affect one responsive image.
+
+    Args:
+        image_tag (Any): Responsive image tag.
+        info (dict[str, Any]): Registration metadata for the image.
+        include_image (bool, optional): Include the image itself in the list.
+            Defaults to `True`.
+
+    Returns:
+        list[Any]: Existing item tags to watch.
+    """
+    watched_items = []
+
+    def _add_item(item_tag: Any) -> None:
+        if item_tag and item_tag not in watched_items and dpg.does_item_exist(item_tag):
+            watched_items.append(item_tag)
+
+    if include_image:
+        _add_item(image_tag)
+
+    for item_tag in (info.get("parent"), info.get("parent_of_parent")):
+        _add_item(item_tag)
+
+    for start_tag in (image_tag, info.get("parent")):
+        current_tag = start_tag
+        for _ in range(8):
+            if not current_tag or not dpg.does_item_exist(current_tag):
+                break
+            try:
+                current_tag = dpg.get_item_parent(current_tag)
+            except Exception:
+                break
+            _add_item(current_tag)
+
+    return watched_items
+
+
+def _measure_item_size(item_tag: Any) -> tuple[int, int]:
+    """
+    Read the current rendered size of a Dear PyGui item.
+
+    Args:
+        item_tag (Any): Dear PyGui item tag.
+
+    Returns:
+        tuple[int, int]: Width and height, or `(0, 0)` if unavailable.
+    """
+    if not item_tag or not dpg.does_item_exist(item_tag):
+        return 0, 0
+    try:
+        w, h = dpg.get_item_rect_size(item_tag)
+        if w or h:
+            return int(w or 0), int(h or 0)
+    except Exception:
+        pass
+    width = 0
+    height = 0
+    try:
+        width = int(dpg.get_item_width(item_tag) or 0)
+    except Exception:
+        pass
+    try:
+        height = int(dpg.get_item_height(item_tag) or 0)
+    except Exception:
+        pass
+    return width, height
+
+
+def _responsive_image_matches_context(state: dict[str, Any], tab: Any) -> bool:
+    """
+    Check whether a responsive image belongs to the currently visible context.
+
+    Args:
+        state (dict[str, Any]): Shared application state.
+        tab (Any): Registered tab or subtab identifier for the image.
+
+    Returns:
+        bool: `True` when the image should be updated in the active UI context.
+    """
+    current_tab = state.get("current_tab")
+    if current_tab == "similarity_tab":
+        return tab == state.get("current_similarity_subtab")
+    if current_tab == "chemspace_tab":
+        return tab == state.get("current_chemspace_subtab")
+    return tab == current_tab
+
+
+def poll_responsive_image_layout_changes(state: dict[str, Any]) -> None:
+    """
+    Refresh responsive images only when their layout inputs actually change.
+
+    The poller watches the rendered size of each registered image and of the
+    containers used to compute its responsive width. This catches viewport,
+    child-window, table-column, splitter, and nested-container resizes without
+    tying image updates to mouse movement.
+
+    Args:
+        state (dict[str, Any]): Shared application state.
+
+    Returns:
+        None: This routine updates responsive images when needed.
+    """
+    registry = state.get("responsive_images", {})
+    if not registry:
+        return
+
+    signatures = state.setdefault("responsive_image_layout_signatures", {})
+    context_signature = (
+        state.get("current_tab"),
+        state.get("current_similarity_subtab"),
+        state.get("current_chemspace_subtab"),
+        int(dpg.get_viewport_client_width() or dpg.get_viewport_width() or 0),
+        int(dpg.get_viewport_client_height() or dpg.get_viewport_height() or 0),
+    )
+    layout_changed = False
+
+    for img_tag, info in list(registry.items()):
+        tab = info.get("tab", None)
+        if not _responsive_image_matches_context(state, tab):
+            signature = (context_signature, "inactive", tab)
+        else:
+            signature = (
+                context_signature,
+                tab,
+                tuple(
+                    (item_tag, *_measure_item_size(item_tag))
+                    for item_tag in _responsive_image_watched_items(img_tag, info)
+                ),
+            )
+
+        if signatures.get(img_tag) != signature:
+            signatures[img_tag] = signature
+            layout_changed = True
+
+    force_ticks = int(state.get("_responsive_image_force_ticks", 0) or 0)
+    if force_ticks > 0:
+        state["_responsive_image_force_ticks"] = force_ticks - 1
+        layout_changed = True
+
+    fallback_tick = int(state.get("_responsive_image_fallback_tick", 0) or 0) + 1
+    if fallback_tick >= 4:
+        fallback_tick = 0
+        layout_changed = True
+    state["_responsive_image_fallback_tick"] = fallback_tick
+
+    if layout_changed:
+        update_responsive_images(state)
+
+    reflow_boxplot = state.get("counts_boxplot_reflow_thumbnails")
+    if callable(reflow_boxplot) and state.get("current_r_analysis_subtab") == "r_analysis_counts_subtab":
+        try:
+            plot_signature = (
+                _measure_item_size("counts_boxplot"),
+                _measure_item_size("counts_boxplot_window"),
+                tuple(dpg.get_axis_limits("counts_boxplot_x_axis")),
+                tuple(dpg.get_axis_limits("counts_boxplot_y_axis")),
+            )
+        except Exception:
+            plot_signature = None
+        if plot_signature and state.get("_counts_boxplot_layout_signature") != plot_signature:
+            state["_counts_boxplot_layout_signature"] = plot_signature
+            try:
+                reflow_boxplot()
+            except Exception:
+                pass
+
+
 def update_responsive_images(state: dict[str, Any]) -> None:
     """
     Recompute sizes for all registered responsive images.
@@ -1377,23 +1626,6 @@ def update_responsive_images(state: dict[str, Any]) -> None:
     if not registry:
         return
 
-    def _measure_item_width(item_tag: Any) -> int:
-        if not item_tag or not dpg.does_item_exist(item_tag):
-            return 0
-        try:
-            w, _ = dpg.get_item_rect_size(item_tag)
-            if w:
-                return int(w)
-        except Exception:
-            pass
-        try:
-            w = dpg.get_item_width(item_tag) or 0
-            if w:
-                return int(w)
-        except Exception:
-            pass
-        return 0
-
     for img_tag, info in list(registry.items()):
         
         parent_tag = info["parent"]
@@ -1401,32 +1633,22 @@ def update_responsive_images(state: dict[str, Any]) -> None:
         aspect = info.get("aspect", 0.75)
         tab = info.get("tab", None)
             
-        # Only update if in the right tab or subtab
-        if state["current_tab"] == "similarity_tab": 
-            if tab != state["current_similarity_subtab"]:
-                continue
-
-        elif state["current_tab"] == "chemspace_tab":
-            if tab != state["current_chemspace_subtab"]:
-                continue
-
-        else:
-            if tab != state["current_tab"]:
-                continue
+        if not _responsive_image_matches_context(state, tab):
+            continue
 
         if not (dpg.does_item_exist(img_tag) and dpg.does_item_exist(parent_tag)):
             continue
 
-        parent_w = _measure_item_width(parent_tag)
+        parent_w, _ = _measure_item_size(parent_tag)
         if parent_w <= 0 and parent_of_parent:
-            parent_w = _measure_item_width(parent_of_parent)
+            parent_w, _ = _measure_item_size(parent_of_parent)
         if parent_w <= 0:
             try:
                 container = dpg.get_item_parent(img_tag)
             except Exception:
                 container = None
             if container:
-                parent_w = _measure_item_width(container)
+                parent_w, _ = _measure_item_size(container)
         if parent_w <= 0:
             continue
 
@@ -1491,5 +1713,9 @@ def update_responsive_images(state: dict[str, Any]) -> None:
 
         new_w = max(1, int(new_w) - safety_margin)
         new_h = max(1, int(new_w * aspect))
+        applied_sizes = state.setdefault("responsive_image_applied_sizes", {})
+        if applied_sizes.get(img_tag) == (new_w, new_h):
+            continue
         dpg.configure_item(img_tag, width=new_w, height=new_h)
+        applied_sizes[img_tag] = (new_w, new_h)
 from app.utils.app_logger import log_event, log_exception
