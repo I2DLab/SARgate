@@ -10,6 +10,38 @@ APP_ICON_ICO = os.path.join(PROJECT_ROOT, 'assets', 'icons', 'SARgate_icon.ico')
 APP_ICON_PNG = os.path.join(PROJECT_ROOT, 'assets', 'icons', 'SARgate_icon.png')
 PYINSTALLER_ICON = APP_ICON_ICO if sys.platform in {"win32", "darwin"} else APP_ICON_PNG
 MACOS_TARGET_ARCHITECTURE = os.environ.get('SARGATE_MACOS_TARGET_ARCHITECTURE') if sys.platform == 'darwin' else None
+MACOS_INFO_PLIST = {
+    'CFBundleDocumentTypes': [
+        {
+            'CFBundleTypeName': 'SARgate input files',
+            'CFBundleTypeRole': 'Editor',
+            'LSHandlerRank': 'Alternate',
+            'CFBundleTypeExtensions': ['sdf', 'csv', 'tsv', 'xlsx', 'smi', 'txt'],
+            'LSItemContentTypes': [
+                'it.unipg.i2dlab.sargate.sdf',
+                'it.unipg.i2dlab.sargate.smi',
+                'public.comma-separated-values-text',
+                'public.tab-separated-values-text',
+                'org.openxmlformats.spreadsheetml.sheet',
+                'public.plain-text',
+            ],
+        },
+    ],
+    'UTImportedTypeDeclarations': [
+        {
+            'UTTypeIdentifier': 'it.unipg.i2dlab.sargate.sdf',
+            'UTTypeDescription': 'Structure-data file',
+            'UTTypeConformsTo': ['public.text'],
+            'UTTypeTagSpecification': {'public.filename-extension': ['sdf']},
+        },
+        {
+            'UTTypeIdentifier': 'it.unipg.i2dlab.sargate.smi',
+            'UTTypeDescription': 'SMILES file',
+            'UTTypeConformsTo': ['public.text'],
+            'UTTypeTagSpecification': {'public.filename-extension': ['smi']},
+        },
+    ],
+} if sys.platform == 'darwin' else {}
 
 
 def _collect_windows_expat_binaries():
@@ -116,7 +148,7 @@ exe = EXE(
     upx=True,
     console=False,
     disable_windowed_traceback=False,
-    argv_emulation=False,
+    argv_emulation=(sys.platform == 'darwin'),
     target_arch=MACOS_TARGET_ARCHITECTURE,
     codesign_identity=None,
     entitlements_file=None,
@@ -136,4 +168,5 @@ app = BUNDLE(
     name='SARgate.app',
     icon=APP_ICON_ICO,
     bundle_identifier='it.unipg.i2dlab.sargate',
+    info_plist=MACOS_INFO_PLIST,
 )

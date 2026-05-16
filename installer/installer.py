@@ -20,13 +20,72 @@ import shutil
 import subprocess
 import sys
 import zipfile
+import atexit
+import logging
 from datetime import datetime
 from pathlib import Path
 import PyInstaller.__main__
 
 
+class _TeeStream:
+    """
+    Mirror writes to the original terminal stream and to a log file.
+    """
+    def __init__(self, stream, log_file):
+        self.stream = stream
+        self.log_file = log_file
+
+    def write(self, text):
+        self.stream.write(text)
+        self.log_file.write(text)
+        self.flush()
+
+    def flush(self):
+        self.stream.flush()
+        self.log_file.flush()
+
+    def isatty(self):
+        return self.stream.isatty()
+
+
+def _start_build_log(project_root: str):
+    """
+    Start mirroring stdout and stderr into build/pyinstaller.log.
+    """
+    build_dir = os.path.join(project_root, "build")
+    os.makedirs(build_dir, exist_ok=True)
+    log_path = os.path.join(build_dir, "pyinstaller.log")
+    log_file = open(log_path, "w", encoding="utf-8")
+    sys.stdout = _TeeStream(sys.__stdout__, log_file)
+    sys.stderr = _TeeStream(sys.__stderr__, log_file)
+    atexit.register(log_file.close)
+    return log_path
+
+
+def _redirect_logging_streams() -> None:
+    """
+    Point existing logging handlers, including PyInstaller's, at the tee stream.
+    """
+    loggers = [logging.getLogger()]
+    for logger in logging.Logger.manager.loggerDict.values():
+        if isinstance(logger, logging.Logger):
+            loggers.append(logger)
+
+    for logger in loggers:
+        for handler in logger.handlers:
+            if isinstance(handler, logging.StreamHandler):
+                try:
+                    handler.setStream(sys.stderr)
+                except Exception:
+                    handler.stream = sys.stderr
+
+
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(PROJECT_ROOT)
+BUILD_LOG_PATH = _start_build_log(PROJECT_ROOT)
+_redirect_logging_streams()
+print("Starting SARgate build...")
+print(f"Build log: {BUILD_LOG_PATH}")
 
 
 # === BUILD OPTIONS ===
@@ -142,6 +201,21 @@ def _write_default_recent_files() -> None:
     tmp_path.replace(recent_files_path)
 
 
+def _reset_default_data_dirs() -> None:
+    """
+    Recreate the bundled data folders as empty release-ready directories.
+    """
+    data_path = PROJECT_ROOT_PATH / "data"
+    print(f"Resetting: {data_path.relative_to(PROJECT_ROOT_PATH)}")
+    if data_path.exists():
+        shutil.rmtree(data_path)
+
+    for dirname in ("input", "output", "predictions"):
+        folder = data_path / dirname
+        folder.mkdir(parents=True, exist_ok=True)
+        (folder / ".gitkeep").write_text("", encoding="utf-8")
+
+
 def _run_pre_build_cleanup() -> None:
     """
     Clean local generated files and reset user-dependent settings before build.
@@ -156,6 +230,7 @@ def _run_pre_build_cleanup() -> None:
                 _delete_cleanup_path(path)
     _write_default_settings()
     _write_default_recent_files()
+    _reset_default_data_dirs()
     print("Cleanup complete.")
 
 
@@ -242,11 +317,12 @@ def _create_release_archive(dist_dir: str) -> str:
     """
     build_output = _build_output_path(dist_dir)
     archive_stem = f"SARgate-{_platform_label()}-{_normalized_architecture_label()}"
-    archive_path = os.path.join(PROJECT_ROOT, f"{archive_stem}.zip")
+    archive_path = os.path.join(dist_dir, f"{archive_stem}.zip")
  
     if os.path.exists(archive_path):
         os.remove(archive_path)
 
+    print(f"Starting final archive compression: {archive_path}")
     if sys.platform == "darwin":
         subprocess.run(
             ["ditto", "-c", "-k", "--keepParent", build_output, archive_path],
@@ -257,13 +333,14 @@ def _create_release_archive(dist_dir: str) -> str:
         parent_dir = os.path.dirname(build_output)
         base_name = os.path.basename(build_output)
         shutil.make_archive(
-            os.path.join(PROJECT_ROOT, archive_stem),
+            os.path.join(dist_dir, archive_stem),
             "zip",
             root_dir=parent_dir,
             base_dir=base_name,
         )
 
     _clean_zip_metadata(archive_path)
+    print(f"Compression complete: {archive_path}")
     return archive_path
 
 
@@ -302,6 +379,7 @@ dist_path, work_path = _resolve_build_paths()
 pyinstaller_args = [
     os.path.join(PROJECT_ROOT, "installer", "SARgate.spec"),
     "--noconfirm",
+    "--log-level", "WARN",
     "--distpath", dist_path,
     "--workpath", work_path,
 ]
@@ -315,3 +393,4 @@ PyInstaller.__main__.run(pyinstaller_args)
 
 archive_path = _create_release_archive(dist_path)
 print(f"Created release archive: {archive_path}")
+print("SARgate build complete.")
