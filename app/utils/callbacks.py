@@ -863,8 +863,24 @@ def register_plot_context_popup(
         context_settings[option_key] = bool(value)
         _apply_context_visuals()
 
+    def _safe_is_plot_hovered() -> bool:
+        if not plot_tag or not dpg.does_item_exist(plot_tag):
+            return False
+        try:
+            return bool(dpg.is_item_hovered(plot_tag))
+        except Exception:
+            return False
+
+    def _safe_get_axis_limits(axis_tag: Any) -> tuple[Any, Any] | None:
+        if not axis_tag or not dpg.does_item_exist(axis_tag):
+            return None
+        try:
+            return tuple(dpg.get_axis_limits(axis_tag))
+        except Exception:
+            return None
+
     def _open_context_popup() -> None:
-        if not dpg.is_item_hovered(plot_tag):
+        if not _safe_is_plot_hovered():
             return
         if dpg.does_item_exist(popup_tag):
             dpg.delete_item(popup_tag)
@@ -905,16 +921,12 @@ def register_plot_context_popup(
                 specific_builder()
 
     def _on_right_mouse_down() -> None:
-        state[down_state_key] = bool(dpg.is_item_hovered(plot_tag))
+        state[down_state_key] = _safe_is_plot_hovered()
         state[drag_time_key] = time.monotonic()
         state[drag_pos_key] = tuple(dpg.get_mouse_pos(local=False))
-        try:
-            state[drag_limits_key] = (
-                tuple(dpg.get_axis_limits(x_axis_tag)),
-                tuple(dpg.get_axis_limits(y_axis_tag)),
-            )
-        except Exception:
-            state[drag_limits_key] = None
+        x_limits = _safe_get_axis_limits(x_axis_tag)
+        y_limits = _safe_get_axis_limits(y_axis_tag)
+        state[drag_limits_key] = (x_limits, y_limits) if x_limits is not None and y_limits is not None else None
 
     def _on_right_mouse_release() -> None:
         down_time = float(state.get(drag_time_key, 0.0) or 0.0)
@@ -930,8 +942,10 @@ def register_plot_context_popup(
         zoomed = False
         if isinstance(down_limits, (tuple, list)) and len(down_limits) == 2:
             try:
-                cur_x = tuple(dpg.get_axis_limits(x_axis_tag))
-                cur_y = tuple(dpg.get_axis_limits(y_axis_tag))
+                cur_x = _safe_get_axis_limits(x_axis_tag)
+                cur_y = _safe_get_axis_limits(y_axis_tag)
+                if cur_x is None or cur_y is None:
+                    raise RuntimeError
                 dx0 = abs(float(cur_x[0]) - float(down_limits[0][0]))
                 dx1 = abs(float(cur_x[1]) - float(down_limits[0][1]))
                 dy0 = abs(float(cur_y[0]) - float(down_limits[1][0]))
