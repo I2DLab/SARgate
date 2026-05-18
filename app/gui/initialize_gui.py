@@ -713,6 +713,17 @@ Copyright © 2007-2024 The scikit-learn developers.
                 dpg.add_text("""Licensed under the MIT License.
 Copyright © 2015 Marcin Kurczewski.
             """)                   
+
+            with dpg.tree_node(label="Bundled fonts", default_open=False, bullet=True):
+                dpg.add_text("""Arimo: Apache License 2.0.
+DejaVu Sans: DejaVu / Bitstream Vera font license.
+Fira Code: SIL Open Font License 1.1.
+Font Awesome Free font: SIL Open Font License 1.1.
+Noto Sans Symbols 2: SIL Open Font License 1.1.
+Ubuntu Font Family: Ubuntu Font Licence 1.0.
+
+Arial and Arial Unicode MS are not bundled with SARgate.
+            """)
             dpg.bind_item_theme("about_SARgate_popup", apply_input_text_theme)
 
 
