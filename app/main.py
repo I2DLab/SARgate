@@ -370,10 +370,49 @@ def _coerce_startup_file_path(value: str) -> str:
 
 def _install_linux_file_associations() -> None:
     """
-    Register SARgate as an Open With target for supported input files on Linux.
+    Register SARgate as a non-default Open With target for SDF and CSV files on Linux.
     """
     if not sys.platform.startswith("linux") or not getattr(sys, "frozen", False):
         return
+
+    def _remove_sargate_defaults(desktop_id: str) -> None:
+        """
+        Remove stale SARgate default handlers left by older builds or manual tests.
+        """
+        config_home = os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config")
+        data_home = os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share")
+        mimeapps_paths = [
+            os.path.join(config_home, "mimeapps.list"),
+            os.path.join(data_home, "applications", "mimeapps.list"),
+        ]
+        for mimeapps_path in mimeapps_paths:
+            if not os.path.isfile(mimeapps_path):
+                continue
+            try:
+                with open(mimeapps_path, "r", encoding="utf-8") as f:
+                    lines = f.readlines()
+                changed = False
+                output: list[str] = []
+                in_default_section = False
+                for line in lines:
+                    stripped = line.strip()
+                    if stripped.startswith("[") and stripped.endswith("]"):
+                        in_default_section = stripped == "[Default Applications]"
+                        output.append(line)
+                        continue
+                    if in_default_section and "=" in line and desktop_id in line:
+                        key, value = line.split("=", 1)
+                        handlers = [item for item in value.strip().split(";") if item and item != desktop_id]
+                        if handlers:
+                            output.append(f"{key}={';'.join(handlers)};\n")
+                        changed = True
+                        continue
+                    output.append(line)
+                if changed:
+                    with open(mimeapps_path, "w", encoding="utf-8") as f:
+                        f.writelines(output)
+            except Exception:
+                pass
 
     try:
         executable = os.path.abspath(sys.executable)
@@ -387,14 +426,7 @@ def _install_linux_file_associations() -> None:
         desktop_path = os.path.join(applications_dir, desktop_id)
         mime_types = [
             "text/csv",
-            "text/tab-separated-values",
-            "text/plain",
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            "chemical/x-mdl-sdfile",
-            "chemical/x-mdl-sdf",
-            "chemical/x-daylight-smiles",
             "application/x-sargate-sdf",
-            "application/x-sargate-smi",
         ]
         with open(desktop_path, "w", encoding="utf-8") as f:
             f.write(
@@ -419,11 +451,6 @@ def _install_linux_file_associations() -> None:
                 '    <glob pattern="*.sdf"/>\n'
                 '    <glob pattern="*.SDF"/>\n'
                 '  </mime-type>\n'
-                '  <mime-type type="application/x-sargate-smi">\n'
-                '    <comment>SMILES file</comment>\n'
-                '    <glob pattern="*.smi"/>\n'
-                '    <glob pattern="*.SMI"/>\n'
-                '  </mime-type>\n'
                 '</mime-info>\n'
             )
 
@@ -435,6 +462,7 @@ def _install_linux_file_associations() -> None:
                 subprocess.run(command, check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=5)
             except Exception:
                 pass
+        _remove_sargate_defaults(desktop_id)
     except Exception:
         pass
 

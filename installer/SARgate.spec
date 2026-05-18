@@ -16,14 +16,10 @@ MACOS_INFO_PLIST = {
             'CFBundleTypeName': 'SARgate input files',
             'CFBundleTypeRole': 'Editor',
             'LSHandlerRank': 'Alternate',
-            'CFBundleTypeExtensions': ['sdf', 'csv', 'tsv', 'xlsx', 'smi', 'txt'],
+            'CFBundleTypeExtensions': ['sdf', 'csv'],
             'LSItemContentTypes': [
                 'it.unipg.i2dlab.sargate.sdf',
-                'it.unipg.i2dlab.sargate.smi',
                 'public.comma-separated-values-text',
-                'public.tab-separated-values-text',
-                'org.openxmlformats.spreadsheetml.sheet',
-                'public.plain-text',
             ],
         },
     ],
@@ -33,12 +29,6 @@ MACOS_INFO_PLIST = {
             'UTTypeDescription': 'Structure-data file',
             'UTTypeConformsTo': ['public.text'],
             'UTTypeTagSpecification': {'public.filename-extension': ['sdf']},
-        },
-        {
-            'UTTypeIdentifier': 'it.unipg.i2dlab.sargate.smi',
-            'UTTypeDescription': 'SMILES file',
-            'UTTypeConformsTo': ['public.text'],
-            'UTTypeTagSpecification': {'public.filename-extension': ['smi']},
         },
     ],
 } if sys.platform == 'darwin' else {}
