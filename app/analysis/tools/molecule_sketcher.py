@@ -126,6 +126,9 @@ MAX_VALENCE = _build_max_valence_map()
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 FONT_ASSETS_DIR = PROJECT_ROOT / "assets" / "fonts"
+TEXT_FONT_FILES = ["Arimo.ttf", "DejaVuSans.ttf"]
+TEXT_BOLD_FONT_FILES = ["Arimo-Bold.ttf", "DejaVuSans-Bold.ttf"]
+SYMBOL_FONT_FILES = ["DejaVuSans.ttf", "NotoSansSymbols2-Regular.ttf", "Arimo.ttf"]
 
 
 def _load_font_with_fallback(font_names: list[str], size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
@@ -647,7 +650,7 @@ class MoleculeSketcherApp:
             "bd": max(1, self.frame_border_size),
             "bg": self.button_bg,
             "fg": TEXT,
-            "font": ("Arial", 10, "bold"),
+            "font": ("Arimo", 10, "bold"),
             "highlightbackground": PANEL_EDGE,
             "highlightcolor": PANEL_EDGE,
             "highlightthickness": 1,
@@ -668,7 +671,7 @@ class MoleculeSketcherApp:
                 height=square_size,
                 padx=0,
                 pady=0,
-                font=("Arial", 12, "bold"),
+                font=("Arimo", 12, "bold"),
             )
         btn = tk.Label(parent, **button_kwargs)
         if square_size is not None:
@@ -695,7 +698,7 @@ class MoleculeSketcherApp:
             font_size = 74
         else:
             font_size = 50
-        font = _load_font_with_fallback(["Arial.ttf", "arial.ttf"], font_size)
+        font = _load_font_with_fallback(TEXT_FONT_FILES, font_size)
         draw.text((hi / 2, hi / 2), symbol, fill=text_color, font=font, anchor="mm")
         out = ImageTk.PhotoImage(image.resize((size, size), Image.Resampling.LANCZOS))
         self.element_button_images[cache_key] = out
@@ -742,7 +745,7 @@ class MoleculeSketcherApp:
             relief=tk.RAISED,
             bd=max(1, self.frame_border_size),
             width=6,
-            font=("Arial", 10),
+            font=("Arimo", 10),
         )
         try:
             menu_name = option_menu.cget("menu")
@@ -774,7 +777,7 @@ class MoleculeSketcherApp:
             fg=TEXT,
             anchor="w",
             justify="left",
-            font=("Arial", 10),
+            font=("Arimo", 10),
         )
 
     def _style_charge_display(self, frame: tk.Frame, label: tk.Label) -> None:
@@ -791,7 +794,7 @@ class MoleculeSketcherApp:
             fg=TEXT,
             anchor="center",
             justify="center",
-            font=("Arial", 13, "bold"),
+            font=("Arimo", 13, "bold"),
         )
 
     def _style_choice_display(self, frame: tk.Frame, label: tk.Label) -> None:
@@ -808,7 +811,7 @@ class MoleculeSketcherApp:
             fg=TEXT,
             anchor="w",
             justify="left",
-            font=("Arial", 10),
+            font=("Arimo", 10),
         )
 
     def _style_plain_toolbar_label(self, label: tk.Label) -> None:
@@ -820,7 +823,7 @@ class MoleculeSketcherApp:
             highlightbackground=PANEL,
             highlightcolor=PANEL,
             relief="flat",
-            font=("Arial", 10),
+            font=("Arimo", 10),
         )
 
     def _periodic_popup_bg(self, symbol: str) -> str:
@@ -838,7 +841,7 @@ class MoleculeSketcherApp:
         image = Image.new("RGBA", (hi, hi), _hex_to_rgb(bg, (203, 213, 225)) + (255,))
         draw = ImageDraw.Draw(image)
         font = _load_font_with_fallback(
-            ["Arial Bold.ttf", "arialbd.ttf", "Arial.ttf", "arial.ttf"],
+            TEXT_BOLD_FONT_FILES + TEXT_FONT_FILES,
             46 if len(symbol) == 1 else 40,
         )
         draw.text(
@@ -857,7 +860,7 @@ class MoleculeSketcherApp:
             height=square_size,
             bg=bg,
             fg=fg,
-            font=("Arial", font_size, "bold"),
+            font=("Arimo", font_size, "bold"),
             anchor="center",
             justify="center",
             relief=tk.RAISED,
@@ -886,7 +889,7 @@ class MoleculeSketcherApp:
             highlightbackground=PANEL_EDGE,
             highlightcolor=PANEL_EDGE,
             highlightthickness=1,
-            font=("Arial", 9, "bold"),
+            font=("Arimo", 9, "bold"),
         )
         setattr(label, "_sargate_periodic_symbol", symbol)
 
@@ -903,7 +906,7 @@ class MoleculeSketcherApp:
             image = Image.new("RGBA", (hi, hi), _hex_to_rgb(target_bg, (203, 213, 225)) + (255,))
             draw = ImageDraw.Draw(image)
             font = _load_font_with_fallback(
-                ["Arial Bold.ttf", "arialbd.ttf", "Arial.ttf", "arial.ttf"],
+                TEXT_BOLD_FONT_FILES + TEXT_FONT_FILES,
                 46 if len(symbol) == 1 else 40,
             )
             draw.text(
@@ -999,7 +1002,7 @@ class MoleculeSketcherApp:
             bd=1,
             padx=6,
             pady=4,
-            font=("Arial", 10),
+            font=("Arimo", 10),
             highlightbackground=PANEL_EDGE,
             highlightcolor=PANEL_EDGE,
             highlightthickness=1,
@@ -1195,14 +1198,14 @@ class MoleculeSketcherApp:
             image = image.resize((size, size), Image.Resampling.LANCZOS)
             return ImageTk.PhotoImage(image)
         if key == "copy":
-            font = _load_font_with_fallback(["Arial Bold.ttf", "arialbd.ttf", "Arial.ttf", "arial.ttf"], 42)
+            font = _load_font_with_fallback(TEXT_BOLD_FONT_FILES + TEXT_FONT_FILES, 42)
             draw.text((cx, cy), "Copy", fill=line_color, font=font, anchor="mm")
             image = image.resize((size, size), Image.Resampling.LANCZOS)
             return ImageTk.PhotoImage(image)
         glyph = ACTION_GLYPHS.get(key)
         if glyph is not None:
             font = _load_font_with_fallback(
-                ["Arial-Unicode.ttf", "Arial Unicode.ttf", "Arial.ttf", "arial.ttf"],
+                SYMBOL_FONT_FILES,
                 118,
             )
             draw.text(
@@ -1291,7 +1294,7 @@ class MoleculeSketcherApp:
                 head_half_width=10,
             )
         elif key == "colored_labels":
-            font = _load_font_with_fallback(["Arial Bold.ttf", "arialbd.ttf", "Arial.ttf", "arial.ttf"], 54)
+            font = _load_font_with_fallback(TEXT_BOLD_FONT_FILES + TEXT_FONT_FILES, 54)
             draw.text((16, cy), "C", fill=(49, 56, 70, 255), font=font, anchor="lm")
             draw.text((80, cy), "N", fill=(29, 78, 216, 255), font=font, anchor="mm")
             draw.text((144, cy), "O", fill=(220, 38, 38, 255), font=font, anchor="rm")
@@ -1395,7 +1398,7 @@ class MoleculeSketcherApp:
     def _build_smiles_display(self, parent: tk.Widget) -> None:
         row = tk.Frame(parent, bg=PANEL)
         row.pack(fill="x", pady=(0, 0), anchor="nw")
-        smiles_text_label = tk.Label(row, text="SMILES", bg=PANEL, fg=TEXT, font=("Arial", 10), bd=0, highlightthickness=0)
+        smiles_text_label = tk.Label(row, text="SMILES", bg=PANEL, fg=TEXT, font=("Arimo", 10), bd=0, highlightthickness=0)
         smiles_text_label.pack(side="left", padx=(0, 8))
         self.smiles_label_widget = smiles_text_label
         smiles_box = tk.Frame(row, height=39)
@@ -1468,7 +1471,7 @@ class MoleculeSketcherApp:
             bd=max(1, self.frame_border_size),
             bg=self.button_bg,
             fg=TEXT,
-            font=("Arial", 9, "bold"),
+            font=("Arimo", 9, "bold"),
             highlightbackground=PANEL_EDGE,
             highlightcolor=PANEL_EDGE,
             highlightthickness=1,
@@ -1613,7 +1616,7 @@ class MoleculeSketcherApp:
 
         misc_row = tk.Frame(box, bg=GRID)
         misc_row.pack(anchor="w", pady=(8, 0))
-        charge_label = tk.Label(misc_row, text="Charge", bg=PANEL, fg=TEXT, font=("Arial", 10))
+        charge_label = tk.Label(misc_row, text="Charge", bg=PANEL, fg=TEXT, font=("Arimo", 10))
         charge_label.pack(side="left")
         charge_box = tk.Frame(misc_row)
         charge_box.pack(side="left", padx=(8, 10))
@@ -2298,7 +2301,7 @@ class MoleculeSketcherApp:
         holder.pack(fill="both", expand=True)
         controls = tk.Frame(holder, bg=PANEL)
         controls.grid(row=0, column=0, columnspan=18, sticky="ew", pady=(0, 8))
-        tk.Label(controls, text="Color by:", bg=PANEL, fg=TEXT, font=("Arial", 10, "bold")).pack(side="left")
+        tk.Label(controls, text="Color by:", bg=PANEL, fg=TEXT, font=("Arimo", 10, "bold")).pack(side="left")
         tk.Radiobutton(
             controls,
             text="CPK",
@@ -2312,7 +2315,7 @@ class MoleculeSketcherApp:
             activeforeground=TEXT,
             highlightthickness=0,
             bd=0,
-            font=("Arial", 10),
+            font=("Arimo", 10),
         ).pack(side="left", padx=(8, 0))
         tk.Radiobutton(
             controls,
@@ -2327,7 +2330,7 @@ class MoleculeSketcherApp:
             activeforeground=TEXT,
             highlightthickness=0,
             bd=0,
-            font=("Arial", 10),
+            font=("Arimo", 10),
         ).pack(side="left", padx=(8, 0))
         for symbol, row, col in PERIODIC_LAYOUT:
             grid_row = row + 1
@@ -2589,9 +2592,9 @@ class MoleculeSketcherApp:
 
     def _ensure_atom_fonts(self) -> None:
         if self._atom_main_font is None:
-            self._atom_main_font = tkfont.Font(family="Arial", size=16, weight="bold")
+            self._atom_main_font = tkfont.Font(family="Arimo", size=16, weight="bold")
         if self._atom_side_font is None:
-            self._atom_side_font = tkfont.Font(family="Arial", size=13, weight="bold")
+            self._atom_side_font = tkfont.Font(family="Arimo", size=13, weight="bold")
 
     def _atom_label_layout(
         self,
@@ -4520,7 +4523,7 @@ class MoleculeSketcherApp:
 
     def _pil_font_for_spec(self, spec: Any, aa_scale: int | None = None) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
         scale = max(1, int(aa_scale or self._active_aa_render_scale or self._aa_render_scale))
-        family = "Arial"
+        family = "Arimo"
         size = 12
         weight = "normal"
         if isinstance(spec, tkfont.Font):
@@ -4546,8 +4549,8 @@ class MoleculeSketcherApp:
         font_size = cache_key[1]
         candidates: list[str] = []
         is_bold = weight.lower() == "bold"
-        if family.lower() == "arial":
-            candidates.extend(["Arial Bold.ttf", "arialbd.ttf"] if is_bold else ["Arial.ttf", "arial.ttf"])
+        if family.lower() in {"arimo", "arial"}:
+            candidates.extend(TEXT_BOLD_FONT_FILES if is_bold else TEXT_FONT_FILES)
         candidates.extend(["DejaVuSans-Bold.ttf"] if is_bold else ["DejaVuSans.ttf"])
         for font_name in candidates:
             local_font = FONT_ASSETS_DIR / font_name
@@ -5015,7 +5018,7 @@ class MoleculeSketcherApp:
                 label_x = sx + 18
                 label_y = sy - 16
                 self._aa_ellipse((label_x - 8, label_y - 7, label_x + 8, label_y + 7), fill="#ffffff", outline="#ffffff", width=1)
-                self._aa_text((label_x, label_y), stereo_label.upper(), BLUE, ("Arial", 10, "bold"), anchor="center")
+                self._aa_text((label_x, label_y), stereo_label.upper(), BLUE, ("Arimo", 10, "bold"), anchor="center")
 
     def draw_guides(self) -> None:
         control_mode_active = self.mode in {"select", "erase", "pan", "rotate"} or self.current_charge != 0
@@ -5028,18 +5031,18 @@ class MoleculeSketcherApp:
         }
         if self.mode in mode_cursor_labels and self.mouse_screen_pos is not None and not self.left_button_down:
             mx, my = self.mouse_screen_pos
-            self._aa_text((mx, my - 8), mode_cursor_labels[self.mode], GUIDE, ("Arial", 10, "bold"), anchor="s")
+            self._aa_text((mx, my - 8), mode_cursor_labels[self.mode], GUIDE, ("Arimo", 10, "bold"), anchor="s")
         if self.current_charge != 0 and self.mouse_screen_pos is not None and not bond_hover_active:
             mx, my = self.mouse_screen_pos
             charge_text = "+" if self.current_charge > 0 else "–"
-            self._aa_text((mx, my), charge_text, GUIDE, ("Arial", 18, "bold"), anchor="center")
+            self._aa_text((mx, my), charge_text, GUIDE, ("Arimo", 18, "bold"), anchor="center")
         elif not control_mode_active and self.mode != "ring" and self.selected_atom_symbol and self.mouse_screen_pos is not None and not bond_hover_active:
             if self.preview_world_pos is not None:
                 mx, my = self.world_to_screen(*self.preview_world_pos)
             else:
                 mx, my = self.mouse_screen_pos
             preview_label = self._next_r_group_label() if self.selected_atom_symbol == "R" else self.selected_atom_symbol
-            self._aa_text((mx, my), preview_label, GUIDE, ("Arial", 16, "bold"), anchor="center")
+            self._aa_text((mx, my), preview_label, GUIDE, ("Arimo", 16, "bold"), anchor="center")
         if self.pending_ring_active and self.preview_ring_points:
             screen_points = [self.world_to_screen(px, py) for px, py in self.preview_ring_points]
             for a_idx, b_idx in self.preview_ring_bonds:
@@ -5064,7 +5067,7 @@ class MoleculeSketcherApp:
                 current_angle = math.atan2(self.mouse_screen_pos[1] - cy, self.mouse_screen_pos[0] - cx)
                 delta_deg = math.degrees(self.rotation_anchor_angle - current_angle)
                 mx, my = self.mouse_screen_pos
-                self._aa_text((mx, my - 18), f"{delta_deg:+.1f}°", GUIDE, ("Arial", 11, "bold"), anchor="s")
+                self._aa_text((mx, my - 18), f"{delta_deg:+.1f}°", GUIDE, ("Arimo", 11, "bold"), anchor="s")
             return
         if self.selected_bond_style == "chain" and self.preview_world_path:
             points = [self.pending_draw_start_pos, *self.preview_world_path]
@@ -5076,7 +5079,7 @@ class MoleculeSketcherApp:
             self._aa_ellipse((lx - 12, ly - 12, lx + 12, ly + 12), outline=GUIDE, width=2)
             angle_text = self._chain_axis_angle_text()
             if angle_text is not None:
-                self._aa_text((lx, ly - 22), angle_text, GUIDE, ("Arial", 11, "bold"), anchor="s")
+                self._aa_text((lx, ly - 22), angle_text, GUIDE, ("Arimo", 11, "bold"), anchor="s")
             return
         if self.preview_world_pos is None:
             return
@@ -5086,7 +5089,7 @@ class MoleculeSketcherApp:
         self._aa_ellipse((x2 - 12, y2 - 12, x2 + 12, y2 + 12), outline=GUIDE, width=2)
         angle_text = self._preview_attachment_angle_text()
         if angle_text is not None:
-            self._aa_text((x2, y2 - 22), angle_text, GUIDE, ("Arial", 11, "bold"), anchor="s")
+            self._aa_text((x2, y2 - 22), angle_text, GUIDE, ("Arimo", 11, "bold"), anchor="s")
 
     # ------------------------------------------------------------------
     # Mouse handling

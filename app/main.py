@@ -679,12 +679,14 @@ if __name__ == "__main__":
 
     _startup_trace("registering fonts")
     FONTS = {
-        "Arial": ["assets/fonts/Arial.ttf", "assets/fonts/Arial-Bold.ttf"],
         "Arimo": ["assets/fonts/Arimo.ttf", "assets/fonts/Arimo-Bold.ttf"],
         "DejaVu Sans": ["assets/fonts/DejaVuSans.ttf", "assets/fonts/DejaVuSans-Bold.ttf"],
         "Ubuntu": ["assets/fonts/Ubuntu.ttf", "assets/fonts/Ubuntu-Bold.ttf"],
         "FiraCode (Mono)": ["assets/fonts/FiraCode.otf", "assets/fonts/FiraCode-Bold.otf"]
     }
+    if font not in FONTS:
+        font = "DejaVu Sans"
+        state["settings"]["font"] = font
     with dpg.font_registry(tag="font_registry"):
         for font_name, font_paths in FONTS.items():
             for font_path in font_paths:

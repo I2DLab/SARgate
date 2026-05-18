@@ -21,3 +21,11 @@ Main dependencies include:
 - SciPy (BSD)
 - screeninfo (MIT)
 - umap-learn (BSD 3-Clause)
+
+Bundled fonts include:
+- Arimo (Apache License 2.0)
+- DejaVu Sans (Bitstream Vera / DejaVu license)
+- Fira Code (SIL Open Font License 1.1)
+- Font Awesome Free font (SIL Open Font License 1.1)
+- Noto Sans Symbols 2 (SIL Open Font License 1.1)
+- Ubuntu Font Family (Ubuntu Font Licence 1.0)

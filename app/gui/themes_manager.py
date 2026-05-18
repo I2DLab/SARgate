@@ -1639,7 +1639,7 @@ def custom_style_editor(state: dict[str, Any]) -> None:
                     dpg.configure_item("tab_button_size_group", show=show_tab_icons)
                 
 
-            FONT_TAGS = ["Arial", "Arimo", "DejaVu Sans", "Ubuntu", "FiraCode (Mono)"]
+            FONT_TAGS = ["Arimo", "DejaVu Sans", "Ubuntu", "FiraCode (Mono)"]
             current_font = state["settings"]["font"]
             current_font_scale = float(state["settings"]["font_scale"])
             current_tab_button_size = int(state["settings"].get("tab_button_size", state.get("tab_button_size", 30)))
