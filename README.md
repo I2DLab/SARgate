@@ -4,6 +4,7 @@
 [![Python](https://img.shields.io/badge/Python-3.13-blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 [![Releases](https://img.shields.io/badge/Downloads-GitHub%20Releases-informational)](https://github.com/I2DLab/SARgate/releases)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.20282517-blue)](https://doi.org/10.5281/zenodo.20282517)
 
 <img src="assets/screenshots/UMAP.png" alt="SARgate interface" width="40%">
 
