@@ -332,11 +332,11 @@ Before opening an issue, please include:
 
 ## Citation
 
-If you use SARgate in academic work, please cite this repository.
+If you use SARgate in academic work, please cite:
 
 
 ```text
-citation
+Labrano, L.; Primavera, E.; Rocchi, M.; Massuoli, M.; Ragni, M.; Gargaro, M.; Fallarino, F.; Manfroni, G.; Barreca, M. L.; Astolfi, A. SARgate: structure–bioactivity analyser for navigating chemical space and mining SAR trends. European Journal of Medicinal Chemistry 2026, 119099. https://doi.org/10.1016/j.ejmech.2026.119099
 ```
 
 ---
